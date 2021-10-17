@@ -1,0 +1,15 @@
+{
+    "name": "hexide-digital/hd-admin-panel",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Oleksandr-Moik",
+            "email": "sashamoik2016@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.4|^8.0",
+        "laravel/framework": "^8.*"
+    }
+}
