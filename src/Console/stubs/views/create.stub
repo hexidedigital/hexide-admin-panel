@@ -1,0 +1,7 @@
+@extends("admin.layouts.editable")
+
+{{--@section('with_files', true)--}}
+
+@section("form-body")
+    @include("admin.view.$module.partials._form")
+@endsection

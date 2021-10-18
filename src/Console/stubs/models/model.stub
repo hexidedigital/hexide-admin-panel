@@ -1,0 +1,18 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Models\Traits\VisibleTrait;
+use App\Models\Traits\PositionSortTrait;
+use Illuminate\Database\Eloquent\Model;
+
+class {{ class }} extends Model
+{
+    use VisibleTrait, PositionSortTrait;
+
+    protected $fillable = [
+        'position',
+        'status',
+        'slug',
+    ];
+}

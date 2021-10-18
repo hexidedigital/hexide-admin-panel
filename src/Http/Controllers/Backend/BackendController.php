@@ -64,6 +64,7 @@ abstract class BackendController extends BaseController
     protected array $accessMap = [];
 
     protected ServiceInterface $service;
+    protected bool $show_error_msg = true;
 
     /**
      * setup module name, app locales
@@ -108,15 +109,7 @@ abstract class BackendController extends BaseController
             return $res;
         }
 
-        $name = $this->getModuleName();
-        if (isset($name) && $this->with_breadcrumbs) {
-            $this->breadcrumbs(
-                trans_choice("models.$name.name", 2),
-                $name === 'home'
-                    ? route("admin.$name")
-                    : route("admin.$name.index")
-            );
-        }
+        $this->addToBreadCrumbs($this->getModuleName());
 
         return parent::callAction($method, $parameters);
     }
@@ -165,33 +158,54 @@ abstract class BackendController extends BaseController
             ? 'admin.view.' . $this->module . '.' . $view
             : $view;
 
-        if ($this->with_breadcrumbs) {
-            $this->addToBreadcrumbs($force_type ?? array_last(explode('.', $view)));
-        }
+        $this->addToBreadcrumbs($force_type ?: array_last(explode('.', $view)));
+
+        /* todo - move to View compose flow*/
+        $data['toggle_attributes'] = [
+            'status' => [
+                'data-on' => '<i class="fas fa-eye"></i>',
+                'data-off' => '<i class="fas fa-eye-slash"></i>',
+                'data-onstyle' => 'success',
+                'data-offstyle' => 'secondary',
+                'data-width' => '75',
+                'data-size' => 'small',
+                'class' => 'toggle_attributes',
+            ],
+            'state_read' => [
+                'data-on' => '<i class="far fa-envelope-open"></i>',
+                'data-off' => '<i class="far fa-envelope"></i>',
+                'data-onstyle' => 'default',
+                'data-offstyle' => 'primary',
+                'class' => 'toggle_attributes',
+            ],
+        ];
 
         return parent::render($view, $data);
     }
 
     protected function addToBreadcrumbs($method)
     {
-        if ($method === 'create') {
-            $method = 'add';
-        }
-
-        if (!empty($method)) {
+        if (isset($method) && $this->with_breadcrumbs) {
             $name = $this->getModuleName();
 
-            if ($method != 'index') {
-                $this->breadcrumbs(__("models.$name.$method"),
-                    $name === 'home' ? route("admin.$name") : route("admin.$name.index"));
+            if ($method == $name) {
+                $this->breadcrumbs(trans_choice("models.$method.name", 2), route("admin.$method.index"));
             } else {
-                $this->breadcrumbs(__("models.$method"),
-                    $name === 'home' ? route("admin.$name") : route("admin.$name.index"));
+                if ($method === 'create') {
+                    $method = 'add';
+                }
+
+                if (!empty($method)) {
+                    if ($method != 'index') {
+                        $title = __("models.$name.$method");
+                        $this->breadcrumbs($title, route("admin.$name.index"));
+                    }
+                }
             }
         }
     }
 
-    protected function redirect(string $action = 'index', array $params = [])
+    protected function redirect(string $action = 'index', array $params = []): \Illuminate\Http\RedirectResponse
     {
         $route = Route::has('admin.' . $this->getModuleName() . '.' . $action) ?
             'admin.' . $this->getModuleName() . '.' . $action
@@ -202,12 +216,12 @@ abstract class BackendController extends BaseController
 
     protected function toastrIfExistsErrors(string $action = '', string $message = '')
     {
-        if (!empty(request()->old())) {
+        if (!empty(request()->old()) && $this->show_error_msg) {
             $this->toastr($action, $message, 'error');
         }
     }
 
-    protected function toastr(string $action = '', string $message = null, string $type = 'success', string $title = '', array $options = [])
+    protected function toastr(string $action = '', string $message = null, string $type = 'success', string $title = '', array $options = []): \Yoeunes\Toastr\Toastr
     {
         $action = in_array($action, self::ACTIONS) ? $action : self::ACTION_DEFAULT;
 
@@ -223,7 +237,7 @@ abstract class BackendController extends BaseController
             }
         }
 
-        toastr($message, $type, $title, $options);
+        return toastr($message, $type, $title, $options);
     }
 
     /**
@@ -260,7 +274,8 @@ abstract class BackendController extends BaseController
             return response()->json(['message' => __('api_labels.forbidden'), 'type' => 'error'])
                 ->setStatusCode(Response::HTTP_FORBIDDEN);
         } else {
-            toastError($message, trans_choice("models." . $this->getModuleName() . ".name", 2));
+            $this->toastr('', $message, 'error');
+            toastInfo($message, trans_choice("models." . $this->getModuleName() . ".name", 2));
 
             return redirect(redirect()->back()->getTargetUrl());
         }

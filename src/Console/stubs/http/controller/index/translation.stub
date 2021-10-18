@@ -1,0 +1,4 @@
+            $list = {{ model }}::joinTranslations()->select([
+                    '{{ module_name }}.*',
+                    '{{ model_variable }}_translations.title as title'
+                ]);

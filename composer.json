@@ -23,7 +23,12 @@
         "laravel/framework": "^8.0",
         "hexide-digital/model-permissions": "^1",
         "hexide-digital/meta-tags-laravel": "^1",
-        "hexide-digital/file-uploader": "^1"
+        "hexide-digital/file-uploader": "^1",
+        "astrotomic/laravel-translatable": "^11.9",
+        "jeroennoten/laravel-adminlte": "^3.6",
+        "laravelcollective/html": "^6.2",
+        "yajra/laravel-datatables-oracle": "~9.0",
+        "yoeunes/toastr": "^1.2"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

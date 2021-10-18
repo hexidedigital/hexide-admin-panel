@@ -1,0 +1,16 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Model;
+
+class {{ class }} extends Model
+{
+    public $timestamps = false;
+
+    protected $fillable = [
+        'locale', '{{ parent_model }}_id',
+        'title',
+        'content',
+    ];
+}

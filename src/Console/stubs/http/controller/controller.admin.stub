@@ -1,0 +1,166 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ namespacedModel }}; //{{ namespaceModelService }}
+use App\Http\Requests\Backend\{{ model }}Request;
+use HexideDigital\HexideAdmin\Http\Controllers\Backend\BackendController;
+use HexideDigital\HexideAdmin\Traits\Http\Controllers\AjaxFieldsChangerTrait;
+use HexideDigital\ModelPermissions\Models\Permission as HDPermissions;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
+
+
+class {{ class }} extends BackendController
+{
+    use AjaxFieldsChangerTrait;
+
+    protected array $accessMap = [
+//        'all'               => HDPermissions::access,
+        'index'             => HDPermissions::access,
+        'show'              => HDPermissions::view,
+        'create'            => HDPermissions::create,
+        'store'             => HDPermissions::create,
+        'edit'              => HDPermissions::edit,
+        'update'            => HDPermissions::edit,
+        'destroy'           => HDPermissions::delete,
+
+        'ajaxFieldChange'   => 'ajax', // AjaxFieldsChangerTrait
+    ];
+
+    /**
+     * to define module name
+     */
+    {{ construct }}
+
+    public function index(Request $request)
+    {
+        if ($request->get('draw')) {
+            {{ index_handle }}
+
+            return $this->_datatable($list);
+        }
+
+        return $this->render();
+    }
+
+    public function show({{ model }} ${{ model_variable }}): \Illuminate\Http\RedirectResponse
+    {
+        return $this->redirect(self::VIEW_EDIT, ['{{ model_variable }}' => ${{ model_variable }}->id]);
+    }
+
+    public function create()
+    {
+        return $this->render(self::VIEW_CREATE);
+    }
+
+    public function store({{ model }}Request $request): \Illuminate\Http\RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            {{ create_handle }}
+
+            $this->toastr(self::VIEW_CREATE);
+
+            DB::commit();
+
+            return $this->redirect();
+        }catch (\Exception $e){
+            $this->toastr(self::VIEW_CREATE, $e->getMessage(), 'error');
+
+            DB::rollBack();
+
+            return back();
+        }
+    }
+
+    public function edit({{ model }} ${{ model_variable }})
+    {
+        $this->data_model(${{ model_variable }});
+
+        return $this->render(self::VIEW_EDIT);
+    }
+
+    public function update({{ model }}Request $request, {{ model }} ${{ model_variable }}): \Illuminate\Http\RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            {{ update_handle }}
+
+            $this->toastr(self::VIEW_EDIT);
+
+            DB::commit();
+
+            return $this->redirect();
+        }catch (\Exception $e){
+            $this->toastr(self::VIEW_EDIT, $e->getMessage(), 'error');
+
+            DB::rollBack();
+
+            return back();
+        }
+    }
+
+    public function destroy({{ model }} ${{ model_variable }}): \Illuminate\Http\RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            ${{ model_variable }}->delete();
+
+            $this->toastr(self::ACTION_DELETE);
+
+            DB::commit();
+        }catch (\Exception $e){
+            $this->toastr(self::ACTION_DELETE, $e->getMessage(), 'error');
+
+            DB::rollBack();
+        }
+
+        return back();
+    }
+
+    private function _datatable($list): \Illuminate\Http\JsonResponse
+    {
+        /** @var {{ model }} $model */
+        return DataTables::eloquent($list)
+/*
+            ->filterColumn(
+                'title',
+                function ($query, $keyword) {
+                    $query->whereRaw('{{ model_variable }}_translations.title like ?', ['%' . $keyword . '%']);
+                }
+            )
+*/
+            ->addColumn(
+                'actions',
+                function ($model) {
+                    return view('admin.partials.control_buttons',
+                        ['model' => $model, 'module' => $this->getModuleName(), 'with_show' => false]
+                    )->render();
+                }
+            )
+            ->editColumn(
+                'status',
+                function ($model) {
+                    return view('admin.partials.ajax.toggler',
+                        ['model' => $model, 'module' => $this->getModuleName(), 'field' => 'status']
+                    )->render();
+                }
+            )
+            ->editColumn(
+                'position',
+                function ($model) {
+                    return view('admin.partials.ajax.input',
+                        ['model' => $model, 'module' => $this->getModuleName(), 'field' => 'position',
+                            'type' => 'number']
+                    )->render();
+                }
+            )
+            ->rawColumns(['actions', 'position', 'status',])
+            ->make();
+    }
+}

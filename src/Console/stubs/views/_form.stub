@@ -1,0 +1,6 @@
+@extends("admin.partials.tabs", [
+    'show_locale_tabs'      => {{ show_locale_tabs }},
+    'show_general_tab'      => true,
+    'show_tab_panel'        => {{ show_locale_tabs }},
+    'general_tab_errors'    => ['name', 'etc']
+])

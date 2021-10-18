@@ -1,0 +1,7 @@
+    /**
+     * to define module name
+     */
+    public function __construct()
+    {
+        parent::__construct("{{ module_name }}");
+    }

@@ -1,0 +1,40 @@
+@php
+/**
+ * @var \App\Models\{{ Model }} $module
+ * @var Illuminate\Support\ViewErrorBag $errors
+ */
+@endphp
+
+<div class="form-group required row">
+    <div class="col-sm-4 col-md-2 text-sm-right">
+        {!! Form::label('name', __('admin_labels.attributes.name')) !!}
+    </div>
+    <div class="col-12 col-sm-8 col-md-6">
+        {!! Form::text('name', old('name', $model->name ?? ''), ['class'=>"form-control".($errors->has('name')?' is-invalid':'') ]) !!}
+
+        {!! $errors->first('name', '<p class="help-block text-red">:message</p>') !!}
+    </div>
+</div>
+
+<div class="form-group row">
+    <div class="col-sm-4 col-md-2 text-sm-right">
+        {!! Form::label('position', __('admin_labels.attributes.position')) !!}
+    </div>
+    <div class="col-12 col-sm-8 col-md-6">
+        {!! Form::number('position', old('position', $model->position ?? 1), ['placeholder' => __('admin_labels.attributes.position'),
+'class' => 'form-control'.($errors->has('position')?' is-invalid':''), 'min' => 1]) !!}
+
+        {!! $errors->first('position', '<p class="help-block text-red">:message</p>') !!}
+    </div>
+</div>
+
+<div class="form-group row">
+    <div class="col-sm-4 col-md-2 text-sm-right">
+        {!! Form::label('status', __('admin_labels.attributes.visible')) !!}
+    </div>
+    <div class="col-12 col-sm-8 col-md-6">
+        {!! Form::input('checkbox', 'status', 1, $toggle_attributes['status'] + (($model->status??true) ? ["checked" => 1]:[])) !!}
+
+        {!! $errors->first('status', '<p class="help-block text-red">:message</p>') !!}
+    </div>
+</div>

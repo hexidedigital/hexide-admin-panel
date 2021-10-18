@@ -1,0 +1,33 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Models\Traits\VisibleTrait;
+use App\Models\Traits\PositionSortTrait;
+use App\Models\Traits\WithTranslationsTrait;
+use Astrotomic\Translatable\Translatable;
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * @method {{ class }}Translation translate(?string $locale = null, bool $withFallback = false)
+ * @mixin {{ class }}Translation
+ */
+class {{ class }} extends Model
+{
+    use Translatable, WithTranslationsTrait;
+    use VisibleTrait, PositionSortTrait;
+
+    /**
+     * @var string[]
+     */
+    protected array $translatedAttributes = [
+        'title',
+        'content',
+    ];
+
+    protected $fillable = [
+        'position',
+        'status',
+        'slug',
+    ];
+}
