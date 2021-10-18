@@ -1,15 +1,37 @@
 {
     "name": "hexide-digital/hd-admin-panel",
+    "description": "hexide-digital admin panel",
     "license": "MIT",
+    "type": "library",
+    "version": "0.0.1",
     "authors": [
         {
             "name": "Oleksandr-Moik",
             "email": "sashamoik2016@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "HexideDigital\\HexideAdmin\\": "src/"
+        },
+        "files": [
+            "./src/Functions/helpers.php"
+        ]
+    },
     "require": {
         "php": "^7.4|^8.0",
-        "laravel/framework": "^8.*"
+        "laravel/framework": "^8.0",
+        "hexide-digital/model-permissions": "^1",
+        "hexide-digital/meta-tags-laravel": "^1",
+        "hexide-digital/file-uploader": "^1"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "HexideDigital\\HexideAdmin\\Providers\\HexideAdminServiceProvider"
+            ]
+        }
     }
 }
