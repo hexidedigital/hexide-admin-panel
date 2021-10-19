@@ -4,8 +4,8 @@ namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
 
 use App\Models\User;
-use App\Models\Variable;
 use Gate;
+use HexideDigital\AdminConfigurations\Models\AdminConfiguration;
 use HexideDigital\FileUploader\Traits\FileUploadingTrait;
 use HexideDigital\HexideAdmin\Http\Controllers\BaseController;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
@@ -82,7 +82,7 @@ abstract class BackendController extends BaseController
 
         $this->url_params([]);
 
-        if (!(Variable::where('key', 'show_debug_footer')->first()->status ?? true)) {
+        if (!(AdminConfiguration::where('key', 'show_debug_footer')->first()->status ?? true)) {
             \Debugbar::disable();
         }
     }
