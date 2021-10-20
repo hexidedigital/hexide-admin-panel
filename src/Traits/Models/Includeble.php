@@ -7,15 +7,19 @@ use Illuminate\Support\Str;
 
 trait Includeble
 {
-    protected $requestedIncludes=[];
+    protected array $requestedIncludes = [];
 
+    /**
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     protected function hasInclude($include): bool
     {
-
         $request = Container::getInstance()->make('request');
+
         if ($request->query->has('include')) {
-            $this->parseIncludes(str_replace(' ','', Str::lower($request->input('include'))));
+            $this->parseIncludes(str_replace(' ', '', Str::lower($request->input('include'))));
         }
+
         return in_array($include, $this->requestedIncludes);
     }
 
@@ -26,7 +30,7 @@ trait Includeble
      *
      * @return $this
      */
-    protected function parseIncludes($includes)
+    protected function parseIncludes($includes): self
     {
         // Wipe these before we go again
         $this->requestedIncludes = [];
@@ -37,7 +41,7 @@ trait Includeble
 
         if (!is_array($includes)) {
             throw new \InvalidArgumentException(
-                    'The parseIncludes() method expects a string or an array. ' . gettype($includes) . ' given'
+                'The parseIncludes() method expects a string or an array. ' . gettype($includes) . ' given'
             );
         }
 
