@@ -1,14 +1,17 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Traits\Models;
+namespace HexideDigital\HexideAdmin\Models\Traits;
 
 use Arr;
+use HexideDigital\HexideAdmin\Contracts\WithTypesContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class WithTypes
- * @package HexideDigital\HexideAdmin\Traits\Models
+ * @package HexideDigital\HexideAdmin\Models\Traits
+ * @implements WithTypesContract
+ * @method static \Illuminate\Database\Eloquent\Builder|self ofTypes($builder, $state, $field)
  * @mixin Model
  */
 trait WithTypes
@@ -16,12 +19,14 @@ trait WithTypes
 
     /**
      * @param Builder $builder
-     * @param string $type
+     * @param string|array $type
      * @param string $field = 'type'
      * @return Builder
      */
-    public function scopeOfType(Builder $builder, string $type, string $field = 'type'): Builder
+    public function scopeOfType(Builder $builder, $type, string $field = 'type'): Builder
     {
+        if (is_array($type)) return $this->ofTypes($builder, $type, $field);
+
         return $builder->where($this->getTable() . '.' . $field, $this->getValueByKey($type));
     }
 
@@ -45,26 +50,26 @@ trait WithTypes
     /**
      * @return array
      */
-    public function getTypes(): array
+    public static function getTypes(): array
     {
-        return $this->types ?? [];
+        return self::$types ?? [];
     }
 
     /**
      * @return array
      */
-    public function getTypesKeys(): array
+    public static function getTypesKeys(): array
     {
-        return array_keys($this->getTypes());
+        return array_keys(self::getTypes());
     }
 
     /**
      * @param int|string|null $key
      * @return int|string|null
      */
-    public function getValueByKey($key = null)
+    public static function getValueByKey($key = null)
     {
-        return Arr::get($this->getTypes(), $key, null);
+        return Arr::get(self::getTypes(), $key, null);
     }
 
 }

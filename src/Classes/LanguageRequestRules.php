@@ -3,65 +3,96 @@
 namespace HexideDigital\HexideAdmin\Classes;
 
 use Arr;
+use Astrotomic\Translatable\Validation\RuleFactory;
 
-Class LanguageRequestRules
+class LanguageRequestRules
 {
+
+    private static string $prefix = '{{';
+    private static string $suffix = '}}';
 
     /**
      * options: prefix: string, old_new: bool, lang_key string, locales: array
      *
-     * @param array $rules
+     * @param array $_rules
      * @param array $options
      * @return array
      */
-    public static function getLangRules(array $rules, array $options = []): array
+    public static function getLangRules(array $_rules, array $options = []): array
     {
         $prefix = Arr::get($options, 'prefix', '');
         $old_new = Arr::get($options, 'old_new', false);
         $lang_key = Arr::get($options, 'lang_key', 'lang_rules');
-        $locales = Arr::get($options, 'locales', config('app.locales'));
+        $locales = Arr::get($options, 'locales', config('translatable.locale'));
 
+        $result_rules = [];
+        $rules = [];
 
-        foreach ($rules as $attribute => $rule) {
+        foreach ($_rules as $attribute => $rule) {
+
             if (is_string($rule) || (is_array($rule) && !Arr::isAssoc($rule))) {
                 if ($old_new) {
-                    $rules[self::prefix($prefix, 'new') .  $attribute] = $rule;
-                    $rules[self::prefix($prefix, 'old') .  $attribute] = $rule;
+                    $rules[self::prefix($prefix) . 'new.' . $attribute] = $rule;
+                    $rules[self::prefix($prefix) . 'old.' . $attribute] = $rule;
                 } else {
-                    $rules[self::prefix($prefix) .  $attribute] = $rule;
+                    $rules[self::prefix($prefix) . self::cl($attribute)] = $rule;
                 }
             }
         }
+        $result_rules = RuleFactory::make(
+            $rules,
+            \Astrotomic\Translatable\Validation\RuleFactory::FORMAT_ARRAY,
+            static::$prefix,
+            static::$suffix,
+            $locales
+        );
 
-        if(!empty($rules[$lang_key])) {
-            foreach ($locales as $locale) {
-                if ($old_new) {
-                    foreach ($rules[$lang_key] as $attribute => $rule) {
-                        $rules[self::prefix($prefix, 'new') . $locale . '.' . $attribute] = $rule;
-                        $rules[self::prefix($prefix, 'old') . $locale . '.' . $attribute] = $rule;
-                    }
-                } else {
-                    foreach ($rules[$lang_key] as $attribute => $rule) {
-                        $rules[self::prefix($prefix) . $locale . '.'. $attribute] = $rule;
-                    }
+        if (!empty($_rules[$lang_key])) {
+            $rules = [];
+            $lang_rules = $_rules[$lang_key];
+
+            if ($old_new) {
+                foreach ($lang_rules as $attribute => $rule) {
+                    $rules[self::prefix($prefix) . 'new.' . static::translated($attribute)] = $rule;
+                    $rules[self::prefix($prefix) . 'old.' . static::translated($attribute)] = $rule;
+                }
+            } else {
+                foreach ($lang_rules as $attribute => $rule) {
+                    $rules[self::prefix($prefix) . static::translated($attribute)] = $rule;
                 }
             }
-            unset($rules[$lang_key]);
+
+            $result_rules += RuleFactory::make(
+                $rules,
+                \Astrotomic\Translatable\Validation\RuleFactory::FORMAT_ARRAY,
+                static::$prefix,
+                static::$suffix,
+                $locales
+            );
         }
 
-        return $rules;
+        return $result_rules;
     }
 
-    private static function prefix(?string $prefix = '', ?string $append = ''): ?string
+    /**
+     * Clear string from dots
+     *
+     * @param string|null $value
+     * @return string
+     */
+    private static function cl(?string $value): string
     {
-        if (empty($prefix)) return null;
+        return trim($value, '.');
+    }
 
-        $prefix = trim($prefix, '.');
+    private static function prefix($prefix): string
+    {
+        $prefix = self::cl($prefix);
+        return empty($prefix) ? '' : $prefix . '.';
+    }
 
-        if (!empty($append)) {
-            $prefix = implode('.', [$prefix, $append, '*']);
-        }
-
-        return $prefix . '.';
+    private static function translated(string $attribute): string
+    {
+        return static::$prefix . static::cl($attribute) . static::$suffix;
     }
 }

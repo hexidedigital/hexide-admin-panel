@@ -1,6 +1,6 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Traits\Http\Controllers;
+namespace HexideDigital\HexideAdmin\Http\Traits;
 
 use Event;
 use Response;
@@ -9,7 +9,7 @@ use Response;
  * url for controller: (post) controller_name/ajax_field/{id}
  *
  * Class AjaxFieldsChangerTrait
- * @package HexideDigital\HexideAdmin\Traits\Http\Controllers
+ * @package HexideDigital\HexideAdmin\Http\Traits
  */
 trait AjaxFieldsChangerTrait
 {
@@ -21,7 +21,7 @@ trait AjaxFieldsChangerTrait
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function ajaxFieldChange($id)
+    public function ajaxFieldChange($id): \Illuminate\Http\JsonResponse
     {
         $class_name = $this->get_model_by_controller(__CLASS__);
         $class = '\App\Models\\'.$class_name;

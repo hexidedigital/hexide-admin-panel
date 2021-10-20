@@ -1,6 +1,6 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Http\Requests\Traits;
+namespace HexideDigital\HexideAdmin\Http\Traits;
 
 use Arr;
 use Illuminate\Foundation\Http\FormRequest;

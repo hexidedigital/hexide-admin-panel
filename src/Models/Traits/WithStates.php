@@ -1,6 +1,6 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Traits\Models;
+namespace HexideDigital\HexideAdmin\Models\Traits;
 
 use Arr;
 use HexideDigital\HexideAdmin\Contracts\WithStatesContract;
@@ -9,22 +9,24 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Trait WithStates
- * @package HexideDigital\HexideAdmin\Traits\Models
+ * @package HexideDigital\HexideAdmin\Models\Traits
  * @implements WithStatesContract
+ * @method static \Illuminate\Database\Eloquent\Builder|self ofStates($builder, $state, $field)
  * @mixin Model
  */
 trait WithStates
 {
 
-
     /**
      * @param Builder $builder
-     * @param string $state
+     * @param string|array $state
      * @param string $field = 'state'
      * @return Builder
      */
-    public function scopeOfState(Builder $builder, string $state, string $field = 'state'): Builder
+    public function scopeOfState(Builder $builder, $state, string $field = 'state'): Builder
     {
+        if (is_array($state)) return $this->ofStates($builder, $state, $field);
+
         return $builder->where($this->getTable() . '.' . $field, $this->getValueByKey($state));
     }
 
@@ -44,6 +46,7 @@ trait WithStates
 
         return $builder->whereIn($this->getTable() . '.' . $field, $_states);
     }
+
     /**
      * @return array
      */
@@ -61,6 +64,15 @@ trait WithStates
     }
 
     /**
+     * @param int|string|null $key
+     * @return int|string|null
+     */
+    public function getValueByKey($key = null)
+    {
+        return Arr::get($this->getStates(), $key, null);
+    }
+
+    /**
      * @param int|string|null $value
      * @return int|string|null
      */
@@ -73,15 +85,6 @@ trait WithStates
         }
 
         return null;
-    }
-
-    /**
-     * @param int|string|null $key
-     * @return int|string|null
-     */
-    public function getValueByKey($key = null)
-    {
-        return Arr::get($this->getStates(), $key, null);
     }
 
 }

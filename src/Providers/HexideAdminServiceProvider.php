@@ -17,8 +17,6 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../config/hexide_admin.php' => config_path('hexide_admin.php'),
         ], 'hexide_admin');
-
-        $this->loadRoutesFrom(__DIR__.'/../../routes/hexide_admin.php');
     }
 
     /**

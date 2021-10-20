@@ -1,6 +1,6 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Traits\Models;
+namespace HexideDigital\HexideAdmin\Models\Traits;
 
 use Illuminate\Container\Container;
 use Illuminate\Support\Str;

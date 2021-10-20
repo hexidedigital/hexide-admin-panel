@@ -2,21 +2,19 @@
 
 return [
 
-    'admin_locales' => [
+
+    'locale' => 'uk',
+    'lang_cookie' => 'admin_locale',
+
+    'locales' => [
         'uk',
         'ru',
-        'en',
-    ],
-
-    'content_locales' => [
-        'uk',
         'en',
     ],
 
     'locales_map' => [
         'ua' => 'uk',
     ],
-
 
 
     'module_files' => [
@@ -27,10 +25,10 @@ return [
 
     'namespaces' => [
         'models' => 'App\\Models',
-        'services' => 'App\\Services',
-        'repositories' => 'App\\Repositories',
+        'services' => 'App\\Services\\Backend',
         'controllers' => 'App\\Http\\Controllers\\Backend',
         'requests' => 'App\\Http\\Requests\\Backend',
+        //        'repositories' => 'App\\Repositories',
     ],
 
     'module_paths' => [

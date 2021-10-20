@@ -15,6 +15,24 @@ if (!function_exists('lang_rules')) {
     }
 }
 
+if (!function_exists('wrap_rules')) {
+    /**
+     * @param string $wrap
+     * @param array $rules
+     * @return array
+     */
+    function wrap_rules(string $wrap, array $rules): array
+    {
+        $arr = [];
+
+        foreach ($rules as $attr => $rule) {
+            $arr[$wrap . '.' . $attr] = $rule;
+        }
+
+        return $arr;
+    }
+}
+
 use App\Http\Middleware\LanguageMiddleware;
 if (!function_exists('locale_prefix')) {
     /**

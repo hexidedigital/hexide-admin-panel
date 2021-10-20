@@ -1,13 +1,13 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Traits\Models;
+namespace HexideDigital\HexideAdmin\Models\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class VisibleTrait
- * @package HexideDigital\HexideAdmin\Traits\Models
+ * @package HexideDigital\HexideAdmin\Models\Traits
  * @mixin Model
  */
 trait VisibleTrait

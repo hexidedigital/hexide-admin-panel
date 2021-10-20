@@ -1,6 +1,6 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Traits\Models;
+namespace HexideDigital\HexideAdmin\Models\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
  * Trail WithTranslationsTrait
  * Add translations scope to class
  *
- * @package HexideDigital\HexideAdmin\Traits\Models
+ * @package HexideDigital\HexideAdmin\Models\Traits
  * @mixin Model
  *
  * @method static Builder|\Illuminate\Database\Query\Builder|self joinTranslations($modelTable = null, $translationsTable = null, $modelTableKey = null, $translationsTableKey = null)

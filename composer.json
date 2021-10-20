@@ -35,7 +35,9 @@
     "extra": {
         "laravel": {
             "providers": [
-                "HexideDigital\\HexideAdmin\\Providers\\HexideAdminServiceProvider"
+                "HexideDigital\\HexideAdmin\\Providers\\HexideAdminServiceProvider",
+                "HexideDigital\\HexideAdmin\\Providers\\RouteServiceProvider",
+                "HexideDigital\\HexideAdmin\\Providers\\MenuBuilderServiceProvider"
             ]
         }
     }

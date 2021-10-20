@@ -2,9 +2,9 @@
 
 namespace {{ namespace }};
 
-use HexideDigital\HexideAdmin\Traits\Models\VisibleTrait;
-use HexideDigital\HexideAdmin\Traits\Models\PositionSortTrait;
-use HexideDigital\HexideAdmin\Traits\Models\WithTranslationsTrait;
+use HexideDigital\HexideAdmin\Models\Traits\VisibleTrait;
+use HexideDigital\HexideAdmin\Models\Traits\PositionSortTrait;
+use HexideDigital\HexideAdmin\Models\Traits\WithTranslationsTrait;
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
 

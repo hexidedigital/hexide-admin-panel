@@ -2,7 +2,6 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
-
 use App\Models\User;
 use Gate;
 use HexideDigital\AdminConfigurations\Models\AdminConfiguration;
@@ -74,6 +73,7 @@ abstract class BackendController extends BaseController
     public function __construct(string $name = null)
     {
         parent::__construct();
+        $this->locales = config('translatable.locales');
 
         $this->setModuleName($name);
 
