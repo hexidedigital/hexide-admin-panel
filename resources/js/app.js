@@ -1,0 +1,1 @@
+require('./hd-admin-front')

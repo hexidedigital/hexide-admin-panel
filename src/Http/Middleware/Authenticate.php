@@ -26,7 +26,7 @@ class Authenticate extends Middleware
             /** @var User|null $user */
             $user = Auth::user();
 
-            if(isset($user) && $user->hasAdminAccess() || $user->roles()->pluck('key')->contains('admin')){
+            if(isset($user) && ($user->hasAdminAccess() || $user->roles()->pluck('key')->contains('admin'))){
                 $request->merge(['auth_user' => $user]);
                 return $next($request);
             }

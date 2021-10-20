@@ -2,6 +2,8 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers;
 
+use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
+use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use Illuminate\Routing\Controller;
 
 abstract class BaseController extends Controller
@@ -10,25 +12,22 @@ abstract class BaseController extends Controller
     /**
      * @var array
      */
-    private array $view_data;
+    private array $view_data = [];
 
     /**
      * @var array
      */
-    protected array $locales;
+    protected array $locales = [];
 
-    /**
-     * @var array
-     */
-    protected array $breadcrumbs;
     protected bool $with_breadcrumbs = true;
 
+    protected HexideAdmin $hexideAdmin;
+    protected Breadcrumbs $breadcrumbs;
 
     public function __construct()
     {
-        $this->locales = config('app.locales');
-        $this->breadcrumbs = [];
-        $this->view_data = [];
+        $this->hexideAdmin = app()->get(HexideAdmin::class);
+        $this->breadcrumbs = $this->hexideAdmin->getBreadcrumbs();
     }
 
     /**
@@ -61,21 +60,11 @@ abstract class BaseController extends Controller
      */
     protected function render(?string $view = null, array $data = [])
     {
-        $this->data('locales', $this->locales);
-        $this->data('breadcrumbs', $this->breadcrumbs);
+        $this->data('breadcrumbs', $this->breadcrumbs->get());
 
         $this->data($data);
 
         return view($view, $this->getViewData());
-    }
-
-    /**
-     * @param string $name
-     * @param string|null $url
-     */
-    protected function breadcrumbs(string $name, ?string $url = null)
-    {
-        $this->breadcrumbs[] = ['name' => $name, 'url' => $url];
     }
 
 }

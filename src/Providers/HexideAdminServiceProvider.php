@@ -2,31 +2,111 @@
 
 namespace HexideDigital\HexideAdmin\Providers;
 
+use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
+use HexideDigital\HexideAdmin\Classes\HexideAdmin;
+use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\ServiceProvider;
+use Route;
 
 class HexideAdminServiceProvider extends ServiceProvider
 {
 
-    /**
-     * Boot the instance.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        $this->publishes([
-            __DIR__.'/../../config/hexide_admin.php' => config_path('hexide_admin.php'),
-        ], 'hexide_admin');
-    }
+    private array $commands = [
 
-    /**
-     * Register services.
-     *
-     * @return void
-     */
+    ];
+
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/../../config/hexide_admin.php', 'hexide_admin');
+        $this->app->singleton(HexideAdmin::class, function (Container $app) {
+            return new HexideAdmin($app);
+        });
+
+        $this->app->singleton(Breadcrumbs::class, function () {
+            return new Breadcrumbs();
+        });
     }
 
+    public function boot(Factory $view)
+    {
+        $this->loadPublishes();
+
+        $this->loadConfig();
+        $this->loadViews();
+        $this->loadTranslations();
+        $this->loadRoutes();
+
+        $this->registerCommands();
+        $this->registerViewComposers($view);
+    }
+
+    private function loadPublishes()
+    {
+        $this->publishes([
+            $this->packagePath("config/hexide_admin.php") => config_path('hexide_admin.php'),
+            $this->packagePath("config/modelPermissions.php") => config_path('modelPermissions.php'),
+            $this->packagePath("config/translatable.php") => config_path('translatable.php'),
+        ], 'hexide-admin-configs');
+
+        $this->publishes([
+            $this->packagePath("config/hexide_admin.php") => resource_path('vendor/hexide_admin')
+        ], 'hexide-admin-translations');
+
+
+    }
+
+    private function loadRoutes()
+    {
+        $routesCfg = [
+            'as' => 'admin.',
+            'prefix' => 'admin',
+            'middleware' => ['web', 'auth:admin'],
+        ];
+
+        Route::group($routesCfg, function () {
+            $this->loadRoutesFrom($this->packagePath('routes/admin.php'));
+        });
+
+        Route::group(['middleware' => ['web']], function () {
+            $this->loadRoutesFrom($this->packagePath('routes/web.php'));
+        });
+    }
+
+    private function loadConfig()
+    {
+        $this->mergeConfigFrom($this->packagePath("config/hexide_admin.php"), 'hexide_admin');
+    }
+
+    private function loadTranslations()
+    {
+        $this->loadTranslationsFrom($this->packagePath('resources/lang'), 'hexide_admin');
+    }
+
+    private function loadViews()
+    {
+        $this->loadViewsFrom($this->packagePath('resources/views'), 'hexide_admin');
+    }
+
+    private function registerCommands()
+    {
+        $this->commands($this->commands);
+    }
+
+    private function registerViewComposers(Factory $view)
+    {
+        $view->composer('admin.*', HexideAdminComposer::class);
+        $view->composer('hexide_admin::*', HexideAdminComposer::class);
+    }
+
+    /**
+     * Get the absolute path to some package resource.
+     *
+     * @param string $path The relative path to the resource
+     * @return string
+     */
+    private function packagePath(string $path): string
+    {
+        return __DIR__ . "/../../$path";
+    }
 }
