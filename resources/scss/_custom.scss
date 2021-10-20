@@ -1,0 +1,111 @@
+@import "./variables";
+
+.w-5.h-5 {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+div.flex.justify-between.flex-1 {
+    display: none !important;
+}
+
+.dataTables_length,
+.dataTables_filter,
+.dt-buttons {
+    margin-bottom: 0.333em;
+}
+.dt-buttons .btn {
+    margin-left: 0.333em;
+    border-radius: 0;
+}
+
+.datatable {
+    width: 100% !important;
+}
+.table.datatable {
+    box-sizing: border-box;
+    border-collapse: collapse;
+}
+
+table {
+    &.dataTable {
+        thead {
+            th {
+                border-bottom: 2px solid #dee2e6;
+            }
+
+            .sorting, .sorting_asc, .sorting_desc {
+                background-image: none;
+            }
+        }
+    }
+}
+
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.btn-group-xs > .btn,
+.btn-xs {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+.message-container {
+    position: fixed;
+    bottom: 0;
+    right: 20px;
+    max-width: 400px;
+    z-index: 99999
+}
+
+.duplicate {
+    display: none
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: $blue !important;
+}
+.select2.select2-container.select2-container--default {
+    width: 100% !important;
+}
+.select2 {
+    max-width: 100%;
+    width: 100%;
+}
+
+.form-group {
+    &.required {
+        label {
+            position: relative;
+            padding-right: 0.2rem;
+
+            &:first-child:after {
+                position: absolute;
+                right: -5px;
+                top: 0;
+                content: "*";
+                width: 5px;
+                height: 5px;
+                font-size: 12px;
+                color: $red;
+            }
+
+            &.error {
+                color: $red;
+            }
+        }
+    }
+}
+
+textarea {
+    .is-invalid {
+        &, & + .cke {
+            border-radius: .25rem;
+            border: 1px solid $red;
+            overflow: hidden;
+        }
+    }
+}

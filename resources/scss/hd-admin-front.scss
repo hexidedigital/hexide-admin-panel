@@ -1,0 +1,28 @@
+// Variables
+@import 'variables';
+
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic');
+@import "~@fortawesome/fontawesome-free/css/all.min.css";
+// OverlayScrollbars
+@import "~overlayscrollbars/css/OverlayScrollbars.min.css";
+// iCheck
+@import '~icheck-bootstrap/icheck-bootstrap.css';
+// AdminLTE
+@import "~admin-lte/dist/css/adminlte.min.css";
+// Bootstrap
+// Already imported by AdminLTE
+//@import '~bootstrap/scss/bootstrap';
+
+// Select2
+@import "~select2/dist/css/select2.min.css";
+
+// DataTables
+@import "~datatables.net-bs4/css/dataTables.bootstrap4.min.css";
+@import "~datatables.net-select-bs4/css/select.bootstrap4.min.css";
+
+// Toastr
+@import "~toastr/toastr";
+
+// Custom Styles
+@import "custom";
