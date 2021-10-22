@@ -3,7 +3,7 @@
 @section("table-body")
     @php
         /**
-         * @var {{ model_namespace }}{{ Model }} $model
+         * @var {{ model_namespace }} $model
          */
     @endphp
 

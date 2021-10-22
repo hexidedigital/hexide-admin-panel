@@ -7,7 +7,7 @@ use HexideDigital\HexideAdmin\Services\ServiceInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
-class PageService extends BaseService implements ServiceInterface
+class {{ ModelService }} extends BaseService implements ServiceInterface
 {
     /**
      * @param Request $request
