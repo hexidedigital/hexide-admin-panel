@@ -16,12 +16,12 @@
             <div class="col-md-6 row">
                 @if(($with_create ?? true) && Route::has('admin.'.$module.'.create'))
                     @can(\HexideDigital\ModelPermissions\Models\Permission::key($module, \HexideDigital\ModelPermissions\Models\Permission::create))
-                        <a class="btn btn-success" title="{{__('buttons.add')}}"
+                        <a class="btn btn-success" title="{{__('hexide_admin::buttons.add')}}"
                            href="{{route('admin.'.$module.'.create', $url_params)}}">
 
                             <span class="mr-2"><i class="fas fa-plus"></i></span>
 
-                            {{__('buttons.add')}}
+                            {{__('hexide_admin::buttons.add')}}
                         </a>
                     @endcan
                 @endif

@@ -15,6 +15,7 @@ $(document).on('click', '.generate_slug', function (e) {
 
     // !generate_value ?  $('.generate_info').removeAttr('hidden') : $('.generate_info').attr('hidden', true);
 })
+
 function translite(str) {
     var space = '-'
 

@@ -1,0 +1,2 @@
+'{{ module_name }}'                     => trans_choice('models.{{ module_name }}.name', 2),
+    /*hexide_admin_stub*/

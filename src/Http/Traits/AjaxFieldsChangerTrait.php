@@ -45,7 +45,7 @@ trait AjaxFieldsChangerTrait
                     return Response::json(
                         [
                             "error"   => 0,
-                            'message' => __('messages.success.action'),
+                            'message' => __('hexide_admin::messages.success.action'),
                         ],
                     );
                 }
@@ -55,7 +55,7 @@ trait AjaxFieldsChangerTrait
         return Response::json(
             [
                 "error"   => 1,
-                'message' => __('messages.error.action'),
+                'message' => __('hexide_admin::messages.error.action'),
             ],
             422
         );

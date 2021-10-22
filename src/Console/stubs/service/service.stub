@@ -1,0 +1,44 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ model_namespace }};
+use HexideDigital\HexideAdmin\Services\ServiceInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+
+class PageService extends BaseService implements ServiceInterface
+{
+    /**
+     * @param Request $request
+     * @param Model|{{ Model }}|null $model
+     * @return Model|{{ Model }}
+     */
+    public function handleRequest(Request $request, ?Model $model = null): {{ Model }}
+    {
+        $inputs = $this->getInputs($request);
+
+        $this->prepareAttributes($request, $model);
+
+        if(isset($model->id)){
+            $model->update();
+        }else{
+            $model = {{ Model }}::create($inputs);
+        }
+
+        $this->postHandle($request, $model);
+
+        return $model;
+    }
+
+    public function prepareAttributes(Request $request, ?{{ Model }} $model = null)
+    {
+
+    }
+
+    public function postHandle(Request $request, {{ Model }} $model)
+    {
+
+    }
+
+}

@@ -4,6 +4,7 @@ namespace HexideDigital\HexideAdmin\Providers;
 
 use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
+use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
@@ -14,7 +15,7 @@ class HexideAdminServiceProvider extends ServiceProvider
 {
 
     private array $commands = [
-
+        HexideAdminCommand::class,
     ];
 
     public function register()
@@ -50,9 +51,16 @@ class HexideAdminServiceProvider extends ServiceProvider
         ], 'hexide-admin-configs');
 
         $this->publishes([
-            $this->packagePath("config/hexide_admin.php") => resource_path('vendor/hexide_admin')
+            $this->packagePath("resources/lang") => resource_path('lang/vendor/hexide_admin')
         ], 'hexide-admin-translations');
 
+        $this->publishes([
+            $this->packagePath("resources/views") => resource_path('views/vendor/hexide_admin')
+        ], 'hexide-admin-translations');
+
+        $this->publishes([
+            $this->packagePath("src/Console/stubs") => base_path('stubs/hexide_admin')
+        ], 'hexide-admin-stubs');
 
     }
 
@@ -90,7 +98,9 @@ class HexideAdminServiceProvider extends ServiceProvider
 
     private function registerCommands()
     {
-        $this->commands($this->commands);
+        if ($this->app->runningInConsole()) {
+            $this->commands($this->commands);
+        }
     }
 
     private function registerViewComposers(Factory $view)

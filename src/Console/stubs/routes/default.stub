@@ -1,0 +1,4 @@
+// {{ module_name }}
+Route::post('{{ module_name }}/{id}/ajax_field','{{ ModelController }}@ajaxFieldChange')->middleware('ajax')->name('{{ module_name }}.ajax_field');
+Route::resource('{{ module_name }}', '{{ ModelController }}');
+/*hexide_admin_stub*/

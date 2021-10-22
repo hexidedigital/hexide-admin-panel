@@ -115,12 +115,12 @@ abstract class BackendController extends BaseController
 
     protected function getModuleName(): ?string
     {
-        return $this->module;
+        return trim($this->module);
     }
 
     protected function setModuleName(?string $name)
     {
-        $this->module = $name;
+        $this->module = trim($name);
         $this->data('module', $name);
     }
 
@@ -143,19 +143,16 @@ abstract class BackendController extends BaseController
      */
     protected function render(?string $view = 'index', array $data = [], string $force_type = null)
     {
-        if ($force_type == self::VIEW_EDIT || $view == self::VIEW_EDIT) {
-            $this->toastrIfExistsErrors(self::VIEW_EDIT);
-            $this->data('layout_type', 'edit');
-        } elseif ($force_type == self::VIEW_CREATE || $view == self::VIEW_CREATE) {
-            $this->toastrIfExistsErrors(self::VIEW_CREATE);
-            $this->data('layout_type', 'add');
+        if (in_array($force_type, [self::VIEW_EDIT, self::VIEW_CREATE]) ||
+            in_array($view, [self::VIEW_EDIT, self::VIEW_CREATE])) {
+            $this->toastrIfExistsErrors($force_type);
+            $this->data('layout_type', $force_type);
         } else {
             $this->toastrIfExistsErrors();
         }
 
-        $view = View::exists('admin.view.' . $this->module . '.' . $view)
-            ? 'admin.view.' . $this->module . '.' . $view
-            : $view;
+        $module = $this->getModuleName();
+        $view = View::exists("admin.view.$module.$view") ? "admin.view.$module.$view" : $view;
 
         $this->addToBreadcrumbs($force_type ?: array_last(explode('.', $view)));
 
@@ -172,21 +169,11 @@ abstract class BackendController extends BaseController
                     trans_choice("models.$module.name", 2),
                     route("admin.$module.index")
                 );
-            } else {
-                $action = $method;
-                if ($method === 'create') {
-                    $action = 'add';
-                }
-
-                if (!empty($method)) {
-                    if ($method != 'index') {
-                        $title = __("models.$module.$action");
-                        $this->breadcrumbs->push(
-                            $title,
-                            route("admin.$module.$method", $this->model??'')
-                        );
-                    }
-                }
+            } else if (!empty($method)) {
+                $this->breadcrumbs->push(
+                    __("models.$module.$method"),
+                    route("admin.$module.$method", $this->model ?? '')
+                );
             }
         }
     }
@@ -212,12 +199,12 @@ abstract class BackendController extends BaseController
         $action = in_array($action, self::ACTIONS) ? $action : self::ACTION_DEFAULT;
 
         if (empty($title)) {
-            $title = __("messages.$type.title");
+            $title = __("hexide_admin::messages.$type.title");
         }
 
         if (empty($message)) {
             if (in_array($type, ['error', 'success'])) {
-                $message = __("messages.$type.$action",
+                $message = __("hexide_admin::messages.$type.$action",
                     ['model' => trans_choice("models.{$this->getModuleName()}.name", 1)]
                 );
             }
@@ -254,10 +241,10 @@ abstract class BackendController extends BaseController
 
     private function abort($action)
     {
-        $message = __('messages.forbidden', ['key' => $action]);
+        $message = __('hexide_admin::messages.forbidden', ['key' => $action]);
 
         if (request()->ajax()) {
-            return response()->json(['message' => __('api_labels.forbidden'), 'type' => 'error'])
+            return response()->json(['message' => __('hexide_admin::api_labels.forbidden'), 'type' => 'error'])
                 ->setStatusCode(Response::HTTP_FORBIDDEN);
         } else {
             $this->toastr('', $message, 'error');

@@ -1,0 +1,35 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use HexideDigital\HexideAdmin\Services\ServiceInterface;
+
+abstract class BaseService implements ServiceInterface
+{
+    /**
+     * @param Request $request
+     * @return Model
+     */
+    public function createModel(Request $request)
+    {
+        return $this->handleRequest($request);
+    }
+
+    /**
+     * @param Request $request
+     * @param Model $model
+     * @return Model
+     */
+    public function updateModel(Request $request, Model $model)
+    {
+        return $this->handleRequest($request, $model);
+    }
+
+    protected function getInputs(Request $request): array
+    {
+        return $request->except('_token', '_method');
+    }
+
+}

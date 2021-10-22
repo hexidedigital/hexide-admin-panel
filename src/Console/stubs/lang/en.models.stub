@@ -1,0 +1,14 @@
+    // for {{ ModuleName }}
+
+    '{{ module_name }}' => [
+        'name' => '{1} Model|[2,*] Models',
+
+        'index' => 'List of models',
+        'create' => 'Creating a model',
+        'edit' => 'Models editing',
+        'show' => 'View model',
+
+        'attributes' => [],
+    ],
+
+    /*hexide_admin_stub*/

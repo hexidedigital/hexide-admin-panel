@@ -12,11 +12,11 @@ class LanguageController extends BaseController
     {
         $path = redirect()->back()->getTargetUrl();
 
-        $message = __('messages.language.changed', [], $locale);
+        $message = __('hexide_admin::messages.language.changed', [], $locale);
 
         if(!in_array($locale, config('hexide_admin.locales'))){
             $locale = config('hexide_admin.locale');
-            $message = __('messages.language.default', [], $locale);
+            $message = __('hexide_admin::messages.language.default', [], $locale);
         }
 
         toastr($message, 'info');

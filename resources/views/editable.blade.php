@@ -1,7 +1,7 @@
 @extends("hexide_admin::master")
 
 @php
-    $layout_type = $layout_type ?? (isset($model->id) ? 'edit' : 'add');
+    $layout_type = $layout_type ?? (isset($model->id) ? 'edit' : 'create');
 @endphp
 
 @section("title_prefix", __("models.$module.$layout_type"))

@@ -1,3 +1,8 @@
+require('./duplication_row')
+require('./ajax_inputs')
+require('./slug_generate')
+require('./tabs_select_active')
+
 $(document).ready(function () {
     window._token = $('meta[name="csrf-token"]').attr('content')
 
@@ -9,13 +14,6 @@ $(document).ready(function () {
     CKEDITOR.config.shiftEnterMode  = CKEDITOR.ENTER_BR
 
     // --------------------
-
-    require('./ajax_inputs')
-    require('./duplication_row')
-    require('./slug_generate')
-
-    // --------------------
-
 
     // make toggle/switch from checkbox
     $(document).ready(function () {

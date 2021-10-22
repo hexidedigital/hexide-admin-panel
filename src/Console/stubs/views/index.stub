@@ -16,7 +16,7 @@
                                ['text' => __('admin_labels.attributes.title')],
                                ['text' => __('admin_labels.attributes.position'), 'attr' => ['style' => 'width: 95px']],
                                ['text' => __('admin_labels.attributes.visible'), 'attr' => ['style' => 'width: 95px']],
-                               ['text' => __("buttons.actions"), 'attr' => ['style' => 'width: 95px']],
+                               ['text' => __("hexide_admin::buttons.actions"), 'attr' => ['style' => 'width: 95px']],
                            ])
                            ->addFoot([
                                ['attr' => ['colspan' => 6]]

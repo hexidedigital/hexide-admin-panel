@@ -1,0 +1,8 @@
+
+        [
+            'text' => '{{ ModuleName }}',
+            'icon' => 'fas fa-file',
+            'can' => '{{ module_name_access }}',
+            'route' => 'admin.{{ module_name }}.index',
+            'active' => ['regex:@^admin/{{ module_name }}/.+@'],
+        ],/*hexide_admin_stub*/

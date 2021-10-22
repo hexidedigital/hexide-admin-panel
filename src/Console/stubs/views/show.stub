@@ -1,9 +1,9 @@
-@extends("admin.layouts.show")
+@extends("hexide_admin::show")
 
 @section("table-body")
     @php
         /**
-         * @var App\Models\{{ Model }} $model
+         * @var {{ model_namespace }}{{ Model }} $model
          */
     @endphp
 
