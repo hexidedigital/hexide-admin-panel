@@ -89,7 +89,7 @@ class HexideAdminCommand extends BaseCommand
         $this->setTranslatable();
 
         $this->createFiles();
-        $this->prepareResources();
+        // $this->prepareResources();
 
         $this->end();
 
@@ -271,8 +271,8 @@ class HexideAdminCommand extends BaseCommand
     {
         $this->warn('Start preparing resources...');
 
-//        $this->appendRoutes();
-//        $this->appendMenuItem();
+        $this->appendRoutes();
+        $this->appendMenuItem();
         $this->appendMenuItemTranslations();
         $this->appendTranslations();
 
