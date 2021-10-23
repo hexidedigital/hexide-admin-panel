@@ -83,15 +83,15 @@ class HexideAdminCommand extends BaseCommand
         $this->with_interact = !$this->option('no-interaction');
         $this->setForceTypes();
 
-        $this->start();
+        $this->info('Start: creating module files...');
 
         $this->setModuleName();
         $this->setTranslatable();
 
         $this->createFiles();
-        // $this->prepareResources();
+//        $this->prepareResources();
 
-        $this->end();
+        $this->info('Finish: files are created and ');
 
         return self::SUCCESS;
     }
@@ -136,52 +136,66 @@ class HexideAdminCommand extends BaseCommand
 
     private function createFiles()
     {
-        $this->warn('Creating files...');
+        $this->info('Creating files...');
 
-//        $this->createModels();
-//        $this->createMigrations();
-//        $this->createService();
-//        $this->createRequest();
-//        $this->createController();
-//        $this->createViews();
+        $methods = array_filter([
+//            'createModels' => ['start' => 'Models', 'finish' => 'Models',],
+            'createMigrations' => ['start' => 'Migrations', 'finish' => 'Migrations',],
+//            'createService' => $this->option('service') ? ['start' => 'Service', 'finish' => 'Service',] : false,
+//            'createRequest' => ['start' => 'Request', 'finish' => 'Request',],
+            'createController' => ['start' => 'Controller', 'finish' => 'Controller',],
+//            'createViews' => ['start' => 'Views', 'finish' => 'Views',],
+        ]);
 
-        $this->warn('Files created.');
+        foreach ($methods as $method => $points) {
+            $this->info("Creating: " . $points['start']);
+
+            $this->{$method}();
+
+            $this->info("Finished: " . $points['finish']);
+            $this->newLine();
+        }
+
+        $this->info('Files created.');
     }
 
     private function createModels()
     {
-        $this->info('Creating models...');
-
-        $namespace = $this->getNamespace('model', 'App\\Models');
+        $path = app_path('/Models');
 
         $type = $this->translatable ? '.with_translation' : '';
-        $stub = $this->resolveStubPath('model', "model$type.stub");
+
+        $class = $this->getModuleName();
+
+        $content = $this->getContent($this->resolveStubPath('model', "model$type.stub"), [
+            "{{ namespace }}" => $this->getNamespace('model', 'App\\Models'),
+            "{{ class }}" => $class,
+        ]);
 
         if ($this->translatable) {
-            $translation = $this->resolveStubPath('model', 'model.translation.stub');
             $this->createTranslatedModel();
         }
 
-        $file = app_path('/Models/') . $this->getModuleName();
-
-
-        $this->warn('Models created.');
+        $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('model'));
     }
 
     private function createTranslatedModel()
     {
-        $this->info('Creating model translation...');
-
         $path = app_path('/Models');
-        $namespace = $this->getNamespace('model', 'App\\Models');
 
-        $this->warn('Model translation created.');
+        $class = $this->getModuleName() . 'Translation';
+
+        $content = $this->getContent($this->resolveStubPath('model', 'model.translation.stub'), [
+            "{{ namespace }}" => $this->getNamespace('model', 'App\\Models'),
+            "{{ parent_model }}" => $this->getSnakeCaseName(),
+            "{{ class }}" => $class,
+        ]);
+
+        $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('model'));
     }
 
     private function createMigrations()
     {
-        $this->info('Creating migration...');
-
         $path = database_path('/migrations');
 
         $type = $this->translatable ? '.translation' : '';
@@ -190,24 +204,20 @@ class HexideAdminCommand extends BaseCommand
         if ($this->hasOption('populate')) {
             $stub = $this->resolveStubPath('migration', "/migration.populate.stub");
         }
-
-        $this->warn('Migration created.');
     }
 
     private function createService()
     {
-        if ($this->hasOption('service')) {
-            $this->info('Creating service...');
-
+        if ($this->option('service')) {
             $path = app_path('Services/Backend/');
 
-            $name = $this->getModuleName() . 'Service';
+            $class = $this->getModuleName() . 'Service';
 
             $content = $this->getContent($this->resolveStubPath('service', "/service.stub"), [
                 "{{ namespace }}" => $this->getNamespace('service', 'App\\Services\\Backend'),
                 "{{ model_namespace }}" => $this->getModelNamespace(),
                 "{{ Model }}" => $this->getModuleName(),
-                "{{ ModelService }}" => $name,
+                "{{ ModelService }}" => $class,
             ]);
 
             $this->makeDir($path);
@@ -221,31 +231,34 @@ class HexideAdminCommand extends BaseCommand
                 );
             }
 
-            if ($this->makeFile($path . $name . '.php', $content)) {
-                $this->warn($name . ' created.');
-            } else {
-                $this->warn($name . ' not created.');
-            }
+            $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('service'));
         }
     }
 
     private function createRequest()
     {
-        $this->info('Creating request...');
-
-        $path = app_path('/Http/Requests/Backend');
-        $namespace = $this->getNamespace('request', 'App\\Http\\Requests\\Backend');
+        $path = app_path('/Http/Requests/Backend/');
 
         $type = $this->translatable ? '.translation' : '';
-        $stub = $this->resolveStubPath('request', "/request.admin$type.stub");
 
-        $this->warn('Request created.');
+        $class = $this->getModuleName() . 'Request';
+
+        $content = $this->getContent($this->resolveStubPath('request', "/request.admin$type.stub"), [
+            "{{ namespace }}" => $this->getNamespace('request', 'App\\Http\\Requests\\Backend'),
+            "{{ model_namespace }}" => $this->getModelNamespace(),
+            "{{ model }}" => $this->getSnakeCaseName(2),
+            "{{ ModuleName }}" => $this->getModuleName(),
+            "{{ module_name }}" => $this->getSnakeCaseName(),
+            "{{ class }}" => $class,
+        ]);
+
+        $this->makeDir($path);
+
+        $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('request'));
     }
 
     private function createController()
     {
-        $this->info('Creating controller...');
-
         $path = app_path('/Http/Controllers/Backend');
         $namespace = $this->getNamespace('controller', 'App\\Http\\Controllers\\Backend');
 
@@ -262,7 +275,41 @@ class HexideAdminCommand extends BaseCommand
         ]);
 
 
-        $this->warn('Controller created.');
+    }
+
+    private function createViews()
+    {
+        $dir_path = base_path($this->config->get('hexide_admin.module_paths.views')) . $this->getSnakeCaseName(2);
+        $this->makeDir($dir_path);
+        $this->makeDir($dir_path . '/tabs');
+        $this->makeDir($dir_path . '/partials');
+
+        $stubs = array_filter([
+            'create.stub' => 'create.blade.php',
+            'edit.stub' => 'edit.blade.php',
+            'index.stub' => 'index.blade.php',
+            'show.stub' => 'show.blade.php',
+            '_form.stub' => 'partials/_form.blade.php',
+            'tabs/general.stub' => 'tabs/general.blade.php',
+            'tabs/locale.stub' => $this->translatable ? 'tabs/locale.blade.php' : false,
+        ]);
+
+        $replaces = [
+            '_form.stub' => ["{{ show_locale_tabs }}" => $this->translatable ? "true" : "false",],
+            'show.stub' => ["{{ model_namespace }}" => "\\" . $this->getModelNamespace(),],
+            'tabs/general.stub' => ["{{ model_namespace }}" => "\\" . $this->getModelNamespace(),],
+            'tabs/locale.stub' => ["{{ model_namespace }}" => "\\" . $this->getModelNamespace(),],
+        ];
+
+        foreach ($stubs as $stub => $name) {
+            $content = $this->getContent($this->resolveStubPath('views', $stub));
+
+            if (in_array($stub, array_keys($replaces))) {
+                $content = $this->getContent($content, $replaces[$stub]);
+            }
+
+            $this->makeFile($dir_path . '/' . $name, $content);
+        }
     }
 
     //--------------------------------------------------------
@@ -384,45 +431,6 @@ class HexideAdminCommand extends BaseCommand
         $this->warn('Model translations appended.');
     }
 
-    private function createViews()
-    {
-        $this->info('Creating views...');
-
-        $dir_path = base_path($this->config->get('hexide_admin.module_paths.views')) . $this->getSnakeCaseName(2);
-        $this->makeDir($dir_path);
-        $this->makeDir($dir_path . '/tabs');
-        $this->makeDir($dir_path . '/partials');
-
-        $stubs = array_filter([
-            'create.stub' => 'create.blade.php',
-            'edit.stub' => 'edit.blade.php',
-            'index.stub' => 'index.blade.php',
-            'show.stub' => 'show.blade.php',
-            '_form.stub' => 'partials/_form.blade.php',
-            'tabs/general.stub' => 'tabs/general.blade.php',
-            'tabs/locale.stub' => $this->translatable ? 'tabs/locale.blade.php' : false,
-        ]);
-
-        $replaces = [
-            '_form.stub' => ["{{ show_locale_tabs }}" => $this->translatable ? "true" : "false",],
-            'show.stub' => ["{{ model_namespace }}" => "\\" . $this->getModelNamespace(),],
-            'tabs/general.stub' => ["{{ model_namespace }}" => "\\" . $this->getModelNamespace(),],
-            'tabs/locale.stub' => ["{{ model_namespace }}" => "\\" . $this->getModelNamespace(),],
-        ];
-
-        foreach ($stubs as $stub => $name) {
-            $content = $this->getContent($this->resolveStubPath('views', $stub));
-
-            if (in_array($stub, array_keys($replaces))) {
-                $content = $this->getContent($content, $replaces[$stub]);
-            }
-
-            $this->makeFile($dir_path . '/' . $name, $content);
-        }
-
-        $this->warn('Views created.');
-    }
-
     //--------------------------------------------------------
 
     protected function getModuleName($plural = 1): string
@@ -477,6 +485,28 @@ class HexideAdminCommand extends BaseCommand
         return false;
     }
 
+    protected function makeClass($class, $path, $content, $force = false)
+    {
+        if ($this->makeFile($path, $content, $force)) {
+            $this->info($class . ' created.', 'vv');
+        } else {
+            $this->warn($class . ' not created.');
+        }
+    }
+
+    protected function isForced($type): bool
+    {
+        if (empty($this->force_types)) {
+            return false;
+        }
+
+        if (in_array('all', $this->force_types) || in_array($type, $this->force_types)) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Get content from file and process replaces
      *
@@ -512,7 +542,7 @@ class HexideAdminCommand extends BaseCommand
         return [
             ['service', 's', InputOption::VALUE_NONE, 'Generate with service class'],
             ['translatable', 't', InputOption::VALUE_NONE, 'Generate files with translatable attributes'],
-            ['force', 'f', InputOption::VALUE_OPTIONAL, 'Overwrite all existing module files or for only defined types of files (controller,model,service,views)', 'all'],
+            ['force', 'f', InputOption::VALUE_OPTIONAL, 'Overwrite all existing module files or for only defined types of files (controller,request,model,service,views)', 'all'],
         ];
     }
 }

@@ -18,7 +18,7 @@ class {{ ModelService }} extends BaseService implements ServiceInterface
     {
         $inputs = $this->getInputs($request);
 
-        $this->prepareAttributes($request, $model);
+        $this->prepareAttributes($inputs, $model);
 
         if(isset($model->id)){
             $model->update();
@@ -31,9 +31,9 @@ class {{ ModelService }} extends BaseService implements ServiceInterface
         return $model;
     }
 
-    public function prepareAttributes(Request $request, ?{{ Model }} $model = null)
+    public function prepareAttributes(array &$inputs, ?{{ Model }} $model = null)
     {
-
+        $inputs['status'] = $inputs['status']??false;
     }
 
     public function postHandle(Request $request, {{ Model }} $model)

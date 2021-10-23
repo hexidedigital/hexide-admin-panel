@@ -55,9 +55,9 @@ abstract class BaseCommand extends Command
      * @param string          $message
      * @param null|int|string $verbosity
      */
-    public function alert($message, $verbosity = null)
+    public function question($message, $verbosity = null)
     {
-        $this->log($message, 'alert', $verbosity);
+        $this->log($message, 'question', $verbosity);
     }
     /**
      * Start command log

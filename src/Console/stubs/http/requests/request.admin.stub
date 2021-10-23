@@ -2,16 +2,11 @@
 
 namespace {{ namespace }};
 
-use HexideDigital\HexideAdmin\Http\Requests\Traits\DefaultInputTrait;
+use {{ model_namespace }};
 use Illuminate\Foundation\Http\FormRequest;
 
 class {{ class }} extends FormRequest
 {
-    use DefaultInputTrait;
-
-    public $defaults = [
-        'status' => false,
-    ];
 
     public function authorize()
     {
@@ -21,18 +16,13 @@ class {{ class }} extends FormRequest
     public function rules()
     {
         $model = $this->{{ model }} ?? '';
-        if(isset($model->id) && ($model instanceof {{ Model }})){$model = $model->id;}
+        if(isset($model->id) && ($model instanceof {{ ModuleName }})){$model = $model->id;}
 
-        $rules = lang_rules(
-            [
-                'position'          => 'required|numeric|min:1',
-                'status'            => 'boolean',
-                'slug'              => 'required|string|max:191|unique:{{ model_table }},slug,'.$model.',id',
-            ],
-            [] // options
-        );
-
-        $this->handleDefaultInputs();
+        $rules = [
+            'position'          => 'required|numeric|min:1',
+            'status'            => 'boolean',
+            'slug'              => 'required|string|max:191|unique:{{ module_name }},slug,'.$model.',id',
+        ];
 
         return $rules;
     }
