@@ -538,7 +538,8 @@ class HexideAdminCommand extends BaseCommand
     protected function makeFile($file, $content, $force = false)
     {
         if ($this->with_interact && !$force && $this->filesystem->exists($file)) {
-            $force = $this->confirm('Ви дійсно хочете переписати цей існуючий файл?', false);
+            $this->warn('File ' . $file . ' already exists');
+            $force = $this->confirm('Are you sure you want to overwrite this existing file?', false);
         }
 
         if (!$this->filesystem->exists($file) || $force) {
