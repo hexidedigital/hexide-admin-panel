@@ -8,6 +8,7 @@ use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Config\Repository;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 use Str;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -118,6 +119,10 @@ class HexideAdminCommand extends BaseCommand
         }
         $this->info('Create module ' . $name);
 
+        if (preg_match('([^A-Za-z0-9_/\\\\])', $name)) {
+            throw new InvalidArgumentException('Model name contains invalid characters.');
+        }
+
         $this->module_name = $name;
     }
 
@@ -143,7 +148,7 @@ class HexideAdminCommand extends BaseCommand
             'createMigrations' => ['start' => 'Migrations', 'finish' => 'Migrations',],
 //            'createService' => $this->option('service') ? ['start' => 'Service', 'finish' => 'Service',] : false,
 //            'createRequest' => ['start' => 'Request', 'finish' => 'Request',],
-            'createController' => ['start' => 'Controller', 'finish' => 'Controller',],
+//            'createController' => ['start' => 'Controller', 'finish' => 'Controller',],
 //            'createViews' => ['start' => 'Views', 'finish' => 'Views',],
         ]);
 
@@ -259,22 +264,48 @@ class HexideAdminCommand extends BaseCommand
 
     private function createController()
     {
-        $path = app_path('/Http/Controllers/Backend');
-        $namespace = $this->getNamespace('controller', 'App\\Http\\Controllers\\Backend');
+        $path = app_path('/Http/Controllers/Backend/');
 
-        $stub = $this->resolveStubPath('controller', "/controller.admin.stub");
+        $class = $this->getModuleName() . 'Controller';
 
-        $service_type = $this->hasOption('service') ? 'service' : 'default';
+        $service_type = $this->option('service') ? 'service' : 'default';
         $translation_type = $this->translatable ? 'translation' : 'default';
-        $partials = collect([
-            'construct' => "$service_type.stub",
-            'create' => "$service_type.stub",
-            'update' => "$service_type.stub",
 
-            'index' => "$translation_type.stub",
+        $partials = [
+            '{{ construct }}' => "construct/$service_type.stub",
+            '{{ create_handle }}' => "create/$service_type.stub",
+            '{{ update_handle }}' => "update/$service_type.stub",
+
+            '{{ index_handle }}' => "index/$translation_type.stub",
+        ];
+
+        $content = $this->getContent($this->resolveStubPath('controller', "/controller.admin.stub"));
+
+        foreach ($partials as $key => $stub) {
+            $content = $this->getContent($content, [
+                $key => $this->getContent($this->resolveStubPath('controller', $stub))
+            ]);
+        }
+
+        $content = $this->getContent($content, [
+            "{{ namespace }}" => $this->getNamespace('controller', 'App\\Http\\Controllers\\Backend'),
+            "{{ model_namespace }}" => $this->getModelNamespace(),
+            "{{ class }}" => $class,
+
+            "{{ model }}" => $this->getModuleName(),
+            "{{ model_variable }}" => $this->getSnakeCaseName(),
+            "{{ modelVariable }}" => lcfirst($this->getModuleName()),
+
+            "{{ model_table }}" => $this->getSnakeCaseName(2),
+            "{{ model_translation_table }}" => $this->getSnakeCaseName(2) . '_translations',
+
+            "//{{ service_namespace }}" => $this->option('service')
+                ? "\nuse " . $this->getNamespace('service', 'App\\Services\\Backend') .
+                '\\' . $this->getModuleName() . "Service;"
+                : ''
         ]);
 
-
+        $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('controller'));
     }
 
     private function createViews()
@@ -513,7 +544,7 @@ class HexideAdminCommand extends BaseCommand
      * @param string $content file path or existed content
      * @param array $replacements
      * @return array|string|string[]
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws FileNotFoundException
      */
     protected function getContent(string $content, array $replacements = [])
     {

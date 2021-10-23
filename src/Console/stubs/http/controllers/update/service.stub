@@ -1,1 +1,1 @@
-            $this->service->updateModel($request, ${{ model_variable }});
+            $this->service->updateModel($request, ${{ modelVariable }});

@@ -1,9 +1,6 @@
-    /**
-     * to define module name
-     */
     public function __construct({{ model }}Service $service)
     {
-        parent::__construct("{{ module_name }}");
+        parent::__construct("{{ model_table }}");
 
         $this->service = $service;
     }
