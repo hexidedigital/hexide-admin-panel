@@ -6,6 +6,7 @@ namespace HexideDigital\HexideAdmin\Console\Commands;
 use Arr;
 use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
@@ -90,7 +91,7 @@ class HexideAdminCommand extends BaseCommand
         $this->setTranslatable();
 
         $this->createFiles();
-//        $this->prepareResources();
+        $this->prepareResources();
 
         $this->info('Finish: files are created and ');
 
@@ -144,12 +145,12 @@ class HexideAdminCommand extends BaseCommand
         $this->info('Creating files...');
 
         $methods = array_filter([
-//            'createModels' => ['start' => 'Models', 'finish' => 'Models',],
+            'createModels' => ['start' => 'Models', 'finish' => 'Models',],
             'createMigrations' => ['start' => 'Migrations', 'finish' => 'Migrations',],
-//            'createService' => $this->option('service') ? ['start' => 'Service', 'finish' => 'Service',] : false,
-//            'createRequest' => ['start' => 'Request', 'finish' => 'Request',],
-//            'createController' => ['start' => 'Controller', 'finish' => 'Controller',],
-//            'createViews' => ['start' => 'Views', 'finish' => 'Views',],
+            'createService' => $this->option('service') ? ['start' => 'Service', 'finish' => 'Service',] : false,
+            'createRequest' => ['start' => 'Request', 'finish' => 'Request',],
+            'createController' => ['start' => 'Controller', 'finish' => 'Controller',],
+            'createViews' => ['start' => 'Views', 'finish' => 'Views',],
         ]);
 
         foreach ($methods as $method => $points) {
@@ -166,7 +167,7 @@ class HexideAdminCommand extends BaseCommand
 
     private function createModels()
     {
-        $path = app_path('/Models');
+        $path = app_path('/Models/');
 
         $type = $this->translatable ? '.with_translation' : '';
 
@@ -186,7 +187,7 @@ class HexideAdminCommand extends BaseCommand
 
     private function createTranslatedModel()
     {
-        $path = app_path('/Models');
+        $path = app_path('/Models/');
 
         $class = $this->getModuleName() . 'Translation';
 
@@ -201,13 +202,33 @@ class HexideAdminCommand extends BaseCommand
 
     private function createMigrations()
     {
-        $path = database_path('/migrations');
+        $path = database_path('/migrations/');
 
         $type = $this->translatable ? '.translation' : '';
-        $stub = $this->resolveStubPath('migration', "/migration.create$type.stub");
+
+        $name = 'Create' . $this->getModuleName(2) . 'Table';
+        $prefix = date('Y_m_d_His');
+
+        $content = $this->getContent($this->resolveStubPath('migration', "/migration.create$type.stub"), [
+            "{{ class }}" => $name,
+            "{{ table }}" => $this->getSnakeCaseName(2),
+            "{{ table_singular }}" => $this->getSnakeCaseName(),
+        ]);
+
+        $this->makeFile($path . $prefix . '_' . Str::snake($name) . '.php', $content, $this->isForced('migration'));
 
         if ($this->hasOption('populate')) {
-            $stub = $this->resolveStubPath('migration', "/migration.populate.stub");
+            $name = 'Populate' . $this->getModuleName(2) . 'Table';
+            $prefix = now()->addSecond()->format('Y_m_d_His');
+
+            $content = $this->getContent($this->resolveStubPath('migration', "/migration.populate.stub"), [
+                "{{ class }}" => $name,
+                "{{ table }}" => $this->getSnakeCaseName(2),
+                "{{ table_singular }}" => $this->getSnakeCaseName(),
+                "{{ Model }}" => $this->getModuleName(),
+            ]);
+
+            $this->makeFile($path . $prefix . '_' . Str::snake($name) . '.php', $content, $this->isForced('migration'));
         }
     }
 
@@ -297,7 +318,7 @@ class HexideAdminCommand extends BaseCommand
             "{{ modelVariable }}" => lcfirst($this->getModuleName()),
 
             "{{ model_table }}" => $this->getSnakeCaseName(2),
-            "{{ model_translation_table }}" => $this->getSnakeCaseName(2) . '_translations',
+            "{{ model_translation_table }}" => $this->getSnakeCaseName() . '_translations',
 
             "//{{ service_namespace }}" => $this->option('service')
                 ? "\nuse " . $this->getNamespace('service', 'App\\Services\\Backend') .
@@ -347,20 +368,41 @@ class HexideAdminCommand extends BaseCommand
 
     private function prepareResources()
     {
-        $this->warn('Start preparing resources...');
+        $this->info('Start preparing resources...');
 
-        $this->appendRoutes();
-        $this->appendMenuItem();
-        $this->appendMenuItemTranslations();
-        $this->appendTranslations();
+        $methods = array_filter([
+            'appendRoutes' => [
+                'start' => 'model routes into admin route file',
+                'finish' => 'Routes',
+            ],
+            'appendMenuItem' => [
+                'start' => 'MenuItem',
+                'finish' => 'MenuItem',
+            ],
+            'appendMenuItemTranslations' => [
+                'start' => 'MenuItemTranslations',
+                'finish' => 'MenuItemTranslations',
+            ],
+            'appendTranslations' => [
+                'start' => 'Translations',
+                'finish' => 'Translations',
+            ],
+        ]);
 
-        $this->warn('Resource generating is completed.');
+        foreach ($methods as $method => $points) {
+            $this->info("Appending: " . $points['start']);
+
+            $this->{$method}();
+
+            $this->info("Finished: " . $points['finish']);
+            $this->newLine();
+        }
+
+        $this->info('Resource generating is completed.');
     }
 
     private function appendRoutes()
     {
-        $this->info('Appending model routes into admin route file ...');
-
         $path = base_path($this->config->get('hexide_admin.module_paths.admin_route'));
 
         if ($this->filesystem->isFile($path)) {
@@ -382,16 +424,14 @@ class HexideAdminCommand extends BaseCommand
 
             $this->makeFile($path, $route_content, true);
 
-            $this->warn('Module routes appended.');
+            $this->info('Module routes appended.');
         } else {
-            $this->error('Admin routes not found.');
+            $this->warn('Admin routes not found.');
         }
     }
 
     private function appendMenuItem()
     {
-        $this->info('Appending menu item...');
-
         $path = config_path('adminlte.php');
 
         if ($this->filesystem->isFile($path)) {
@@ -403,16 +443,14 @@ class HexideAdminCommand extends BaseCommand
 
             $this->makeFile($path, $this->getContent($path, ["/*hexide_admin_stub*/" => $content]), true);
 
-            $this->warn('Menu item appended.');
+            $this->info('Menu item appended.');
         } else {
-            $this->error('Can`t add menu item to file config/adminlte.php - file does not exist');
+            $this->warn('Can`t add menu item to file config/adminlte.php - file does not exist');
         }
     }
 
     private function appendMenuItemTranslations()
     {
-        $this->info('Appending menu item translations...');
-
         $locales = $this->config->get('hexide_admin.locales');
         list($path, $file_name) = $this->config->get('hexide_admin.module_paths.adminlte_menu_translations');
 
@@ -428,17 +466,13 @@ class HexideAdminCommand extends BaseCommand
 
                 $this->makeFile($file_path, $this->getContent($file_path, ["/*hexide_admin_stub*/" => $content]), true);
             } else {
-                $this->error('can`t append menu translations for locale ' . $locale);
+                $this->warn('can`t append menu translations for locale ' . $locale);
             }
         }
-
-        $this->warn('Menu item translations appended');
     }
 
     private function appendTranslations()
     {
-        $this->info('Appending model translations...');
-
         $locales = $this->config->get('hexide_admin.locales');
         list($path, $file_name) = $this->config->get('hexide_admin.module_paths.lang');
 
@@ -455,11 +489,9 @@ class HexideAdminCommand extends BaseCommand
 
                 $this->makeFile($file_path, $this->getContent($file_path, ["/*hexide_admin_stub*/" => $content]), true);
             } else {
-                $this->error('can`t append model translations for locale ' . $locale);
+                $this->warn('can`t append model translations for locale ' . $locale);
             }
         }
-
-        $this->warn('Model translations appended.');
     }
 
     //--------------------------------------------------------
@@ -573,6 +605,7 @@ class HexideAdminCommand extends BaseCommand
         return [
             ['service', 's', InputOption::VALUE_NONE, 'Generate with service class'],
             ['translatable', 't', InputOption::VALUE_NONE, 'Generate files with translatable attributes'],
+            ['populate', null, InputOption::VALUE_NONE, 'Generate populate migration for model'],
             ['force', 'f', InputOption::VALUE_OPTIONAL, 'Overwrite all existing module files or for only defined types of files (controller,request,model,service,views)', 'all'],
         ];
     }

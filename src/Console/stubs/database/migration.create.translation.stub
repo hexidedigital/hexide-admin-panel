@@ -24,7 +24,6 @@ class {{ class }} extends Migration
             $table->timestamps();
         });
 
-
         Schema::create('{{ table_singular }}_translations', function (Blueprint $table) {
             $table->id();
             $table->string('locale');
@@ -38,7 +37,6 @@ class {{ class }} extends Migration
             $table->foreign('{{ table_singular }}_id')->references('id')->on('{{ table }}')
                 ->cascadeOnDelete()->cascadeOnUpdate();
         });
-
 
         PermissionRelation::touch('{{ table }}')->addCustom()->all();
     }

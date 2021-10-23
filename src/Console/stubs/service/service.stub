@@ -20,9 +20,9 @@ class {{ ModelService }} extends BaseService implements ServiceInterface
 
         $this->prepareAttributes($inputs, $model);
 
-        if(isset($model->id)){
+        if (isset($model->id)) {
             $model->update();
-        }else{
+        } else {
             $model = {{ Model }}::create($inputs);
         }
 
@@ -33,7 +33,7 @@ class {{ ModelService }} extends BaseService implements ServiceInterface
 
     public function prepareAttributes(array &$inputs, ?{{ Model }} $model = null)
     {
-        $inputs['status'] = $inputs['status']??false;
+        $inputs['status'] = $inputs['status'] ?? false;
     }
 
     public function postHandle(Request $request, {{ Model }} $model)
