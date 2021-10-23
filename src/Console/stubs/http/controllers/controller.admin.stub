@@ -3,11 +3,11 @@
 namespace {{ namespace }};
 
 use {{ model_namespace }}; //{{ service_namespace }}
-use DB;
 use App\Http\Requests\Backend\{{ model }}Request;
 use HexideDigital\HexideAdmin\Http\Controllers\Backend\BackendController;
 use HexideDigital\HexideAdmin\Http\Traits\AjaxFieldsChangerTrait;
 use HexideDigital\ModelPermissions\Models\Permission as HDPermissions;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 

@@ -167,7 +167,7 @@ class HexideAdminCommand extends BaseCommand
 
     private function createModels()
     {
-        $path = app_path('/Models/');
+        $path = app_path('Models/');
 
         $type = $this->translatable ? '.with_translation' : '';
 
@@ -187,7 +187,7 @@ class HexideAdminCommand extends BaseCommand
 
     private function createTranslatedModel()
     {
-        $path = app_path('/Models/');
+        $path = app_path('Models/');
 
         $class = $this->getModuleName() . 'Translation';
 
@@ -202,34 +202,69 @@ class HexideAdminCommand extends BaseCommand
 
     private function createMigrations()
     {
-        $path = database_path('/migrations/');
+        $path = database_path('migrations/');
 
         $type = $this->translatable ? '.translation' : '';
 
         $name = 'Create' . $this->getModuleName(2) . 'Table';
-        $prefix = date('Y_m_d_His');
 
-        $content = $this->getContent($this->resolveStubPath('migration', "/migration.create$type.stub"), [
-            "{{ class }}" => $name,
-            "{{ table }}" => $this->getSnakeCaseName(2),
-            "{{ table_singular }}" => $this->getSnakeCaseName(),
-        ]);
+        if ($this->migrationExists($name, $path)) {
+            $this->warn("A $name class already exists");
+        } else {
+            $prefix = date('Y_m_d_His');
 
-        $this->makeFile($path . $prefix . '_' . Str::snake($name) . '.php', $content, $this->isForced('migration'));
-
-        if ($this->hasOption('populate')) {
-            $name = 'Populate' . $this->getModuleName(2) . 'Table';
-            $prefix = now()->addSecond()->format('Y_m_d_His');
-
-            $content = $this->getContent($this->resolveStubPath('migration', "/migration.populate.stub"), [
+            $content = $this->getContent($this->resolveStubPath('migration', "/migration.create$type.stub"), [
                 "{{ class }}" => $name,
                 "{{ table }}" => $this->getSnakeCaseName(2),
                 "{{ table_singular }}" => $this->getSnakeCaseName(),
-                "{{ Model }}" => $this->getModuleName(),
             ]);
 
             $this->makeFile($path . $prefix . '_' . Str::snake($name) . '.php', $content, $this->isForced('migration'));
         }
+
+        if ($this->hasOption('populate')) {
+            $name = 'Populate' . $this->getModuleName(2) . 'Table';
+
+            if ($this->migrationExists($name, $path)) {
+                $this->warn("A $name class already exists");
+            } else {
+                $prefix = now()->addSecond()->format('Y_m_d_His');
+
+                $content = $this->getContent($this->resolveStubPath('migration', "/migration.populate.stub"), [
+                    "{{ class }}" => $name,
+                    "{{ table }}" => $this->getSnakeCaseName(2),
+                    "{{ table_singular }}" => $this->getSnakeCaseName(),
+                    "{{ Model }}" => $this->getModuleName(),
+                ]);
+
+                $this->makeFile($path . $prefix . '_' . Str::snake($name) . '.php', $content, $this->isForced('migration'));
+            }
+        }
+    }
+
+    /**
+     * Ensure that a migration with the given name doesn't already exist.
+     *
+     * @param string $name
+     * @param string $migrationPath
+     *
+     * @throws FileNotFoundException
+     */
+    protected function migrationExists($name, $migrationPath = null): bool
+    {
+        if (!empty($migrationPath)) {
+            $migrationFiles = $this->filesystem->glob($migrationPath . '*.php');
+
+            foreach ($migrationFiles as $migrationFile) {
+                $this->filesystem->requireOnce($migrationFile);
+            }
+        }
+
+        if (class_exists($name)) {
+            return true;
+        }
+
+        return false;
     }
 
     private function createService()
@@ -263,7 +298,7 @@ class HexideAdminCommand extends BaseCommand
 
     private function createRequest()
     {
-        $path = app_path('/Http/Requests/Backend/');
+        $path = app_path('Http/Requests/Backend/');
 
         $type = $this->translatable ? '.translation' : '';
 
@@ -272,9 +307,9 @@ class HexideAdminCommand extends BaseCommand
         $content = $this->getContent($this->resolveStubPath('request', "/request.admin$type.stub"), [
             "{{ namespace }}" => $this->getNamespace('request', 'App\\Http\\Requests\\Backend'),
             "{{ model_namespace }}" => $this->getModelNamespace(),
-            "{{ model }}" => $this->getSnakeCaseName(2),
+            "{{ model }}" => $this->getSnakeCaseName(),
             "{{ ModuleName }}" => $this->getModuleName(),
-            "{{ module_name }}" => $this->getSnakeCaseName(),
+            "{{ module_name }}" => $this->getSnakeCaseName(2),
             "{{ class }}" => $class,
         ]);
 
@@ -285,7 +320,7 @@ class HexideAdminCommand extends BaseCommand
 
     private function createController()
     {
-        $path = app_path('/Http/Controllers/Backend/');
+        $path = app_path('Http/Controllers/Backend/');
 
         $class = $this->getModuleName() . 'Controller';
 
@@ -332,9 +367,15 @@ class HexideAdminCommand extends BaseCommand
     private function createViews()
     {
         $dir_path = base_path($this->config->get('hexide_admin.module_paths.views')) . $this->getSnakeCaseName(2);
-        $this->makeDir($dir_path);
-        $this->makeDir($dir_path . '/tabs');
-        $this->makeDir($dir_path . '/partials');
+
+        $force = $this->isForced('views');
+
+        if (!$this->makeDir($dir_path, $force)) {
+            $this->warn("Directory for model views already exists $dir_path");
+        }
+
+        $this->makeDir($dir_path . '/tabs', $force);
+        $this->makeDir($dir_path . '/partials', $force);
 
         $stubs = array_filter([
             'create.stub' => 'create.blade.php',
@@ -360,7 +401,7 @@ class HexideAdminCommand extends BaseCommand
                 $content = $this->getContent($content, $replaces[$stub]);
             }
 
-            $this->makeFile($dir_path . '/' . $name, $content);
+            $this->makeFile($dir_path . '/' . $name, $content, $force);
         }
     }
 
@@ -368,6 +409,10 @@ class HexideAdminCommand extends BaseCommand
 
     private function prepareResources()
     {
+        if (!$this->option('resources')) {
+            return;
+        }
+
         $this->info('Start preparing resources...');
 
         $methods = array_filter([
@@ -520,11 +565,11 @@ class HexideAdminCommand extends BaseCommand
 
     protected function resolveStubPath($type, $stub): string
     {
-        $stub = trim($stub, '/');
+        $stub = trim(Arr::get($this->stub_paths, $type), '/') . '/' . trim($stub, '/');
 
         return file_exists($customPath = $this->laravel->basePath('stubs/hexide_admin/' . $stub))
             ? $customPath
-            : __DIR__ . "/../stubs/" . trim(Arr::get($this->stub_paths, $type), '/') . "/$stub";
+            : __DIR__ . "/../stubs/" . $stub;
     }
 
     protected function makeDir(string $path, bool $force = false): bool
@@ -607,6 +652,7 @@ class HexideAdminCommand extends BaseCommand
             ['service', 's', InputOption::VALUE_NONE, 'Generate with service class'],
             ['translatable', 't', InputOption::VALUE_NONE, 'Generate files with translatable attributes'],
             ['populate', null, InputOption::VALUE_NONE, 'Generate populate migration for model'],
+            ['resources', '-r', InputOption::VALUE_NONE, 'Enable appending and modify resource filed (lang,menu,routes,models)'],
             ['force', 'f', InputOption::VALUE_OPTIONAL, 'Overwrite all existing module files or for only defined types of files (controller,request,model,service,views)', 'all'],
         ];
     }

@@ -27,6 +27,11 @@ abstract class BaseService implements ServiceInterface
         return $this->handleRequest($request, $model);
     }
 
+    public function prepareAttributes(array &$inputs, ?Model $model = null)
+    {
+        $inputs['status'] = $inputs['status'] ?? false;
+    }
+
     protected function getInputs(Request $request): array
     {
         return $request->except('_token', '_method');

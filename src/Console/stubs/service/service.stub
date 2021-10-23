@@ -31,11 +31,6 @@ class {{ ModelService }} extends BaseService implements ServiceInterface
         return $model;
     }
 
-    public function prepareAttributes(array &$inputs, ?{{ Model }} $model = null)
-    {
-        $inputs['status'] = $inputs['status'] ?? false;
-    }
-
     public function postHandle(Request $request, {{ Model }} $model)
     {
 
