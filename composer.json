@@ -24,6 +24,7 @@
         "hexide-digital/model-permissions": "^1",
         "hexide-digital/meta-tags-laravel": "^1",
         "hexide-digital/file-uploader": "^1",
+        "hexide-digital/admin-configurations": "*",
         "astrotomic/laravel-translatable": "^11.9",
         "jeroennoten/laravel-adminlte": "^3.6",
         "laravelcollective/html": "^6.2",
