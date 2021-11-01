@@ -1,1 +1,1 @@
-require('./hd-admin-front')
+require('@moik.o/hexide-admin-panel')
