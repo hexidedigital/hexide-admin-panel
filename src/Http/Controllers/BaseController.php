@@ -8,21 +8,30 @@ use Illuminate\Routing\Controller;
 
 abstract class BaseController extends Controller
 {
+    /**
+     * @var array
+     */
+    private $view_data = [];
 
     /**
      * @var array
      */
-    private array $view_data = [];
+    protected $locales = [];
 
     /**
-     * @var array
+     * @var bool
      */
-    protected array $locales = [];
+    protected $with_breadcrumbs = true;
 
-    protected bool $with_breadcrumbs = true;
+    /**
+     * @var HexideAdmin|mixed
+     */
+    protected $hexideAdmin;
 
-    protected HexideAdmin $hexideAdmin;
-    protected Breadcrumbs $breadcrumbs;
+    /**
+     * @var Breadcrumbs
+     */
+    protected $breadcrumbs;
 
     public function __construct()
     {

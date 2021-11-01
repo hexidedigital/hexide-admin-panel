@@ -13,8 +13,10 @@ use Route;
 
 class HexideAdminServiceProvider extends ServiceProvider
 {
-
-    private array $commands = [
+    /**
+     * @var string[]
+     */
+    private $commands = [
         HexideAdminCommand::class,
     ];
 

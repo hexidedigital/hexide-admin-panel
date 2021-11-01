@@ -20,7 +20,7 @@ class {{ class }} extends Model
     /**
      * @var string[]
      */
-    protected array $translatedAttributes = [
+    protected $translatedAttributes = [
         'title',
         'content',
     ];

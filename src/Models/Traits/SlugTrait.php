@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait SlugTrait
 {
-
     /**
      * @param Builder $query
      * @param string|null $slug
@@ -20,6 +19,6 @@ trait SlugTrait
      */
     public function scopeSlug(Builder $query, ?string $slug = null): Builder
     {
-        return $query->where($this->getTable().'.slug', $slug);
+        return $query->where($this->getTable() . '.slug', $slug);
     }
 }

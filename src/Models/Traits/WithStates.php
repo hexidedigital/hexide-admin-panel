@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait WithStates
 {
-
     /**
      * @param Builder $builder
      * @param string|array $state

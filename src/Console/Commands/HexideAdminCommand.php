@@ -30,7 +30,10 @@ class HexideAdminCommand extends BaseCommand
      */
     protected $description = 'Generate module files such as model, controllers, views etc.';
 
-    protected array $stub_paths = [
+    /**
+     * @var array|string[]
+     */
+    protected $stub_paths = [
         'migration' => 'database',
         'model' => 'models',
         'request' => 'http/requests',
@@ -43,21 +46,39 @@ class HexideAdminCommand extends BaseCommand
         'menu_item' => 'menu_item',
     ];
 
-    protected Repository $config;
-    protected Filesystem $filesystem;
+    /**
+     * @var Repository
+     */
+    protected $config;
+    /**
+     * @var Filesystem
+     */
+    protected $filesystem;
 
-    protected bool $with_interact;
-    protected array $force_types;
+    /**
+     * @var bool
+     */
+    protected $with_interact;
+    /**
+     * @var array
+     */
+    protected $force_types;
 
     /**
      * Camel cased ModuleName
      *
      * @var string
      */
-    protected string $module_name;
-    protected bool $translatable;
+    protected $module_name;
+    /**
+     * @var bool
+     */
+    protected $translatable;
 
-    protected Collection $namespaces;
+    /**
+     * @var Collection
+     */
+    protected $namespaces;
 
 
     /**

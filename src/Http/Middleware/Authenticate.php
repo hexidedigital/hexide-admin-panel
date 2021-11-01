@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class Authenticate extends Middleware
 {
-
     /**
      * Handle an incoming request.
      *
@@ -22,11 +21,11 @@ class Authenticate extends Middleware
      */
     public function handle($request, Closure $next, ...$guards)
     {
-        if(in_array('admin', $guards)){
+        if (in_array('admin', $guards)) {
             /** @var User|null $user */
             $user = Auth::user();
 
-            if(isset($user) && ($user->hasAdminAccess() || $user->roles()->pluck('key')->contains('admin'))){
+            if (isset($user) && ($user->hasAdminAccess() || $user->roles()->pluck('key')->contains('admin'))) {
                 $request->merge(['auth_user' => $user]);
                 return $next($request);
             }

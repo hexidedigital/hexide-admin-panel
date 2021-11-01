@@ -11,7 +11,10 @@ use Illuminate\View\View;
 class HexideAdminComposer
 {
 
-    protected HexideAdmin $hexideAdmin;
+    /**
+     * @var HexideAdmin
+     */
+    protected $hexideAdmin;
 
     public function __construct(HexideAdmin $hexideAdmin)
     {

@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait WithTypes
 {
-
     /**
      * @param Builder $builder
      * @param string|array $type

@@ -14,7 +14,7 @@ class LanguageController extends BaseController
 
         $message = __('hexide_admin::messages.language.changed', [], $locale);
 
-        if(!in_array($locale, config('hexide_admin.locales'))){
+        if (!in_array($locale, config('hexide_admin.locales'))) {
             $locale = config('hexide_admin.locale');
             $message = __('hexide_admin::messages.language.default', [], $locale);
         }

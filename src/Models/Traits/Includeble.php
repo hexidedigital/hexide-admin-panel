@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 trait Includeble
 {
-    protected array $requestedIncludes = [];
+    protected $requestedIncludes = [];
 
     /**
      * @throws \Illuminate\Contracts\Container\BindingResolutionException

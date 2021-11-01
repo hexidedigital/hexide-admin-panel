@@ -11,14 +11,14 @@ use Yajra\DataTables\Facades\DataTables;
 
 class PermissionController extends BackendController
 {
-    protected array $accessMap = [
-        'index'             => HDPermission::access,
-        'show'              => HDPermission::view,
-        'create'            => HDPermission::create,
-        'store'             => HDPermission::create,
-        'edit'              => HDPermission::edit,
-        'update'            => HDPermission::edit,
-        'destroy'           => HDPermission::delete,
+    protected $accessMap = [
+        'index' => HDPermission::access,
+        'show' => HDPermission::view,
+        'create' => HDPermission::create,
+        'store' => HDPermission::create,
+        'edit' => HDPermission::edit,
+        'update' => HDPermission::edit,
+        'destroy' => HDPermission::delete,
     ];
 
     public function __construct()

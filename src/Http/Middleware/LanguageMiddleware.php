@@ -7,7 +7,6 @@ use Request;
 
 class LanguageMiddleware
 {
-
     public static function getMainLocale()
     {
 //        config('app.locale');

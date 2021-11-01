@@ -18,7 +18,6 @@ use Illuminate\Support\Str;
  */
 trait WithTranslationsTrait
 {
-
     /**
      * @param Builder $query
      *
@@ -46,10 +45,10 @@ trait WithTranslationsTrait
      */
     public function scopeJoinTranslations(
         Builder $query,
-        ?string                               $modelTable = null,
-        ?string                               $translationsTable = null,
-        ?string                               $modelTableKey = null,
-        ?string                               $translationsTableKey = null
+        ?string $modelTable = null,
+        ?string $translationsTable = null,
+        ?string $modelTableKey = null,
+        ?string $translationsTableKey = null
     )
     {
         if (!$modelTable) {

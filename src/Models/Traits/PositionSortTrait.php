@@ -22,7 +22,7 @@ trait PositionSortTrait
      */
     public function scopeSorted(Builder $query, string $direction = 'ASC', string $field = 'position'): Builder
     {
-        return $query->orderBy($this->getTable().'.'.$field, $direction);
+        return $query->orderBy($this->getTable() . '.' . $field, $direction);
     }
 
     /**
@@ -32,7 +32,7 @@ trait PositionSortTrait
      */
     public function scopeSortedAsc(Builder $query, string $field = 'position'): Builder
     {
-        return $query->orderBy($this->getTable().'.'.$field, 'ASC');
+        return $query->orderBy($this->getTable() . '.' . $field, 'ASC');
     }
 
     /**
@@ -42,6 +42,6 @@ trait PositionSortTrait
      */
     public function scopeSortedDesc(Builder $query, string $field = 'position'): Builder
     {
-        return $query->orderBy($this->getTable().'.'.$field, 'DESC');
+        return $query->orderBy($this->getTable() . '.' . $field, 'DESC');
     }
 }

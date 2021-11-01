@@ -13,7 +13,6 @@ use Response;
  */
 trait AjaxFieldsChangerTrait
 {
-
     /**
      * change field = $field of record with id = $id
      *

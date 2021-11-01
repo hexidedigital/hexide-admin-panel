@@ -8,8 +8,8 @@ use Astrotomic\Translatable\Validation\RuleFactory;
 class LanguageRequestRules
 {
 
-    private static string $prefix = '{{';
-    private static string $suffix = '}}';
+    private static $prefix = '{{';
+    private static $suffix = '}}';
 
     /**
      * options: prefix: string, old_new: bool, lang_key string, locales: array

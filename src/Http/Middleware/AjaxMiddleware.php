@@ -11,7 +11,6 @@ use Illuminate\Contracts\Auth\Guard;
  */
 class AjaxMiddleware
 {
-
     /**
      * The Guard implementation.
      *
@@ -22,7 +21,7 @@ class AjaxMiddleware
     /**
      * Create a new filter instance.
      *
-     * @param  Guard $auth
+     * @param Guard $auth
      *
      */
     public function __construct(Guard $auth)
@@ -33,22 +32,14 @@ class AjaxMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Closure                 $next
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure $next
      *
      * @return mixed
      */
     public function handle($request, Closure $next)
     {
         if (!$request->ajax() && !$request->wantsJson()) {
-            if (is_admin_panel()) {
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json(['status' => 'error'], 403);
-                }
-
-                return redirect()->back();
-            }
-
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['status' => 'error'], 403);
             }

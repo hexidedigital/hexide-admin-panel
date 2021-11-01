@@ -33,14 +33,14 @@ if (!function_exists('wrap_rules')) {
     }
 }
 
-use App\Http\Middleware\LanguageMiddleware;
+use HexideDigital\HexideAdmin\Http\Middleware\LanguageMiddleware;
 if (!function_exists('locale_prefix')) {
     /**
      * @return string
      */
     function locale_prefix(): string
     {
-        $locale_prefix = LanguageMiddleware::getLocale();
+        $locale_prefix = LanguageMiddleware::getLocaleFromUrl();
         if (!empty($locale_prefix) || $locale_prefix === config('app.locale')) {
             $locale_prefix = '';
         }

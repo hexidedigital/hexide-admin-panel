@@ -40,30 +40,36 @@ abstract class BackendController extends BaseController
     /**
      * @var string|null
      */
-    protected ?string $module;
+    protected $module;
 
     /**
      * @var Model|null
      */
-    protected ?Model $model;
+    protected $model;
 
     /**
      * @var User|null
      */
-    protected ?User $user;
+    protected $user;
 
     /**
-     * @var array|null
+     * @var array|bool[]|string[]
      *
      * pair: 'action' => 'permission'
      * <br>
      * if key of action if 'all' = full actions for all actions
      * ['all' => 'access'] or ['all' => true]
      */
-    protected array $accessMap = [];
+    protected $accessMap;
 
-    protected ServiceInterface $service;
-    protected bool $show_error_msg = true;
+    /**
+     * @var ServiceInterface
+     */
+    protected $service;
+    /**
+     * @var bool
+     */
+    protected $show_error_msg = true;
 
     /**
      * setup module name, app locales

@@ -30,10 +30,10 @@ class AuthGates
                 }
             }
 
-            if(empty($permissionsArray) == true){
+            if (empty($permissionsArray) == true) {
                 Auth::logout();
                 return redirect(route('admin.login'));
-            }else {
+            } else {
 
                 foreach ($permissionsArray as $title => $role_id) {
                     Gate::define($title, function (User $user) use ($role_id) {

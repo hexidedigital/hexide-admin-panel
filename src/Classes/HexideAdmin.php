@@ -7,8 +7,15 @@ use Illuminate\Container\Container;
 class HexideAdmin
 {
 
-    protected Container $container;
-    protected Breadcrumbs $breadcrumbs;
+    /**
+     * @var Container
+     */
+    protected $container;
+
+    /**
+     * @var Breadcrumbs|mixed
+     */
+    protected $breadcrumbs;
 
     public function __construct(Container $container)
     {
