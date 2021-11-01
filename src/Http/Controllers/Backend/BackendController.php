@@ -151,6 +151,7 @@ abstract class BackendController extends BaseController
     {
         if (in_array($force_type, [self::VIEW_EDIT, self::VIEW_CREATE]) ||
             in_array($view, [self::VIEW_EDIT, self::VIEW_CREATE])) {
+            $force_type = $force_type ?? $view;
             $this->toastrIfExistsErrors($force_type);
             $this->data('layout_type', $force_type);
         } else {
