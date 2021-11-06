@@ -2,6 +2,11 @@
 
 return [
 
+    'index' => 'Список',
+    'create' => 'Додавання',
+    'edit' => 'Редагування',
+    'show' => 'Перегляд',
+
     // specific attributes for each module or model
     'example_' => [
         // singular and plural forms of modules

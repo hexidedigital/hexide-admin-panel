@@ -2,6 +2,11 @@
 
 return [
 
+    'index' => 'List',
+    'create' => 'Creating',
+    'edit' => 'Editing',
+    'show' => 'View',
+
     // specific attributes for each module or model
     'example_' => [
         // singular and plural forms of modules
