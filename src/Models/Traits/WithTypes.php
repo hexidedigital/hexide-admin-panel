@@ -51,7 +51,7 @@ trait WithTypes
      */
     public static function getTypes(): array
     {
-        return self::$types ?? [];
+        return static::$types ?? [];
     }
 
     /**
@@ -59,7 +59,7 @@ trait WithTypes
      */
     public static function getTypesKeys(): array
     {
-        return array_keys(self::getTypes());
+        return array_keys(static::getTypes());
     }
 
     /**
@@ -68,7 +68,7 @@ trait WithTypes
      */
     public static function getValueByKey($key = null)
     {
-        return Arr::get(self::getTypes(), $key, null);
+        return Arr::get(static::getTypes(), $key, null);
     }
 
 }

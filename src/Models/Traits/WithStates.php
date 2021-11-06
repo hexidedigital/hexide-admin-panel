@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * Trait WithStates
  * @package HexideDigital\HexideAdmin\Models\Traits
  * @implements WithStatesContract
- * @method static \Illuminate\Database\Eloquent\Builder|self ofStates($builder, $state, $field)
+ * @method static \Illuminate\Database\Eloquent\Builder|static ofStates($builder, $state, $field)
  * @mixin Model
  */
 trait WithStates
@@ -49,35 +49,35 @@ trait WithStates
     /**
      * @return array
      */
-    public function getStates(): array
+    public static function getStates(): array
     {
-        return $this->states ?? [];
+        return static::$states ?? [];
     }
 
     /**
      * @return array
      */
-    public function getStatesKeys(): array
+    public static function getStatesKeys(): array
     {
-        return array_keys($this->getStates());
+        return array_keys(static::getStates());
     }
 
     /**
      * @param int|string|null $key
      * @return int|string|null
      */
-    public function getValueByKey($key = null)
+    public static function getValueByKey($key = null)
     {
-        return Arr::get($this->getStates(), $key, null);
+        return Arr::get(static::getStates(), $key, null);
     }
 
     /**
      * @param int|string|null $value
      * @return int|string|null
      */
-    public function getKeyByValue($value)
+    public static function getKeyByValue($value)
     {
-        foreach ($this->getStates() as $key => $_value) {
+        foreach (static::getStates() as $key => $_value) {
             if ($_value === $value) {
                 return $key;
             }

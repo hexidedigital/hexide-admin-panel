@@ -11,23 +11,23 @@ interface WithStatesContract
     /**
      * @return array
      */
-    public function getStates(): array;
+    public static function getStates(): array;
 
     /**
      * @return array
      */
-    public function getStatesKeys(): array;
+    public static function getStatesKeys(): array;
 
     /**
      * @param int|string|null $type
      * @return int|string|null
      */
-    public function getValueByKey($type);
+    public static function getValueByKey($type);
 
     /**
      * @param int|string|null $value
      * @return int|string|null
      */
-    public function getKeyByValue($value);
+    public static function getKeyByValue($value);
 
 }

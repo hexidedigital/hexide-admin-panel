@@ -3,7 +3,7 @@
     "description": "hexide-digital admin panel",
     "license": "MIT",
     "type": "library",
-    "version": "0.0.4",
+    "version": "0.0.4.1",
     "authors": [
         {
             "name": "Oleksandr-Moik",
@@ -20,13 +20,13 @@
     },
     "require": {
         "php": "^7.3|^8.0",
-        "laravel/framework": "^8.0",
-        "hexide-digital/model-permissions": "^1|dev-main",
-        "hexide-digital/meta-tags-laravel": "^1|dev-main",
-        "hexide-digital/file-uploader": "^1|dev-main",
-        "hexide-digital/admin-configurations": "^0|dev-main",
         "astrotomic/laravel-translatable": "^11.9",
+        "hexide-digital/admin-configurations": "^0|dev-main",
+        "hexide-digital/file-uploader": "^1|dev-main",
+        "hexide-digital/meta-tags-laravel": "^1|dev-main",
+        "hexide-digital/model-permissions": "^1|dev-main",
         "jeroennoten/laravel-adminlte": "^3.6",
+        "laravel/framework": "^8.0",
         "laravelcollective/html": "^6.2",
         "yajra/laravel-datatables-oracle": "~9.0",
         "yoeunes/toastr": "^1.2"
