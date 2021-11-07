@@ -5,6 +5,7 @@ namespace HexideDigital\HexideAdmin\Http\Controllers;
 use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use Illuminate\Routing\Controller;
+use View;
 
 abstract class BaseController extends Controller
 {
@@ -73,7 +74,8 @@ abstract class BaseController extends Controller
 
         $this->data($data);
 
-        return view($view, $this->getViewData());
+        View::share($this->getViewData());
+        return view($view);
     }
 
 }
