@@ -17,7 +17,6 @@ class {{ class }} extends BackendController
     use AjaxFieldsChangerTrait;
 
     protected $accessMap = [
-//        'all'               => HDPermissions::access,
         'index'             => HDPermissions::access,
         'show'              => HDPermissions::view,
         'create'            => HDPermissions::create,
