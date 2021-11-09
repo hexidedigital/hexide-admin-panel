@@ -4,8 +4,8 @@ namespace HexideDigital\HexideAdmin\Http\Middleware;
 
 use App\Models\User;
 use Closure;
-use HexideDigital\HexideAdmin\Models\Permission;
-use HexideDigital\HexideAdmin\Models\Role;
+use HexideDigital\ModelPermissions\Models\Permission;
+use HexideDigital\ModelPermissions\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
