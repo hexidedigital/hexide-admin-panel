@@ -7,6 +7,7 @@
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/css/bootstrap2/bootstrap-switch.min.css"
           rel="stylesheet">
     <link rel="stylesheet" href="{{asset('/vendor/flag-icon-css/css/flag-icon.min.css')}}">
+    @livewireStyles
 @endpush
 
 @push("js")
@@ -20,6 +21,7 @@
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 
     @toastr_render
+    @livewireScripts
 
     <script>
         (function () {

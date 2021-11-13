@@ -3,7 +3,7 @@
     "description": "hexide-digital admin panel",
     "license": "MIT",
     "type": "library",
-    "version": "0.0.4.1",
+    "version": "0.0.4.2",
     "authors": [
         {
             "name": "Oleksandr-Moik",
@@ -28,6 +28,7 @@
         "jeroennoten/laravel-adminlte": "^3.6",
         "laravel/framework": "^8.0",
         "laravelcollective/html": "^6.2",
+        "livewire/livewire": "^2.7",
         "yajra/laravel-datatables-oracle": "~9.0",
         "yoeunes/toastr": "^1.2"
     },

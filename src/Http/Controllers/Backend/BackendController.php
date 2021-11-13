@@ -48,11 +48,6 @@ abstract class BackendController extends BaseController
     protected $model;
 
     /**
-     * @var User|null
-     */
-    protected $user;
-
-    /**
      * @var array|bool[]|string[]
      *
      * pair: 'action' => 'permission'
@@ -81,9 +76,6 @@ abstract class BackendController extends BaseController
         parent::__construct();
 
         $this->setModuleName($name);
-
-        $this->user = request('auth_user');
-        $this->data('auth_user', $this->user);
 
         $this->url_params([]);
 
