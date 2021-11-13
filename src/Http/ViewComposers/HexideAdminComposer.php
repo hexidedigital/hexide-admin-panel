@@ -23,10 +23,13 @@ class HexideAdminComposer
 
     public function compose(View $view)
     {
+        if(!$view->offsetExists('locales')){
+            $view->offsetSet('locales', config('translatable.locales'));
+        }
+
         $view->with([
             'hexideAdmin' => $this->hexideAdmin,
             'breadcrumbs' => $this->hexideAdmin->getBreadcrumbs()->get(),
-            'locales' => config('translatable.locales'),
             'toggle_attributes' => $this->getToggleAttributes(),
         ]);
     }

@@ -4,6 +4,7 @@ namespace HexideDigital\HexideAdmin\Providers;
 
 use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
+use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
 use Illuminate\Container\Container;
@@ -18,6 +19,7 @@ class HexideAdminServiceProvider extends ServiceProvider
      */
     private $commands = [
         HexideAdminCommand::class,
+        CreateAdminUser::class,
     ];
 
     public function register()

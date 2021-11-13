@@ -75,7 +75,7 @@ abstract class BaseController extends Controller
         $this->data($data);
 
         View::share($this->getViewData());
-        return view($view);
+        return view($view, $this->getViewData());
     }
 
 }

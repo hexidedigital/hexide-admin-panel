@@ -2,6 +2,8 @@
 
 return [
 
+    'secret_key' => env('ADMIN_SECRET', null),
+
     'locale' => 'uk',
     'lang_cookie' => 'admin_locale',
 

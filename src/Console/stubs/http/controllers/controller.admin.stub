@@ -4,7 +4,6 @@ namespace {{ namespace }};
 
 use {{ model_namespace }}; //{{ service_namespace }}
 use App\Http\Requests\Backend\{{ model }}Request;
-use HexideDigital\HexideAdmin\Http\Controllers\Backend\BackendController;
 use HexideDigital\HexideAdmin\Http\Traits\AjaxFieldsChangerTrait;
 use HexideDigital\ModelPermissions\Models\Permission as HDPermissions;
 use Illuminate\Support\Facades\DB;
@@ -17,15 +16,15 @@ class {{ class }} extends BackendController
     use AjaxFieldsChangerTrait;
 
     protected $accessMap = [
-        'index'             => HDPermissions::access,
-        'show'              => HDPermissions::view,
-        'create'            => HDPermissions::create,
-        'store'             => HDPermissions::create,
-        'edit'              => HDPermissions::edit,
-        'update'            => HDPermissions::edit,
-        'destroy'           => HDPermissions::delete,
+        'index' => HDPermissions::access,
+        'show' => HDPermissions::view,
+        'create' => HDPermissions::create,
+        'store' => HDPermissions::create,
+        'edit' => HDPermissions::edit,
+        'update' => HDPermissions::edit,
+        'destroy' => HDPermissions::delete,
 
-        'ajaxFieldChange'   => 'ajax', // AjaxFieldsChangerTrait
+        'ajaxFieldChange' => 'ajax', // AjaxFieldsChangerTrait
     ];
 
     /**
@@ -134,14 +133,14 @@ class {{ class }} extends BackendController
     private function _datatable($list): \Illuminate\Http\JsonResponse
     {
         return DataTables::eloquent($list)
-/*
+            /*
             ->filterColumn(
                 'title',
                 function ($query, $keyword) {
                     $query->whereRaw('{{ model_translation_table }}.title like ?', ['%' . $keyword . '%']);
                 }
             )
-*/
+            */
             ->addColumn(
                 'actions',
                 function ($model) {

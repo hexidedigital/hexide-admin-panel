@@ -34,7 +34,7 @@ abstract class BaseService implements ServiceInterface
 
     protected function getInputs(Request $request): array
     {
-        return $request->except('_token', '_method');
+        return $request->validated();
     }
 
 }
