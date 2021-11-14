@@ -4,9 +4,12 @@ namespace HexideDigital\HexideAdmin\Providers;
 
 use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
+use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
+use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotofication;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
+use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\ServiceProvider;
@@ -14,12 +17,13 @@ use Route;
 
 class HexideAdminServiceProvider extends ServiceProvider
 {
-    /**
-     * @var string[]
-     */
     private $commands = [
         HexideAdminCommand::class,
         CreateAdminUser::class,
+    ];
+
+    private $components = [
+        LanguageItem::class,
     ];
 
     public function register()
@@ -30,6 +34,10 @@ class HexideAdminServiceProvider extends ServiceProvider
 
         $this->app->singleton(Breadcrumbs::class, function () {
             return new Breadcrumbs();
+        });
+
+        $this->app->bind(NotificationInterface::class, function (){
+            return new ToastrNotofication();
         });
     }
 
@@ -43,6 +51,7 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->loadRoutes();
 
         $this->registerCommands();
+        $this->registerComponents();
         $this->registerViewComposers($view);
     }
 
@@ -111,6 +120,23 @@ class HexideAdminServiceProvider extends ServiceProvider
     {
         $view->composer('admin.*', HexideAdminComposer::class);
         $view->composer('hexide_admin::*', HexideAdminComposer::class);
+    }
+
+    private function registerComponents()
+    {
+        // Support of x-components is only available for Laravel >= 7.x
+        // versions. So, we check if we can load components.
+
+        $canLoadComponents = method_exists(
+            'Illuminate\Support\ServiceProvider',
+            'loadViewComponentsAs'
+        );
+
+        if (! $canLoadComponents) {
+            return;
+        }
+
+        $this->loadViewComponentsAs('hdadmin', $this->components);
     }
 
     /**

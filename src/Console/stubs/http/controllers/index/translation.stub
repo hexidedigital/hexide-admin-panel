@@ -1,4 +1,0 @@
-            $list = {{ model }}::joinTranslations()->select([
-                '{{ model_table }}.*',
-                '{{ model_translation_table }}.title as title'
-            ]);

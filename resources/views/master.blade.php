@@ -4,12 +4,34 @@
 
 @push("css")
     <link rel="stylesheet" href="{{asset('/vendor/flag-icon-css/css/flag-icon.min.css')}}">
-    @livewireStyles
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
 @endpush
 
 @push("js")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+            integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 
     @toastr_render
-    @livewireScripts
 @endpush
+
+@section("content_top_nav_right")
+    <x-hdadmin-language-item/>
+@endsection
+
+@section("content_header")
+    <div class="row mb-2">
+        <div class="col-sm-6 d-flex align-items-center">
+            <h1 class="d-inline">
+                @yield("header_title", trans_choice("models.$module.name", 2))
+            </h1>
+            @yield("content_header_add")
+            @stack("content_header_add")
+        </div>
+        <div class="col-sm-6">
+            @include('hexide_admin::partials.breadcrumbs')
+        </div>
+    </div>
+@endsection

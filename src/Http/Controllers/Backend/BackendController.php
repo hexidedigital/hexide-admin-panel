@@ -2,40 +2,26 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
-use App\Models\User;
-use Gate;
 use HexideDigital\AdminConfigurations\Models\AdminConfiguration;
 use HexideDigital\FileUploader\Traits\FileUploadingTrait;
+use HexideDigital\HexideAdmin\Classes\ActionNames;
+use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
+use HexideDigital\HexideAdmin\Classes\ViewNames;
 use HexideDigital\HexideAdmin\Http\Controllers\BaseController;
+use HexideDigital\HexideAdmin\Http\Traits\CanNotify;
+use HexideDigital\HexideAdmin\Http\Traits\ModuleBreadcrumbs;
+use HexideDigital\HexideAdmin\Http\Traits\SecureActions;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
-use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Support\Facades\Route;
-use Symfony\Component\HttpFoundation\Response;
 use View;
 
 abstract class BackendController extends BaseController
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     use FileUploadingTrait;
-
-    protected const VIEW_SHOW = 'show';
-    protected const VIEW_EDIT = 'edit';
-    protected const VIEW_CREATE = 'create';
-
-    protected const ACTION_DEFAULT = 'action';
-    protected const ACTION_DELETE = 'delete';
-
-    /* follow locale file in lang/__/messages.php' */
-    protected const ACTIONS = [
-        self::ACTION_DEFAULT,
-        self::VIEW_CREATE,
-        self::VIEW_EDIT,
-        self::ACTION_DELETE,
-    ];
+    use SecureActions;
+    use ModuleBreadcrumbs;
+    use CanNotify;
 
     /**
      * @var string|null
@@ -61,10 +47,16 @@ abstract class BackendController extends BaseController
      * @var ServiceInterface
      */
     protected $service;
+
+    /**
+     * @var NotificationInterface
+     */
+    protected NotificationInterface $notificator;
+
     /**
      * @var bool
      */
-    protected $show_error_msg = true;
+    protected $show_error_notification = true;
 
     /**
      * setup module name, app locales
@@ -75,6 +67,8 @@ abstract class BackendController extends BaseController
     {
         parent::__construct();
 
+        $this->setNotifier(app(NotificationInterface::class));
+
         $this->setModuleName($name);
 
         $this->url_params([]);
@@ -84,29 +78,17 @@ abstract class BackendController extends BaseController
         }
     }
 
-    /**
-     * Call controller with the specified parameters.
-     *
-     * @param string $method
-     * @param array $parameters
-     *
-     * @return bool|\Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|object|\Symfony\Component\HttpFoundation\Response
-     */
     public function callAction($method, $parameters)
     {
-        $permission = array_get($this->accessMap, $method);
+        $this->addToBreadCrumbs($this->getModuleName());
 
-        if (!isset($permission)) {
-            $permission = array_get($this->accessMap, 'all');
-        }
-
-        $res = $this->allowIfCan($permission, $method);
+        $res = $this->protectAction($method);
 
         if ($res !== true) {
+            $message = __('messages.forbidden', ['key' => $method]);
+            $this->notify('', $message, 'error');
             return $res;
         }
-
-        $this->addToBreadCrumbs($this->getModuleName());
 
         return parent::callAction($method, $parameters);
     }
@@ -139,15 +121,20 @@ abstract class BackendController extends BaseController
      * @param string|null $force_type
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    protected function render(?string $view = 'index', array $data = [], string $force_type = null)
+    protected function render(?string $view = null, array $data = [], string $force_type = null)
     {
-        if (in_array($force_type, [self::VIEW_EDIT, self::VIEW_CREATE]) ||
-            in_array($view, [self::VIEW_EDIT, self::VIEW_CREATE])) {
+        if(empty($view)) $view = ViewNames::INDEX;
+
+        if (in_array($force_type, [ViewNames::EDIT, ViewNames::CREATE]) ||
+            in_array($view, [ViewNames::EDIT, ViewNames::CREATE])) {
+
             $force_type = $force_type ?? $view;
-            $this->toastrIfExistsErrors($force_type);
+
+            $this->notifyIfExistsErrors($force_type);
+
             $this->data('layout_type', $force_type);
         } else {
-            $this->toastrIfExistsErrors();
+            $this->notifyIfExistsErrors();
         }
 
         $module = $this->getModuleName();
@@ -158,98 +145,14 @@ abstract class BackendController extends BaseController
         return parent::render($view, $data);
     }
 
-    protected function addToBreadcrumbs($method)
+    protected function redirect(string $action = null, array $params = []): \Illuminate\Http\RedirectResponse
     {
-        if (isset($method) && $this->with_breadcrumbs) {
-            $module = $this->getModuleName();
+        if(empty($action)) $action = ActionNames::INDEX;
 
-            if ($method == $module) {
-                $this->breadcrumbs->push(
-                    trans_choice("models.$module.name", 2),
-                    route("admin.$module.index")
-                );
-            } else if (!empty($method)) {
-                $this->breadcrumbs->push(
-                    __("models.$module.$method"),
-                    route("admin.$module.$method", $this->model ?? '')
-                );
-            }
-        }
-    }
-
-    protected function redirect(string $action = 'index', array $params = []): \Illuminate\Http\RedirectResponse
-    {
-        $route = Route::has('admin.' . $this->getModuleName() . '.' . $action) ?
-            'admin.' . $this->getModuleName() . '.' . $action
-            : $action;
+        $module = $this->getModuleName();
+        $route = Route::has("admin.$module.$action") ? "admin.$module.$action" : $action;
 
         return redirect()->route($route, $params);
     }
 
-    protected function toastrIfExistsErrors(string $action = '', string $message = '')
-    {
-        if (!empty(request()->old()) && $this->show_error_msg) {
-            $this->toastr($action, $message, 'error');
-        }
-    }
-
-    protected function toastr(string $action = '', string $message = null, string $type = 'success', string $title = '', array $options = []): \Yoeunes\Toastr\Toastr
-    {
-        $action = in_array($action, self::ACTIONS) ? $action : self::ACTION_DEFAULT;
-
-        if (empty($title)) {
-            $title = __("hexide_admin::messages.$type.title");
-        }
-
-        if (empty($message)) {
-            if (in_array($type, ['error', 'success'])) {
-                $message = __("hexide_admin::messages.$type.$action",
-                    ['model' => trans_choice("models.{$this->getModuleName()}.name", 1)]
-                );
-            }
-        }
-
-        return toastr($message, $type, $title, $options);
-    }
-
-    /**
-     * @param string|bool $permission
-     * @param string $action
-     * @return bool|\Illuminate\Contracts\Foundation\Application|\Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|object
-     */
-    private function allowIfCan($permission = false, string $action = 'access')
-    {
-        if ($permission === true) {
-            return true;
-        }
-        if (empty($permission)) {
-            return $this->abort($action);
-        }
-
-        $key = Permission::key($this->getModuleName(), $permission);
-
-        if ($key === 'home_access' || Gate::allows($key)) {
-            return true;
-        }
-        if (Gate::allows($permission)) {
-            return true;
-        }
-
-        return $this->abort($action);
-    }
-
-    private function abort($action)
-    {
-        $message = __('hexide_admin::messages.forbidden', ['key' => $action]);
-
-        if (request()->ajax()) {
-            return response()->json(['message' => __('hexide_admin::api_labels.forbidden'), 'type' => 'error'])
-                ->setStatusCode(Response::HTTP_FORBIDDEN);
-        } else {
-            $this->toastr('', $message, 'error');
-            toastInfo($message, trans_choice("models." . $this->getModuleName() . ".name", 2));
-
-            return redirect(redirect()->back()->getTargetUrl());
-        }
-    }
 }

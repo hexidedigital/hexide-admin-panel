@@ -3,13 +3,14 @@
 namespace {{ namespace }};
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
 
 abstract class BaseService implements ServiceInterface
 {
     /**
-     * @param Request $request
+     * @param FormRequest|Request $request
      * @return Model
      */
     public function createModel(Request $request)
@@ -18,7 +19,7 @@ abstract class BaseService implements ServiceInterface
     }
 
     /**
-     * @param Request $request
+     * @param FormRequest|Request $request
      * @param Model $model
      * @return Model
      */
@@ -31,10 +32,4 @@ abstract class BaseService implements ServiceInterface
     {
         $inputs['status'] = $inputs['status'] ?? false;
     }
-
-    protected function getInputs(Request $request): array
-    {
-        return $request->validated();
-    }
-
 }

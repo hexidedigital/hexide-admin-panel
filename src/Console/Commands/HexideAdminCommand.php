@@ -346,14 +346,11 @@ class HexideAdminCommand extends BaseCommand
         $class = $this->getModuleName() . 'Controller';
 
         $service_type = $this->option('service') ? 'service' : 'default';
-        $translation_type = $this->translatable ? 'translation' : 'default';
 
         $partials = [
             '{{ construct }}' => "construct/$service_type.stub",
             '{{ create_handle }}' => "create/$service_type.stub",
             '{{ update_handle }}' => "update/$service_type.stub",
-
-            '{{ index_handle }}' => "index/$translation_type.stub",
         ];
 
         $content = $this->getContent($this->resolveStubPath('controller', "/controller.admin.stub"));
@@ -409,6 +406,7 @@ class HexideAdminCommand extends BaseCommand
         ]);
 
         $replaces = [
+            'index.stub' => ["{{ model }}" => $this->getSnakeCaseName(),],
             '_form.stub' => ["{{ show_locale_tabs }}" => $this->translatable ? "true" : "false",],
             'show.stub' => ["{{ model_namespace }}" => "\\" . $this->getModelNamespace(),],
             'tabs/general.stub' => ["{{ model_namespace }}" => "\\" . $this->getModelNamespace(),],

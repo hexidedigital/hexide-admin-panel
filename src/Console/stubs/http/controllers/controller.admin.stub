@@ -4,11 +4,11 @@ namespace {{ namespace }};
 
 use {{ model_namespace }}; //{{ service_namespace }}
 use App\Http\Requests\Backend\{{ model }}Request;
+use HexideDigital\HexideAdmin\Classes\ActionNames;
+use HexideDigital\HexideAdmin\Classes\ViewNames;
 use HexideDigital\HexideAdmin\Http\Traits\AjaxFieldsChangerTrait;
 use HexideDigital\ModelPermissions\Models\Permission as HDPermissions;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
-use Yajra\DataTables\Facades\DataTables;
 
 
 class {{ class }} extends BackendController
@@ -32,25 +32,19 @@ class {{ class }} extends BackendController
      */
 {{ construct }}
 
-    public function index(Request $request)
+    public function index()
     {
-        if ($request->get('draw')) {
-{{ index_handle }}
-
-            return $this->_datatable($list);
-        }
-
         return $this->render();
     }
 
     public function show({{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
     {
-        return $this->redirect(self::VIEW_EDIT, ['{{ model_variable }}' => ${{ modelVariable }}->id]);
+        return $this->redirect(ViewNames::EDIT, ['{{ model_variable }}' => ${{ modelVariable }}->id]);
     }
 
     public function create()
     {
-        return $this->render(self::VIEW_CREATE);
+        return $this->render(ViewNames::CREATE);
     }
 
     /**
@@ -63,13 +57,13 @@ class {{ class }} extends BackendController
         try {
 {{ create_handle }}
 
-            $this->toastr(self::VIEW_CREATE);
+            $this->notify(ActionNames::CREATE);
 
             DB::commit();
 
             return $this->redirect();
         }catch (\Exception $e){
-            $this->toastr(self::VIEW_CREATE, $e->getMessage(), 'error');
+            $this->notify(ActionNames::CREATE, $e->getMessage(), 'error');
 
             DB::rollBack();
 
@@ -81,7 +75,7 @@ class {{ class }} extends BackendController
     {
         $this->data_model(${{ modelVariable }});
 
-        return $this->render(self::VIEW_EDIT);
+        return $this->render(ViewNames::EDIT);
     }
 
     /**
@@ -94,13 +88,13 @@ class {{ class }} extends BackendController
         try {
 {{ update_handle }}
 
-            $this->toastr(self::VIEW_EDIT);
+            $this->notify(ActionNames::EDIT);
 
             DB::commit();
 
             return $this->redirect();
         }catch (\Exception $e){
-            $this->toastr(self::VIEW_EDIT, $e->getMessage(), 'error');
+            $this->notify(ActionNames::EDIT, $e->getMessage(), 'error');
 
             DB::rollBack();
 
@@ -118,58 +112,15 @@ class {{ class }} extends BackendController
         try {
             ${{ modelVariable }}->delete();
 
-            $this->toastr(self::ACTION_DELETE);
+            $this->notify(ActionNames::DELETE);
 
             DB::commit();
         }catch (\Exception $e){
-            $this->toastr(self::ACTION_DELETE, $e->getMessage(), 'error');
+            $this->notify(ActionNames::DELETE, $e->getMessage(), 'error');
 
             DB::rollBack();
         }
 
         return back();
-    }
-
-    private function _datatable($list): \Illuminate\Http\JsonResponse
-    {
-        return DataTables::eloquent($list)
-            /*
-            ->filterColumn(
-                'title',
-                function ($query, $keyword) {
-                    $query->whereRaw('{{ model_translation_table }}.title like ?', ['%' . $keyword . '%']);
-                }
-            )
-            */
-            ->addColumn(
-                'actions',
-                function ($model) {
-                    /** @var {{ model }} $model */
-                    return view('admin.partials.control_buttons',
-                        ['model' => $model, 'module' => $this->getModuleName()]
-                    )->render();
-                }
-            )
-            ->editColumn(
-                'status',
-                function ($model) {
-                    /** @var {{ model }} $model */
-                    return view('admin.partials.ajax.toggler',
-                        ['model' => $model, 'module' => $this->getModuleName(), 'field' => 'status']
-                    )->render();
-                }
-            )
-            ->editColumn(
-                'position',
-                function ($model) {
-                    /** @var {{ model }} $model */
-                    return view('admin.partials.ajax.input',
-                        ['model' => $model, 'module' => $this->getModuleName(), 'field' => 'position',
-                            'type' => 'number']
-                    )->render();
-                }
-            )
-            ->rawColumns(['actions', 'position', 'status',])
-            ->make();
     }
 }

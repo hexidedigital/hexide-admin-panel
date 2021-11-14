@@ -3,5 +3,7 @@
 {{--@section('with_files', true)--}}
 
 @section("form-body")
-    @include("admin.view.$module.partials._form")
+    <x-adminlte-card theme="info" class="shadow" collapsible maximizable>
+        @include("admin.view.$module.partials._form")
+    </x-adminlte-card>
 @endsection
