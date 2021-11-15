@@ -1,9 +1,5 @@
-@extends("admin.layouts.editable")
-
-{{--@section('with_files', true)--}}
+@extends("hexide_admin::editable")
 
 @section("form-body")
-    <x-adminlte-card theme="info" class="shadow" collapsible maximizable>
-        @include("admin.view.$module.partials._form")
-    </x-adminlte-card>
+    @include("admin.view.$module.partials._form")
 @endsection

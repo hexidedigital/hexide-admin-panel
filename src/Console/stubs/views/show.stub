@@ -28,7 +28,7 @@
     <tr>
         <th>{{__('admin_labels.attributes.visible')}}</th>
         <td>
-            @include('admin.partials.ajax.toggler', ['field' => 'state_read'])
+            @include('admin.partials.ajax.toggler', ['field' => 'status'])
         </td>
     </tr>
 

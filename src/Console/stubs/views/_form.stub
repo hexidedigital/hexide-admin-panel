@@ -1,8 +1,12 @@
-<x-admin.tabs.tabs-component
-    :module="$module"
-    :locales="$locales"
-    :show-locale-tabs="{{ show_locale_tabs }}"
-    :show-general-tab="true"
-    :show-tab-panel="{{ show_locale_tabs }}"
-    :general-tab-errors="['name', 'etc']"
-/>
+{{-- @section('with_files', true) --}}
+
+<x-adminlte-card theme="navy" class="shadow" collapsible maximizable>
+    <x-admin.tabs.tabs-component
+        :module="$module"
+        :locales="$locales"
+        :show-locale-tabs="{{ show_locale_tabs }}"
+        :show-general-tab="true"
+        :general-tab-errors="['name', 'etc']"
+    />
+    {{-- @include("admin.view.$module.tabs.general") --}}
+</x-adminlte-card>
