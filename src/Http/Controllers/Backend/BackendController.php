@@ -9,6 +9,7 @@ use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\ViewNames;
 use HexideDigital\HexideAdmin\Http\Controllers\BaseController;
 use HexideDigital\HexideAdmin\Http\Traits\CanNotify;
+use HexideDigital\HexideAdmin\Http\Traits\HasNextAction;
 use HexideDigital\HexideAdmin\Http\Traits\ModuleBreadcrumbs;
 use HexideDigital\HexideAdmin\Http\Traits\SecureActions;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
@@ -22,6 +23,7 @@ abstract class BackendController extends BaseController
     use SecureActions;
     use ModuleBreadcrumbs;
     use CanNotify;
+    use HasNextAction;
 
     /**
      * @var string|null

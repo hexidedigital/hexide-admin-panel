@@ -55,13 +55,13 @@ class {{ class }} extends BackendController
         DB::beginTransaction();
 
         try {
-{{ create_handle }}
+            {{ create_handle }}
 
             $this->notify(ActionNames::CREATE);
 
             DB::commit();
 
-            return $this->redirect();
+            return $this->next_action($this->module, ${{ modelVariable }});
         }catch (\Exception $e){
             $this->notify(ActionNames::CREATE, $e->getMessage(), 'error');
 
@@ -92,7 +92,7 @@ class {{ class }} extends BackendController
 
             DB::commit();
 
-            return $this->redirect();
+            return $this->next_action($this->module, ${{ modelVariable }});
         }catch (\Exception $e){
             $this->notify(ActionNames::EDIT, $e->getMessage(), 'error');
 
