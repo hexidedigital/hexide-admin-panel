@@ -14,7 +14,7 @@ class CreateAdminUser extends BaseCommand
      *
      * @var string
      */
-    protected $name = 'admin:user';
+    protected $name = 'hd-admin:user';
 
     /**
      * The console command description.

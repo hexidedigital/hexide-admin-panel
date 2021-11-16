@@ -21,7 +21,7 @@ class HexideAdminCommand extends BaseCommand
      *
      * @var string
      */
-    protected $name = 'hexide_admin:module';
+    protected $name = 'hd-admin:module';
 
     /**
      * The console command description.
@@ -39,6 +39,7 @@ class HexideAdminCommand extends BaseCommand
         'request' => 'http/requests',
         'service' => 'service',
         'controller' => 'http/controllers',
+        'livewire' => 'http/livewire',
 
         'lang' => 'lang',
         'views' => 'views',
@@ -172,6 +173,7 @@ class HexideAdminCommand extends BaseCommand
             'createRequest' => ['start' => 'Request', 'finish' => 'Request',],
             'createController' => ['start' => 'Controller', 'finish' => 'Controller',],
             'createViews' => ['start' => 'Views', 'finish' => 'Views',],
+            'createLivewire' => ['start' => 'Livewire table', 'finish' => 'Livewire table',],
         ]);
 
         foreach ($methods as $method => $points) {
@@ -422,6 +424,26 @@ class HexideAdminCommand extends BaseCommand
 
             $this->makeFile($dir_path . '/' . $name, $content, $force);
         }
+    }
+
+    private function createLivewire()
+    {
+        $path = app_path('Http/Livewire/Admin/Tables/');
+
+        $class = $this->getModuleName() . 'Table';
+
+        $content = $this->getContent($this->resolveStubPath('livewire', "/table.stub"), [
+            "{{ namespace }}" => $this->getNamespace('livewire-table', 'App\\Http\\Livewire\\Admin\\Tables'),
+            "{{ model_namespace }}" => $this->getModelNamespace(),
+            "{{ model }}" => $this->getSnakeCaseName(),
+            "{{ ModuleName }}" => $this->getModuleName(),
+            "{{ module_name }}" => $this->getSnakeCaseName(2),
+            "{{ class }}" => $class,
+        ]);
+
+        $this->makeDir($path);
+
+        $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('livewire'));
     }
 
     //--------------------------------------------------------
