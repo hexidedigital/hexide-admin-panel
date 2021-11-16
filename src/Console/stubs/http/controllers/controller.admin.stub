@@ -62,7 +62,7 @@ class {{ class }} extends BackendController
             DB::commit();
 
             return $this->next_action($this->module, ${{ modelVariable }});
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->notify(ActionNames::CREATE, $e->getMessage(), 'error');
 
             DB::rollBack();
@@ -93,7 +93,7 @@ class {{ class }} extends BackendController
             DB::commit();
 
             return $this->next_action($this->module, ${{ modelVariable }});
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->notify(ActionNames::EDIT, $e->getMessage(), 'error');
 
             DB::rollBack();
@@ -115,7 +115,7 @@ class {{ class }} extends BackendController
             $this->notify(ActionNames::DELETE);
 
             DB::commit();
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->notify(ActionNames::DELETE, $e->getMessage(), 'error');
 
             DB::rollBack();

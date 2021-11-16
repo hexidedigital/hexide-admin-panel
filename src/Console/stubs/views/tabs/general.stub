@@ -1,6 +1,6 @@
 @php
     /**
-     * @var {{ model_namespace }} $module
+     * @var {{ model_namespace }} $model
      * @var Illuminate\Support\ViewErrorBag $errors
      */
 @endphp
