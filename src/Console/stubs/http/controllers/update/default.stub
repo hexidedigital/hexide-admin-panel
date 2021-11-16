@@ -1,1 +1,1 @@
-            ${{ modelVariable }}->update($request->validated(););
+            ${{ modelVariable }}->update($request->validated());

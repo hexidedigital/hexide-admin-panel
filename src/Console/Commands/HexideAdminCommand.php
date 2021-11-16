@@ -661,18 +661,18 @@ class HexideAdminCommand extends BaseCommand
     protected function getArguments(): array
     {
         return [
-            ['name', InputArgument::OPTIONAL, 'Module name in title camel cased type ex. ModuleName'],
+            new InputArgument('name', InputArgument::OPTIONAL, 'Module name in title camel cased type ex. ModuleName'),
         ];
     }
 
     protected function getOptions(): array
     {
         return [
-            ['service', 's', InputOption::VALUE_NONE, 'Generate with service class'],
-            ['translatable', 't', InputOption::VALUE_NONE, 'Generate files with translatable attributes'],
-            ['populate', null, InputOption::VALUE_NONE, 'Generate populate migration for model'],
-            ['resources', '-r', InputOption::VALUE_NONE, 'Enable appending and modify resource filed (lang,menu,routes,models)'],
-            ['force', 'f', InputOption::VALUE_OPTIONAL, 'Overwrite all existing module files or for only defined types of files (controller,request,model,service,views)', 'all'],
+            new InputOption('service', 's', InputOption::VALUE_NONE, 'Generate with service class'),
+            new InputOption('translatable', 't', InputOption::VALUE_NONE, 'Generate files with translatable attributes'),
+            new InputOption('populate', null, InputOption::VALUE_NONE, 'Generate populate migration for model'),
+            new InputOption('resources', '-r', InputOption::VALUE_NONE, 'Enable appending and modify resource filed (lang,menu,routes,models)'),
+            new InputOption('force', 'f', InputOption::VALUE_OPTIONAL, 'Overwrite all existing module files or for only defined types of files (livewire,controller,request,model,service,views)', 'all'),
         ];
     }
 }

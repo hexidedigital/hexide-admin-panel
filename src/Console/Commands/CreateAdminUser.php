@@ -114,7 +114,7 @@ class CreateAdminUser extends BaseCommand
                 ['name', $name],
                 ['email', $email],
                 ['password', $generate ? $password : '********'],
-                ['url', route('admin.home')],
+                ['url', route('admin.login')],
             ]
         );
 
@@ -124,10 +124,10 @@ class CreateAdminUser extends BaseCommand
     protected function getOptions(): array
     {
         return [
-            ['email', 'e', InputOption::VALUE_OPTIONAL, 'Set email'],
-            ['name', null, InputOption::VALUE_OPTIONAL, 'Set name'],
-            ['password', null, InputOption::VALUE_OPTIONAL, 'Set password'],
-            ['generate', 'P', InputOption::VALUE_NONE, 'Autogenerate password'],
+            new InputOption('email', 'e', InputOption::VALUE_OPTIONAL, 'Set email'),
+            new InputOption('name', null, InputOption::VALUE_OPTIONAL, 'Set name'),
+            new InputOption('password', null, InputOption::VALUE_OPTIONAL, 'Set password'),
+            new InputOption('generate', 'P', InputOption::VALUE_NONE, 'Autogenerate password'),
         ];
     }
 }
