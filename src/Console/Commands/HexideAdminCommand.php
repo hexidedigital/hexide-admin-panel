@@ -547,7 +547,7 @@ class HexideAdminCommand extends BaseCommand
             if ($this->filesystem->isFile($file_path)) {
                 $content = $this->getContent($this->resolveStubPath('menu_item', "menu_locale.stub"), [
                     "{{ module_name }}" => $this->getSnakeCaseName(2),
-                    "{{ ModuleName }}" => $this->getModuleName(2),
+                    "{{ ModuleName }}" => $this->getModuleName(),
                 ]);
 
                 $this->makeFile($file_path, $this->getContent($file_path, ["/*hexide_admin_stub*/" => $content]), true);
