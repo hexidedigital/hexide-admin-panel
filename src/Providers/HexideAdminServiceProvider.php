@@ -17,12 +17,12 @@ use Route;
 
 class HexideAdminServiceProvider extends ServiceProvider
 {
-    private $commands = [
+    private array $commands = [
         HexideAdminCommand::class,
         CreateAdminUser::class,
     ];
 
-    private $components = [
+    private array $components = [
         LanguageItem::class,
     ];
 
@@ -58,7 +58,7 @@ class HexideAdminServiceProvider extends ServiceProvider
     private function loadPublishes()
     {
         $this->publishes([
-            $this->packagePath("config/hexide_admin.php") => config_path('hexide_admin.php'),
+            $this->packagePath("config/hexide-admin.php") => config_path('hexide-admin.php'),
             $this->packagePath("config/modelPermissions.php") => config_path('modelPermissions.php'),
             $this->packagePath("config/translatable.php") => config_path('translatable.php'),
         ], 'hexide-admin-configs');
@@ -96,7 +96,7 @@ class HexideAdminServiceProvider extends ServiceProvider
 
     private function loadConfig()
     {
-        $this->mergeConfigFrom($this->packagePath("config/hexide_admin.php"), 'hexide_admin');
+        $this->mergeConfigFrom($this->packagePath("config/hexide-admin.php"), 'hexide_admin');
     }
 
     private function loadTranslations()

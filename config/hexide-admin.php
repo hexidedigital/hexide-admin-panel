@@ -2,7 +2,7 @@
 
 return [
 
-    'secret_key' => env('ADMIN_SECRET', null),
+    'secret_key' => null,
 
     'locale' => 'uk',
     'lang_cookie' => 'admin_locale',
