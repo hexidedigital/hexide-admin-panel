@@ -24,7 +24,7 @@ class {{ class }} extends Migration
             $table->timestamps();
         });
 
-        PermissionRelation::touch('{{ table }}')->addCustom()->all();
+        PermissionRelation::touch('{{ table }}')->addCustomSet()->addResourceSet();
     }
 
     /**

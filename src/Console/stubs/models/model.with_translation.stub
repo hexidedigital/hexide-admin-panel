@@ -15,12 +15,10 @@ use Illuminate\Database\Eloquent\Model;
 class {{ class }} extends Model
 {
     use Translatable, WithTranslationsTrait;
-    use VisibleTrait, PositionSortTrait;
+    use VisibleTrait;
+    use PositionSortTrait;
 
-    /**
-     * @var string[]
-     */
-    protected $translatedAttributes = [
+    protected array $translatedAttributes = [
         'title',
         'content',
     ];

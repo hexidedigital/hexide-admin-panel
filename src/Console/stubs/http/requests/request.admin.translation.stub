@@ -22,14 +22,10 @@ class {{ class }} extends FormRequest
             'status'            => 'boolean',
             'slug'              => 'required|string|max:191|unique:{{ module_name }},slug,'.$model.',id',
 
-            'lang_rules' => [
-                'title'             => 'required|string|max:191',
-                'content'           => 'nullable|string|max:10000',
-            ]
+            '{{title}}'         => 'required|string|max:191',
+            '{{content}}'       => 'nullable|string|max:10000',
         ];
 
-        $options = [];
-
-        return lang_rules($rules, $options);
+        return lang_rules($rules);
     }
 }

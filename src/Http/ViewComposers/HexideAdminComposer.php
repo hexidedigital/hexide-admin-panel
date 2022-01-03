@@ -2,19 +2,13 @@
 
 namespace HexideDigital\HexideAdmin\Http\ViewComposers;
 
-
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
-
 class HexideAdminComposer
 {
-
-    /**
-     * @var HexideAdmin
-     */
-    protected $hexideAdmin;
+    protected HexideAdmin $hexideAdmin;
 
     public function __construct(HexideAdmin $hexideAdmin)
     {

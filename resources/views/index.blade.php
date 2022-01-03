@@ -13,7 +13,7 @@
 @section("content_header_add")
     <div class="ml-3">
         @if(($with_create ?? true) && Route::has('admin.'.$module.'.create'))
-            @can(\HexideDigital\ModelPermissions\Models\Permission::key($module, \HexideDigital\ModelPermissions\Models\Permission::create))
+            @can(\HexideDigital\ModelPermissions\Models\Permission::key($module, \HexideDigital\ModelPermissions\Models\Permission::Create))
                 <a class="btn btn-outline-success btn-sm" title="{{__('hexide_admin::buttons.add')}}"
                    href="{{route('admin.'.$module.'.create', $url_params)}}">
 

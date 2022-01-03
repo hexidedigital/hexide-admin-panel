@@ -2,7 +2,6 @@
 
 namespace HexideDigital\HexideAdmin\Services;
 
-
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;

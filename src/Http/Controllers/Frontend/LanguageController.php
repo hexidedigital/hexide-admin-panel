@@ -2,7 +2,6 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Frontend;
 
-
 use HexideDigital\HexideAdmin\Http\Controllers\BaseController;
 use HexideDigital\HexideAdmin\Http\Middleware\LanguageMiddleware;
 

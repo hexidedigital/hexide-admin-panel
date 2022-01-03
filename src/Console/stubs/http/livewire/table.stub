@@ -55,7 +55,7 @@ class {{ class }} extends DefaultTable
     public function query(): Builder
     {
         // return {{ ModuleName }}::joinTranslations()
-        //              ->select(['{{ module_name }}.*', '{{ model }}_translations.title as title']);
-        return {{ ModuleName }}::query()->select();
+        //     ->select(['{{ module_name }}.*', '{{ model }}_translations.title as title']);
+        // return {{ ModuleName }}::query()->select();
     }
 }

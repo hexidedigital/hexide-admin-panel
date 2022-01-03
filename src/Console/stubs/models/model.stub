@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class {{ class }} extends Model
 {
-    use VisibleTrait, PositionSortTrait;
+    use VisibleTrait;
+    use PositionSortTrait;
 
     protected $fillable = [
         'position',

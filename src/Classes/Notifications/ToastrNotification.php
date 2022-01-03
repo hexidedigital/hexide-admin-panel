@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Classes\Notifications;
 
-class ToastrNotofication implements NotificationInterface
+class ToastrNotification implements NotificationInterface
 {
     public function notify($message, $type = null, $title = null, $options = [])
     {

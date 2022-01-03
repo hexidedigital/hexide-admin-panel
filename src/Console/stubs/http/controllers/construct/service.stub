@@ -1,6 +1,10 @@
     public function __construct({{ model }}Service $service)
     {
-        parent::__construct("{{ model_table }}");
+        parent::__construct();
 
         $this->service = $service;
+
+        $this->setFullAccessMap();
+
+        $this->setModule({{ model }}::class);
     }

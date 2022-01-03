@@ -5,7 +5,7 @@ namespace HexideDigital\HexideAdmin\Providers;
 use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
-use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotofication;
+use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotification;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
@@ -37,7 +37,7 @@ class HexideAdminServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(NotificationInterface::class, function (){
-            return new ToastrNotofication();
+            return new ToastrNotification();
         });
     }
 
@@ -59,7 +59,7 @@ class HexideAdminServiceProvider extends ServiceProvider
     {
         $this->publishes([
             $this->packagePath("config/hexide-admin.php") => config_path('hexide-admin.php'),
-            $this->packagePath("config/modelPermissions.php") => config_path('modelPermissions.php'),
+            $this->packagePath("config/model-permissions.php") => config_path('model-permissions.php'),
             $this->packagePath("config/translatable.php") => config_path('translatable.php'),
         ], 'hexide-admin-configs');
 

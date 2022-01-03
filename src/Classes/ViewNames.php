@@ -4,12 +4,12 @@ namespace HexideDigital\HexideAdmin\Classes;
 
 abstract class ViewNames
 {
-    public const INDEX = 'index';
-    public const SHOW = 'show';
-    public const EDIT = 'edit';
-    public const CREATE = 'create';
-    public const DELETE = 'delete';
+    public const Index = 'index';
+    public const Show = 'show';
+    public const Edit = 'edit';
+    public const Create = 'create';
+    public const Delete = 'delete';
 
-    public const GENERAL = 'general';
-    public const LOCALE = 'lang';
+    public const General = 'general';
+    public const Locale = 'lang';
 }

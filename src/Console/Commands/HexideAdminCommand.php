@@ -2,7 +2,6 @@
 
 namespace HexideDigital\HexideAdmin\Console\Commands;
 
-
 use Arr;
 use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Config\Repository;
@@ -16,24 +15,11 @@ use Symfony\Component\Console\Input\InputOption;
 
 class HexideAdminCommand extends BaseCommand
 {
-    /**
-     * The name of the console command.
-     *
-     * @var string
-     */
     protected $name = 'hd-admin:module';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Generate module files such as model, controllers, views etc.';
 
-    /**
-     * @var array|string[]
-     */
-    protected $stub_paths = [
+    /** @var array<string, string> */
+    protected array $stubPaths = [
         'migration' => 'database',
         'model' => 'models',
         'request' => 'http/requests',
@@ -47,46 +33,19 @@ class HexideAdminCommand extends BaseCommand
         'menu_item' => 'menu_item',
     ];
 
-    /**
-     * @var Repository
-     */
-    protected $config;
-    /**
-     * @var Filesystem
-     */
-    protected $filesystem;
+    protected Repository $config;
+    protected Filesystem $filesystem;
 
-    /**
-     * @var bool
-     */
-    protected $with_interact;
-    /**
-     * @var array
-     */
-    protected $force_types;
+    protected bool $withInteract;
+    /** @var array<string|int, string> */
+    protected array $forceTypes;
 
-    /**
-     * Camel cased ModuleName
-     *
-     * @var string
-     */
-    protected $module_name;
-    /**
-     * @var bool
-     */
-    protected $translatable;
-
-    /**
-     * @var Collection
-     */
-    protected $namespaces;
+    /** Camel cased ModuleName */
+    protected string $moduleName;
+    protected bool $translatable;
+    protected Collection $namespaces;
 
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
     public function __construct(Repository $config, Filesystem $filesystem)
     {
         parent::__construct();
@@ -95,16 +54,12 @@ class HexideAdminCommand extends BaseCommand
         $this->filesystem = $filesystem;
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
+
     public function handle(): int
     {
-        $this->namespaces = collect($this->config->get('hexide_admin.namespaces'));
+        $this->namespaces = collect($this->config->get('hexide-admin.namespaces'));
 
-        $this->with_interact = !$this->option('no-interaction');
+        $this->withInteract = !$this->option('no-interaction');
         $this->setForceTypes();
 
         $this->info('Start: creating module files...');
@@ -122,14 +77,13 @@ class HexideAdminCommand extends BaseCommand
 
     private function setForceTypes()
     {
-        $this->force_types = [];
+        $this->forceTypes = [];
 
-        if ($this->hasOption('force')) {
-            $force = $this->option('force');
+        if ($force = $this->option('force')) {
             if (empty($force)) {
                 $force = 'all';
             }
-            $this->force_types = explode(',', $force);
+            $this->forceTypes = explode(',', $force);
         }
     }
 
@@ -137,7 +91,7 @@ class HexideAdminCommand extends BaseCommand
     {
         $name = Str::singular(Str::studly($this->argument('name')));
 
-        if ($this->with_interact) {
+        if ($this->withInteract) {
             $name = $this->ask("Enter the module name", $name);
         }
         $this->info('Create module ' . $name);
@@ -146,14 +100,14 @@ class HexideAdminCommand extends BaseCommand
             throw new InvalidArgumentException('Model name contains invalid characters.');
         }
 
-        $this->module_name = $name;
+        $this->moduleName = $name;
     }
 
     private function setTranslatable()
     {
         $transl = $this->option('translatable');
 
-        if (!$this->option('translatable') && $this->with_interact) {
+        if (!$this->option('translatable') && $this->withInteract) {
             $transl = $this->confirm('Create a model with translated fields?', false);
         }
 
@@ -162,7 +116,7 @@ class HexideAdminCommand extends BaseCommand
 
     //--------------------------------------------------------
 
-    private function createFiles()
+    private function createFiles(): void
     {
         $this->info('Creating files...');
 
@@ -188,7 +142,7 @@ class HexideAdminCommand extends BaseCommand
         $this->info('Files created.');
     }
 
-    private function createModels()
+    private function createModels(): void
     {
         $path = app_path('Models/');
 
@@ -208,7 +162,7 @@ class HexideAdminCommand extends BaseCommand
         $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('model'));
     }
 
-    private function createTranslatedModel()
+    private function createTranslatedModel(): void
     {
         $path = app_path('Models/');
 
@@ -223,7 +177,7 @@ class HexideAdminCommand extends BaseCommand
         $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('model'));
     }
 
-    private function createMigrations()
+    private function createMigrations(): void
     {
         $path = database_path('migrations/');
 
@@ -269,11 +223,12 @@ class HexideAdminCommand extends BaseCommand
      * Ensure that a migration with the given name doesn't already exist.
      *
      * @param string $name
-     * @param string $migrationPath
+     * @param string|null $migrationPath
      *
+     * @return bool
      * @throws FileNotFoundException
      */
-    protected function migrationExists($name, $migrationPath = null): bool
+    protected function migrationExists(string $name, string $migrationPath = null): bool
     {
         if (!empty($migrationPath)) {
             $migrationFiles = $this->filesystem->glob($migrationPath . '*.php');
@@ -290,7 +245,7 @@ class HexideAdminCommand extends BaseCommand
         return false;
     }
 
-    private function createService()
+    private function createService(): void
     {
         if ($this->option('service')) {
             $path = app_path('Services/Backend/');
@@ -319,7 +274,7 @@ class HexideAdminCommand extends BaseCommand
         }
     }
 
-    private function createRequest()
+    private function createRequest(): void
     {
         $path = app_path('Http/Requests/Backend/');
 
@@ -341,7 +296,7 @@ class HexideAdminCommand extends BaseCommand
         $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('request'));
     }
 
-    private function createController()
+    private function createController(): void
     {
         $path = app_path('Http/Controllers/Backend/');
 
@@ -384,9 +339,9 @@ class HexideAdminCommand extends BaseCommand
         $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('controller'));
     }
 
-    private function createViews()
+    private function createViews(): void
     {
-        $dir_path = base_path($this->config->get('hexide_admin.module_paths.views')) . $this->getSnakeCaseName(2);
+        $dir_path = base_path($this->config->get('hexide-admin.module_paths.views')) . $this->getSnakeCaseName(2);
 
         $force = $this->isForced('views');
 
@@ -426,7 +381,7 @@ class HexideAdminCommand extends BaseCommand
         }
     }
 
-    private function createLivewire()
+    private function createLivewire(): void
     {
         $path = app_path('Http/Livewire/Admin/Tables/');
 
@@ -448,7 +403,7 @@ class HexideAdminCommand extends BaseCommand
 
     //--------------------------------------------------------
 
-    private function prepareResources()
+    private function prepareResources(): void
     {
         if (!$this->option('resources')) {
             return;
@@ -487,9 +442,9 @@ class HexideAdminCommand extends BaseCommand
         $this->info('Resource generating is completed.');
     }
 
-    private function appendRoutes()
+    private function appendRoutes(): void
     {
-        $path = base_path($this->config->get('hexide_admin.module_paths.admin_route'));
+        $path = base_path($this->config->get('hexide-admin.module_paths.admin_route'));
 
         if ($this->filesystem->isFile($path)) {
             $stubs = [
@@ -516,7 +471,7 @@ class HexideAdminCommand extends BaseCommand
         }
     }
 
-    private function appendMenuItem()
+    private function appendMenuItem(): void
     {
         $path = config_path('adminlte.php');
 
@@ -524,7 +479,7 @@ class HexideAdminCommand extends BaseCommand
             $content = $this->getContent($this->resolveStubPath('menu_item', "menu_item.stub"), [
                 "{{ ModuleName }}" => $this->getModuleName(),
                 "{{ module_name }}" => $this->getSnakeCaseName(2),
-                "{{ module_name_access }}" => Permission::key($this->getSnakeCaseName(2), Permission::access),
+                "{{ module_name_access }}" => Permission::key($this->getSnakeCaseName(2), Permission::Access),
             ]);
 
             $this->makeFile($path, $this->getContent($path, ["/*hexide_admin_stub*/" => $content]), true);
@@ -535,10 +490,10 @@ class HexideAdminCommand extends BaseCommand
         }
     }
 
-    private function appendMenuItemTranslations()
+    private function appendMenuItemTranslations(): void
     {
-        $locales = $this->config->get('hexide_admin.locales');
-        list($path, $file_name) = $this->config->get('hexide_admin.module_paths.adminlte_menu_translations');
+        $locales = $this->config->get('hexide-admin.locales');
+        list($path, $file_name) = $this->config->get('hexide-admin.module_paths.adminlte_menu_translations');
 
         $path = base_path($path);
         foreach ($locales as $locale) {
@@ -557,10 +512,10 @@ class HexideAdminCommand extends BaseCommand
         }
     }
 
-    private function appendTranslations()
+    private function appendTranslations(): void
     {
-        $locales = $this->config->get('hexide_admin.locales');
-        list($path, $file_name) = $this->config->get('hexide_admin.module_paths.lang');
+        $locales = $this->config->get('hexide-admin.locales');
+        list($path, $file_name) = $this->config->get('hexide-admin.module_paths.lang');
 
         $path = base_path($path);
 
@@ -582,14 +537,16 @@ class HexideAdminCommand extends BaseCommand
 
     //--------------------------------------------------------
 
-    protected function getModuleName($plural = 1): string
+    protected function getModuleName(int $plural = 1): string
     {
-        return Str::plural($this->module_name, $plural);
+        return $plural === 1 ? Str::singular($this->moduleName) : Str::plural($this->moduleName);
     }
 
-    protected function getSnakeCaseName($plural = 1): string
+    protected function getSnakeCaseName(int $plural = 1): string
     {
-        return Str::plural(Str::snake($this->getModuleName()), $plural);
+        $name = Str::snake($this->getModuleName());
+
+        return $plural === 1 ? Str::singular($name) : Str::plural($name);
     }
 
     protected function getModelNamespace(): string
@@ -606,7 +563,7 @@ class HexideAdminCommand extends BaseCommand
 
     protected function resolveStubPath($type, $stub): string
     {
-        $stub = trim(Arr::get($this->stub_paths, $type), '/') . '/' . trim($stub, '/');
+        $stub = trim(Arr::get($this->stubPaths, $type), '/') . '/' . trim($stub, '/');
 
         return file_exists($customPath = $this->laravel->basePath('stubs/hexide_admin/' . $stub))
             ? $customPath
@@ -623,7 +580,7 @@ class HexideAdminCommand extends BaseCommand
 
     protected function makeFile($file, $content, $force = false)
     {
-        if ($this->with_interact && !$force && $this->filesystem->exists($file)) {
+        if ($this->withInteract && !$force && $this->filesystem->exists($file)) {
             $this->warn('File ' . $file . ' already exists');
             $force = $this->confirm('Are you sure you want to overwrite this existing file?', false);
         }
@@ -646,11 +603,11 @@ class HexideAdminCommand extends BaseCommand
 
     protected function isForced($type): bool
     {
-        if (empty($this->force_types)) {
+        if (empty($this->forceTypes)) {
             return false;
         }
 
-        if (in_array('all', $this->force_types) || in_array($type, $this->force_types)) {
+        if (in_array('all', $this->forceTypes) || in_array($type, $this->forceTypes)) {
             return true;
         }
 

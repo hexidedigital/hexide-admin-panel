@@ -22,7 +22,7 @@ class {{ ModelService }} extends BaseService implements ServiceInterface
         $this->prepareAttributes($inputs, $model);
 
         if (isset($model->id)) {
-            $model->update();
+            $model->update($inputs);
         } else {
             $model = {{ Model }}::create($inputs);
         }

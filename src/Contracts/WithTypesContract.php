@@ -2,12 +2,8 @@
 
 namespace HexideDigital\HexideAdmin\Contracts;
 
-/**
- *
- */
 interface WithTypesContract
 {
-
     /**
      * @return array
      */
@@ -23,5 +19,4 @@ interface WithTypesContract
      * @return int|string|null
      */
     public static function getValueByKey($type);
-
 }

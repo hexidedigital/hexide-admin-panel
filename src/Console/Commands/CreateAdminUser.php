@@ -4,49 +4,23 @@ namespace HexideDigital\HexideAdmin\Console\Commands;
 
 use App\Models\Role;
 use App\Models\User;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 class CreateAdminUser extends BaseCommand
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $name = 'hd-admin:user';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Create new user with admin roles';
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
+    public function handle(): int
     {
         $email_exists = true;
         $first = $this->option('email');
+        $email = null;
         while ($email_exists) {
-            if($first){
+            if ($first) {
                 $email = $this->option('email');
                 $first = false;
-            }else{
+            } else {
                 $email = $this->ask('Enter email', $this->option('email') ?? 'admin@admin.com');
             }
 
@@ -58,7 +32,7 @@ class CreateAdminUser extends BaseCommand
                 $email_exists = true;
                 $this->warn('Email invalid.');
             }
-            if($this->option('no-interaction') && $email_exists){
+            if ($this->option('no-interaction') && $email_exists) {
                 return self::FAILURE;
             }
         }
@@ -66,7 +40,7 @@ class CreateAdminUser extends BaseCommand
         $name = $this->option('name');
         if (!empty($name)) {
             $name = $this->ask('Enter name', \Arr::first(explode('@', $email)));
-        }else{
+        } else {
             $name = \Arr::first(explode('@', $email));
         }
 
@@ -80,9 +54,9 @@ class CreateAdminUser extends BaseCommand
             if (!$generate) {
                 $length_correct = 4 <= strlen($password) && strlen($password) <= 20;
                 if ($length_correct) {
-                    $confirm_password = $this->option('password') ?? $this->secret('Confirm password');
+                    $confirmPassword = $this->option('password') ?? $this->secret('Confirm password');
 
-                    $incorrect = $confirm_password !== $password;
+                    $incorrect = $confirmPassword !== $password;
                     if ($incorrect) {
                         $this->warn('Invalid confirm password');
                     }
@@ -126,7 +100,7 @@ class CreateAdminUser extends BaseCommand
         return [
             new InputOption('email', 'e', InputOption::VALUE_OPTIONAL, 'Set email'),
             new InputOption('name', null, InputOption::VALUE_OPTIONAL, 'Set name'),
-            new InputOption('password', null, InputOption::VALUE_OPTIONAL, 'Set password'),
+            new InputOption('password', null, InputOption::VALUE_OPTIONAL, 'Set password (Is not secure)'),
             new InputOption('generate', 'P', InputOption::VALUE_NONE, 'Autogenerate password'),
         ];
     }

@@ -6,50 +6,15 @@ use {{ model_namespace }}; //{{ service_namespace }}
 use App\Http\Requests\Backend\{{ model }}Request;
 use HexideDigital\HexideAdmin\Classes\ActionNames;
 use HexideDigital\HexideAdmin\Classes\ViewNames;
-use HexideDigital\HexideAdmin\Http\Traits\AjaxFieldsChangerTrait;
 use HexideDigital\ModelPermissions\Models\Permission as HDPermissions;
 use Illuminate\Support\Facades\DB;
 
-
 class {{ class }} extends BackendController
 {
-    use AjaxFieldsChangerTrait;
-
-    protected $accessMap = [
-        'index' => HDPermissions::access,
-        'show' => HDPermissions::view,
-        'create' => HDPermissions::create,
-        'store' => HDPermissions::create,
-        'edit' => HDPermissions::edit,
-        'update' => HDPermissions::edit,
-        'destroy' => HDPermissions::delete,
-
-        'ajaxFieldChange' => 'ajax', // AjaxFieldsChangerTrait
-    ];
-
-    /**
-     * to define module name
-     */
+    /** define module */
 {{ construct }}
 
-    public function index()
-    {
-        return $this->render();
-    }
-
-    public function show({{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
-    {
-        return $this->redirect(ViewNames::EDIT, ['{{ model_variable }}' => ${{ modelVariable }}->id]);
-    }
-
-    public function create()
-    {
-        return $this->render(ViewNames::CREATE);
-    }
-
-    /**
-     * @throws \Throwable
-     */
+    /** @throws \Throwable */
     public function store({{ model }}Request $request): \Illuminate\Http\RedirectResponse
     {
         DB::beginTransaction();
@@ -71,16 +36,7 @@ class {{ class }} extends BackendController
         }
     }
 
-    public function edit({{ model }} ${{ modelVariable }})
-    {
-        $this->data_model(${{ modelVariable }});
-
-        return $this->render(ViewNames::EDIT);
-    }
-
-    /**
-     * @throws \Throwable
-     */
+    /** @throws \Throwable */
     public function update({{ model }}Request $request, {{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
     {
         DB::beginTransaction();
@@ -102,9 +58,7 @@ class {{ class }} extends BackendController
         }
     }
 
-    /**
-     * @throws \Throwable
-     */
+    /** @throws \Throwable */
     public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
     {
         DB::beginTransaction();

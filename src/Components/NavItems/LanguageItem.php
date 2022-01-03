@@ -7,16 +7,12 @@ use Str;
 
 class LanguageItem extends Component
 {
-    public $locales;
+    public array $locales;
 
-    /**
-     * Create a new component instance.
-     *
-     * @param array|null $locales
-     */
+    /** Create a new component instance. */
     public function __construct(array $locales = null)
     {
-        $this->locales = $locales ?? config('hexide_admin.locales');
+        $this->locales = $locales ?? config('hexide-admin.locales');
     }
 
     public function showLanguages(): bool

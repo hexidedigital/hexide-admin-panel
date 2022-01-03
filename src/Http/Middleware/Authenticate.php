@@ -4,21 +4,13 @@ namespace HexideDigital\HexideAdmin\Http\Middleware;
 
 use App\Models\User;
 use Closure;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class Authenticate extends Middleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @param mixed ...$guards
-     * @return mixed
-     * @throws \Illuminate\Auth\AuthenticationException
-     */
     public function handle($request, Closure $next, ...$guards)
     {
         if (in_array('admin', $guards)) {
@@ -36,5 +28,4 @@ class Authenticate extends Middleware
 
         return parent::handle($request, $next, ...$guards);
     }
-
 }

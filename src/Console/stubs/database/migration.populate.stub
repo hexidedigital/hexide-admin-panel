@@ -17,8 +17,6 @@ class {{ class }} extends Migration
             [
                 'slug'           => 'slug',
                 'uk' => ['title' => 'title_uk'],
-                'ru' => ['title' => 'title_ru'],
-                'en' => ['title' => 'title_en'],
             ],
         ];
 

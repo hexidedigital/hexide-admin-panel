@@ -1,4 +1,8 @@
     public function __construct()
     {
-        parent::__construct("{{ model_table }}");
+        parent::__construct();
+
+        $this->setFullAccessMap();
+
+        $this->setModule({{ model }}::class);
     }

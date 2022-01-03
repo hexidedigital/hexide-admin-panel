@@ -1,5 +1,4 @@
 // for {{ ModuleName }}
-
     '{{ module_name }}' => [
         'name' => '{1} Модель|[2,*] Модели',
 

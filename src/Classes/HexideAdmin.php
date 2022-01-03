@@ -6,11 +6,7 @@ use Illuminate\Container\Container;
 
 class HexideAdmin
 {
-
-    /**
-     * @var Container
-     */
-    protected $container;
+    protected Container $container;
 
     /**
      * @var Breadcrumbs|mixed
@@ -30,5 +26,4 @@ class HexideAdmin
     {
         return $this->breadcrumbs;
     }
-
 }

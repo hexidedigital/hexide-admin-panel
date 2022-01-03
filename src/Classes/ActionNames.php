@@ -6,20 +6,20 @@ abstract class ActionNames
 {
     /* follow locale file in lang/__/messages.php' */
 
-    public const DEFAULT = 'action';
-    public const INDEX = 'index';
-    public const SHOW = 'show';
-    public const EDIT = 'edit';
-    public const CREATE = 'create';
-    public const DELETE = 'delete';
+    public const Action = 'action';
+    public const Index = 'index';
+    public const Show = 'show';
+    public const Edit = 'edit';
+    public const Create = 'create';
+    public const Delete = 'delete';
 
     public const ALLOWED = [
-        self::DEFAULT,
-        self::INDEX,
-        self::SHOW,
-        self::EDIT,
-        self::CREATE,
-        self::DELETE,
+        self::Action,
+        self::Index,
+        self::Show,
+        self::Edit,
+        self::Create,
+        self::Delete,
     ];
 
     public static function isAllowed(?string $action): bool

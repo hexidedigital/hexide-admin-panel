@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Trait WithStates
- * @package HexideDigital\HexideAdmin\Models\Traits
  * @implements WithStatesContract
  * @method static \Illuminate\Database\Eloquent\Builder|static ofStates($builder, $state, $field)
  * @mixin Model
@@ -20,6 +18,7 @@ trait WithStates
      * @param Builder $builder
      * @param string|array $state
      * @param string $field = 'state'
+     *
      * @return Builder
      */
     public function scopeOfState(Builder $builder, $state, string $field = 'state'): Builder
@@ -29,12 +28,6 @@ trait WithStates
         return $builder->where($this->getTable() . '.' . $field, $this->getValueByKey($state));
     }
 
-    /**
-     * @param Builder $builder
-     * @param array $states
-     * @param string $field = 'state'
-     * @return Builder
-     */
     public function scopeOfStates(Builder $builder, array $states, string $field = 'state'): Builder
     {
         $_states = [];
@@ -46,17 +39,11 @@ trait WithStates
         return $builder->whereIn($this->getTable() . '.' . $field, $_states);
     }
 
-    /**
-     * @return array
-     */
     public static function getStates(): array
     {
         return static::$states ?? [];
     }
 
-    /**
-     * @return array
-     */
     public static function getStatesKeys(): array
     {
         return array_keys(static::getStates());

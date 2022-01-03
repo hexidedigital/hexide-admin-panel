@@ -3,26 +3,26 @@
 namespace HexideDigital\HexideAdmin\Http\Middleware;
 
 use Closure;
-use Request;
+use Illuminate\Http\Request;
 
 class LanguageMiddleware
 {
-    public static function getMainLocale()
+    public static function getMainLocale(): string
     {
 //        config('app.locale');
         return 'uk';
     }
 
-    public static function getLocaleFromUrl($guard)
+    public static function getLocaleFromUrl()
     {
         $languages = config('app.locales');
 
         $mainLanguage = self::getMainLocale();
 
-        $uri = Request::path();
+        $uri = \Request::path();
         $segmentsURI = explode('/', $uri);
 
-        if (Request::acceptsJson()) {
+        if (\Request::acceptsJson()) {
 
             if (!empty($segmentsURI[1]) && in_array($segmentsURI[1], $languages)) {
 
@@ -46,14 +46,14 @@ class LanguageMiddleware
         return null;
     }
 
-    public function handle(\Illuminate\Http\Request $request, Closure $next, ...$args)
+    public function handle(Request $request, Closure $next, ...$args)
     {
         if (in_array('admin', $args)) {
 
-            $locale = \Cookie::get(config('hexide_admin.lang_cookie'), config('hexide_admin.locale'));
+            $locale = \Cookie::get(config('hexide-admin.lang_cookie'), config('hexide-admin.locale'));
 
-            if (!in_array($locale, config('hexide_admin.locales'))) {
-                $locale = config('hexide_admin.locale');
+            if (!in_array($locale, config('hexide-admin.locales'))) {
+                $locale = config('hexide-admin.locale');
             }
 
             app()->setLocale($locale);
@@ -66,7 +66,7 @@ class LanguageMiddleware
 
         } elseif (in_array('web', $args)) {
 
-            $locale = self::getLocaleFromUrl('web');
+            $locale = self::getLocaleFromUrl();
 
             if ($locale) app()->setLocale($locale);
             else app()->setLocale(config('app.locale'));
@@ -75,5 +75,4 @@ class LanguageMiddleware
 
         return $next($request);
     }
-
 }

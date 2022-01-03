@@ -2,20 +2,10 @@
 
 namespace HexideDigital\HexideAdmin\Contracts;
 
-/**
- *
- */
 interface WithStatesContract
 {
-
-    /**
-     * @return array
-     */
     public static function getStates(): array;
 
-    /**
-     * @return array
-     */
     public static function getStatesKeys(): array;
 
     /**
@@ -29,5 +19,4 @@ interface WithStatesContract
      * @return int|string|null
      */
     public static function getKeyByValue($value);
-
 }

@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class WithTypes
- * @package HexideDigital\HexideAdmin\Models\Traits
  * @implements WithTypesContract
  * @method static \Illuminate\Database\Eloquent\Builder|self ofTypes($builder, $state, $field)
  * @mixin Model
@@ -29,12 +27,6 @@ trait WithTypes
         return $builder->where($this->getTable() . '.' . $field, $this->getValueByKey($type));
     }
 
-    /**
-     * @param Builder $builder
-     * @param array $types
-     * @param string $field = 'type'
-     * @return Builder
-     */
     public function scopeOfTypes(Builder $builder, array $types, string $field = 'type'): Builder
     {
         $_types = [];
@@ -46,17 +38,11 @@ trait WithTypes
         return $builder->whereIn($this->getTable() . '.' . $field, $_types);
     }
 
-    /**
-     * @return array
-     */
     public static function getTypes(): array
     {
         return static::$types ?? [];
     }
 
-    /**
-     * @return array
-     */
     public static function getTypesKeys(): array
     {
         return array_keys(static::getTypes());
@@ -70,5 +56,4 @@ trait WithTypes
     {
         return Arr::get(static::getTypes(), $key, null);
     }
-
 }

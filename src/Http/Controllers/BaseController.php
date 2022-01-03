@@ -9,36 +9,21 @@ use View;
 
 abstract class BaseController extends Controller
 {
-    /**
-     * @var array
-     */
-    private $view_data = [];
+    private array $viewData = [];
 
-    /**
-     * @var array
-     */
-    protected $locales = [];
+    protected array $locales = [];
+    protected bool $withBreadcrumbs = true;
 
-    /**
-     * @var bool
-     */
-    protected $with_breadcrumbs = true;
+    protected ?HexideAdmin $hexideAdmin;
+    protected ?Breadcrumbs $breadcrumbs;
 
-    /**
-     * @var HexideAdmin|mixed
-     */
-    protected $hexideAdmin;
-
-    /**
-     * @var Breadcrumbs
-     */
-    protected $breadcrumbs;
 
     public function __construct()
     {
         $this->hexideAdmin = app()->get(HexideAdmin::class);
         $this->breadcrumbs = $this->hexideAdmin->getBreadcrumbs();
     }
+
 
     /**
      * @param string|array $key
@@ -51,8 +36,8 @@ abstract class BaseController extends Controller
         }
 
         foreach ($key as $_key => $_data) {
-            $this->view_data = array_merge(
-                $this->view_data,
+            $this->viewData = array_merge(
+                $this->viewData,
                 array($_key => $_data)
             );
         }
@@ -60,7 +45,7 @@ abstract class BaseController extends Controller
 
     protected function getViewData(): array
     {
-        return $this->view_data;
+        return $this->viewData;
     }
 
     /**
@@ -75,6 +60,7 @@ abstract class BaseController extends Controller
         $this->data($data);
 
         View::share($this->getViewData());
+
         return view($view, $this->getViewData());
     }
 
