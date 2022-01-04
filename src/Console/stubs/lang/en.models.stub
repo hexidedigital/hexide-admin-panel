@@ -1,5 +1,5 @@
-// for {{ ModuleName }}
-    '{{ module_name }}' => [
+// for {{ ModelName }}
+    '{{ model_names }}' => [
         'name' => '{1} Model|[2,*] Models',
 
         'index' => 'List of models',

@@ -9,7 +9,7 @@ class {{ class }} extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'locale', '{{ parent_model }}_id',
+        'locale', '{{ model_name }}_id',
         'title',
         'content',
     ];

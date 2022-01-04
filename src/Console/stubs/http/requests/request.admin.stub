@@ -15,12 +15,12 @@ class {{ class }} extends FormRequest
     public function rules()
     {
         $model = $this->{{ model }} ?? '';
-        if(isset($model->id) && ($model instanceof {{ ModuleName }})){$model = $model->id;}
+        if(isset($model->id) && ($model instanceof {{ ModelName }})){$model = $model->id;}
 
         $rules = [
             'position'          => 'required|numeric|min:1',
             'status'            => 'boolean',
-            'slug'              => 'required|string|max:191|unique:{{ module_name }},slug,'.$model.',id',
+            'slug'              => 'required|string|max:191|unique:{{ model_name }},slug,'.$model.',id',
         ];
 
         return $rules;

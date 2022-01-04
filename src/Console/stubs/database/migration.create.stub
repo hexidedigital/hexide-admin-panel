@@ -7,11 +7,6 @@ use HexideDigital\ModelPermissions\Models\Permission as HDPermission;
 
 class {{ class }} extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('{{ table }}', function (Blueprint $table) {
@@ -27,11 +22,6 @@ class {{ class }} extends Migration
         PermissionRelation::touch('{{ table }}')->addCustomSet()->addResourceSet();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('{{ table }}');

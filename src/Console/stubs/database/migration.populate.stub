@@ -3,14 +3,10 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use {{ model_namespace }};
 
 class {{ class }} extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         $data = [
@@ -25,15 +21,10 @@ class {{ class }} extends Migration
             $item['position'] = ++$i;
             $item['status'] = true;
 
-            {{ Model }}::create($item);
+            {{ ModelName }}::create($item);
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         DB::table('{{ table_singular }}_translations')->delete();

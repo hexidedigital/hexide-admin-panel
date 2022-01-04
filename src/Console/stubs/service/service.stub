@@ -3,41 +3,12 @@
 namespace {{ namespace }};
 
 use {{ model_namespace }};
-use HexideDigital\HexideAdmin\Services\ServiceInterface;
+use HexideDigital\HexideAdmin\Services\BackendService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 
-class {{ ModelService }} extends BaseService implements ServiceInterface
+class {{ class }} extends BackendService
 {
-    /**
-     * @param FormRequest|Request $request
-     * @param Model|{{ Model }}|null $model
-     * @return Model|{{ Model }}
-     */
-    public function handleRequest(Request $request, ?Model $model = null): {{ Model }}
-    {
-        $inputs = $request->validated();
 
-        $this->prepareAttributes($inputs, $model);
-
-        if (isset($model->id)) {
-            $model->update($inputs);
-        } else {
-            $model = {{ Model }}::create($inputs);
-        }
-
-        $this->postHandle($request, $model);
-
-        return $model;
-    }
-
-    /**
-     * @param FormRequest|Request $request
-     * @param {{ Model }} $model
-     */
-    public function postHandle(Request $request, {{ Model }} $model)
-    {
-
-    }
 }

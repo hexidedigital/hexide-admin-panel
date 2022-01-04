@@ -8,7 +8,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class {{ class }} extends DefaultTable
 {
-    public ?string $module = '{{ module_name }}';
+    public ?string $module = '{{ model_names }}';
 
     public function columns(): array
     {
@@ -54,8 +54,8 @@ class {{ class }} extends DefaultTable
 
     public function query(): Builder
     {
-        // return {{ ModuleName }}::joinTranslations()
-        //     ->select(['{{ module_name }}.*', '{{ model }}_translations.title as title']);
-        // return {{ ModuleName }}::query()->select();
+        // return {{ ModelName }}::joinTranslations()
+        //     ->select(['{{ table }}.*', '{{ table_singular }}_translations.title as title']);
+        // return {{ ModelName }}::query()->select();
     }
 }

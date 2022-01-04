@@ -2,79 +2,16 @@
 
 namespace {{ namespace }};
 
-use {{ model_namespace }}; //{{ service_namespace }}
-use App\Http\Requests\Backend\{{ model }}Request;
-use HexideDigital\HexideAdmin\Classes\ActionNames;
-use HexideDigital\HexideAdmin\Classes\ViewNames;
-use HexideDigital\ModelPermissions\Models\Permission as HDPermissions;
-use Illuminate\Support\Facades\DB;
+use {{ model_namespace }};
 
 class {{ class }} extends BackendController
 {
-    /** define module */
-{{ construct }}
-
-    /** @throws \Throwable */
-    public function store({{ model }}Request $request): \Illuminate\Http\RedirectResponse
+    public function __construct()
     {
-        DB::beginTransaction();
+        parent::__construct();
 
-        try {
-            {{ create_handle }}
+        $this->setFullAccessMap();
 
-            $this->notify(ActionNames::CREATE);
-
-            DB::commit();
-
-            return $this->next_action($this->module, ${{ modelVariable }});
-        } catch (\Exception $e) {
-            $this->notify(ActionNames::CREATE, $e->getMessage(), 'error');
-
-            DB::rollBack();
-
-            return back();
-        }
-    }
-
-    /** @throws \Throwable */
-    public function update({{ model }}Request $request, {{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
-    {
-        DB::beginTransaction();
-
-        try {
-{{ update_handle }}
-
-            $this->notify(ActionNames::EDIT);
-
-            DB::commit();
-
-            return $this->next_action($this->module, ${{ modelVariable }});
-        } catch (\Exception $e) {
-            $this->notify(ActionNames::EDIT, $e->getMessage(), 'error');
-
-            DB::rollBack();
-
-            return back();
-        }
-    }
-
-    /** @throws \Throwable */
-    public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
-    {
-        DB::beginTransaction();
-
-        try {
-            ${{ modelVariable }}->delete();
-
-            $this->notify(ActionNames::DELETE);
-
-            DB::commit();
-        } catch (\Exception $e) {
-            $this->notify(ActionNames::DELETE, $e->getMessage(), 'error');
-
-            DB::rollBack();
-        }
-
-        return back();
+        $this->setModule({{ ModelName }}::class);
     }
 }

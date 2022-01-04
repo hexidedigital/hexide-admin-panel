@@ -1,24 +1,24 @@
 @php
     /**
-     * @var {{ model_namespace }} $model
-     * @var Illuminate\Support\ViewErrorBag $errors
+     * @var \{{ model_namespace }} $model
+     * @var \Illuminate\Support\ViewErrorBag $errors
      */
 @endphp
 
 <div class="form-group required">
     {!! Form::label('name', __('admin_labels.attributes.name')) !!}
-    {!! Form::text('name', old('name', $model->name ?? ''), ['class'=>"form-control".($errors->has('name')?' is-invalid':'') ]) !!}
+    {!! Form::text('name', null, ['class'=>"form-control".($errors->has('name')?' is-invalid':'') ]) !!}
     {!! $errors->first('name', '<p class="help-block text-red">:message</p>') !!}
 </div>
 
 <div class="form-group">
     {!! Form::label('position', __('admin_labels.attributes.position')) !!}
-    {!! Form::number('position', old('position', $model->position ?? 1), ['class' => 'form-control form-control-border'.($errors->has('position')?' is-invalid':''), 'min' => 1]) !!}
+    {!! Form::number('position', null, ['class' => 'form-control form-control-border'.($errors->has('position')?' is-invalid':''), 'min' => 1]) !!}
     {!! $errors->first('position', '<p class="help-block text-red">:message</p>') !!}
 </div>
 
 <div class="form-group">
     {!! Form::label('status', __('admin_labels.attributes.visible')) !!}
-    {!! Form::input('checkbox', 'status', 1, $toggle_attributes['status'] + (($model->status??true) ? ["checked" => 1]:[])) !!}
+    {!! Form::input('checkbox', 'status', 1, $toggle_attributes['status'] + (($model->status ?? true)?["checked" => 1]:[])) !!}
     {!! $errors->first('status', '<p class="help-block text-red">:message</p>') !!}
 </div>

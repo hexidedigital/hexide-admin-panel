@@ -1,1 +1,0 @@
-${{ modelVariable }} = {{ model }}::create($request->validated());

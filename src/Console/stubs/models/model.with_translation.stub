@@ -9,8 +9,9 @@ use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @method {{ class }}Translation translate(?string $locale = null, bool $withFallback = false)
+ * @mixin \Eloquent
  * @mixin {{ class }}Translation
+ * @method {{ class }}Translation translate(?string $locale = null, bool $withFallback = false)
  */
 class {{ class }} extends Model
 {

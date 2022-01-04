@@ -1,17 +1,14 @@
 @php
     /**
-     * @var {{ model_namespace }}|null $model
      * @var string $locale
-     * @var Illuminate\Support\ViewErrorBag $errors
+     * @var \{{ model_namespace }}|null $model
+     * @var \Illuminate\Support\ViewErrorBag $errors
      */
 @endphp
 
 <div class="form-group required">
     {!! Form::label($locale.'[title]', __('admin_labels.attributes.title')) !!}
-
     {!! Form::text($locale.'[title]', old("$locale.title", isset($model->id) ? $model->translate($locale)->title ?? null : null),
-['placeholder' => __('admin_labels.attributes.title'),
-'class' => 'form-control form-control-border'.($errors->has("$locale.title")?' is-invalid':'')]) !!}
-
+['placeholder' => __('admin_labels.attributes.title'), 'class' => 'form-control form-control-border'.($errors->has("$locale.title")?' is-invalid':'')]) !!}
     {!! $errors->first("$locale.title", '<p class="help-block text-red">:message</p>') !!}
 </div>
