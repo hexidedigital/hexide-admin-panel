@@ -5,7 +5,7 @@
 @push("css")
     <link rel="stylesheet" href="{{asset('/vendor/flag-icon-css/css/flag-icon.min.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
 @endpush
 
 @push("js")
@@ -27,7 +27,6 @@
             <h1 class="d-inline">
                 @yield("header_title", trans_choice("models.$module.name", 2))
             </h1>
-            @yield("content_header_add")
             @stack("content_header_add")
         </div>
         <div class="col-sm-6">
