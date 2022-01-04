@@ -6,19 +6,15 @@ use App\Models\Translation;
 use Exception;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Log;
 use function app;
 use function cache;
 use function request;
 
-/**
- * Class DBLoader
- * @package App\Classes
- */
 class DBLoader implements Loader
 {
-
     /**
      * Load the messages for the given locale.
      *
@@ -45,21 +41,10 @@ class DBLoader implements Loader
                     ->whereNotNull('value')
                     ->where('value', '<>', '')
                     ->get(['key', 'value'])
-                    ->keyBy('key')
-                    ->map(
-                        function ($item) {
-                            return $item['value'];
-                        }
-                    )
+                    ->pluck('value', 'key')
                     ->toArray();
 
-                foreach ($result as $key => $value) {
-                    unset($result[$key]);
-
-                    Arr::set($result, $key, $value);
-                }
-
-                if (app()->environment('production') && Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
+                if (App::isProduction() && Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
                     cache()->tags('translations')->put($locale.'_'.$group, $result, 60);
                 }
             }

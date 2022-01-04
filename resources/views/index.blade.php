@@ -10,7 +10,7 @@
      */
 @endphp
 
-@section("content_header_add")
+@push("content_header_add")
     <div class="ml-3">
         @if(($with_create ?? true) && Route::has('admin.'.$module.'.create'))
             @can(\HexideDigital\ModelPermissions\Models\Permission::key($module, \HexideDigital\ModelPermissions\Models\Permission::Create))
@@ -24,4 +24,4 @@
             @endcan
         @endif
     </div>
-@endsection
+@endpush

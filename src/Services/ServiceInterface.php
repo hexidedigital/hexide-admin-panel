@@ -2,7 +2,6 @@
 
 namespace HexideDigital\HexideAdmin\Services;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
@@ -11,22 +10,14 @@ interface ServiceInterface
 {
     /**
      * @param FormRequest|Request $request
-     * @return Model|Builder
-     */
-    public function createModel(Request $request);
-
-    /**
-     * @param FormRequest|Request $request
      * @param Model $model
-     * @return Model|Builder|null
+     * @return Model
      */
-    public function updateModel(Request $request, Model $model);
+    public function handleRequest(Request $request, Model $model): Model;
 
-    /**
-     * @param FormRequest|Request $request
-     * @param Model|null $model
-     * @return Model|mixed
-     */
-    public function handleRequest(Request $request, ?Model $model = null);
+    public function saveModel(array $attributes, Model $model): Model;
 
+    public function prepareAttributes(array &$inputs, Model $model): void;
+
+    public function postHandle(Request $request, Model $model);
 }

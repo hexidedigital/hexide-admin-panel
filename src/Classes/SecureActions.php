@@ -129,6 +129,6 @@ class SecureActions
 
     private function gateCheck(string $permission): bool
     {
-        return Gate::allows(Permission::key($this->moduleName, $permission)) || Gate::allows($permission);
+        return !Gate::has($permission) || Gate::allows(Permission::key($this->moduleName, $permission)) || Gate::allows($permission);
     }
 }

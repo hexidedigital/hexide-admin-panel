@@ -17,6 +17,7 @@ class AuthGates
         if (!app()->runningInConsole() && Auth::check()) {
             /** @var Collection|Role[] $roles */
             $roles = Role::with('permissions')->get();
+            $permissionsArray = [];
 
             foreach ($roles as $role) {
                 /** @var Permission $permissions */
@@ -25,14 +26,9 @@ class AuthGates
                 }
             }
 
-            if (empty($permissionsArray) == true) {
-                Auth::logout();
-                return redirect(route('admin.login'));
-            }
-
-            foreach ($permissionsArray as $title => $role_id) {
-                Gate::define($title, function (User $user) use ($role_id) {
-                    return count(array_intersect($user->roles->pluck('id')->toArray(), $role_id)) > 0;
+            foreach ($permissionsArray as $title => $roles_ids) {
+                Gate::define($title, function (User $user) use ($roles_ids) {
+                    return count(array_intersect($user->roles->pluck('id')->toArray(), $roles_ids)) > 0;
                 });
             }
         }

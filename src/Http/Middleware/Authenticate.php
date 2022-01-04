@@ -4,9 +4,7 @@ namespace HexideDigital\HexideAdmin\Http\Middleware;
 
 use App\Models\User;
 use Closure;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class Authenticate extends Middleware
@@ -18,6 +16,8 @@ class Authenticate extends Middleware
             $user = Auth::user();
 
             if (isset($user) && ($user->hasAdminAccess() || $user->roles()->pluck('key')->contains('admin'))) {
+                $user->load(['roles', 'roles.permissions']);
+
                 return $next($request);
             }
 

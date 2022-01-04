@@ -10,20 +10,47 @@ use View;
 abstract class BaseController extends Controller
 {
     private array $viewData = [];
+    private bool $withBreadcrumbs = true;
 
     protected array $locales = [];
-    protected bool $withBreadcrumbs = true;
 
-    protected ?HexideAdmin $hexideAdmin;
-    protected ?Breadcrumbs $breadcrumbs;
-
+    protected HexideAdmin $hexideAdmin;
+    protected Breadcrumbs $breadcrumbs;
 
     public function __construct()
     {
-        $this->hexideAdmin = app()->get(HexideAdmin::class);
+        $this->hexideAdmin = app(HexideAdmin::class);
         $this->breadcrumbs = $this->hexideAdmin->getBreadcrumbs();
     }
 
+    /* ------------ Breadcrumbs ------------ */
+
+    protected function withBreadcrumbs()
+    {
+        $this->withBreadcrumbs = true;
+    }
+
+    protected function withoutBreadcrumbs()
+    {
+        $this->withBreadcrumbs = false;
+    }
+
+    protected function canAddToBreadcrumbs(): bool
+    {
+        return $this->withBreadcrumbs;
+    }
+
+    /**
+     * @param string $name
+     * @param string|null $route
+     * @return void
+     */
+    protected function addToBreadcrumbs(string $name, ?string $route = null)
+    {
+        if ($this->canAddToBreadcrumbs()) {
+            $this->breadcrumbs->push($name, $route);
+        }
+    }
 
     /**
      * @param string|array $key
@@ -51,7 +78,7 @@ abstract class BaseController extends Controller
     /**
      * @param string|null $view
      * @param array $data
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
      */
     protected function render(?string $view = null, array $data = [])
     {
@@ -63,5 +90,4 @@ abstract class BaseController extends Controller
 
         return view($view, $this->getViewData());
     }
-
 }

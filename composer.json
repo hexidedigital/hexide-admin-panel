@@ -29,6 +29,7 @@
         "laravel/framework": "^8.0",
         "laravelcollective/html": "^6.2",
         "livewire/livewire": "^2.7",
+        "intervention/image": "^2.7",
         "yoeunes/toastr": "^1.2"
     },
     "minimum-stability": "dev",

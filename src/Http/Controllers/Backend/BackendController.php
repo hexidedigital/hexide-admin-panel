@@ -3,19 +3,22 @@
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
 // use HexideDigital\AdminConfigurations\Models\AdminConfiguration;
-use HexideDigital\FileUploader\Traits\FileUploadingTrait;
 use HexideDigital\HexideAdmin\Classes\ActionNames;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\SecureActions;
 use HexideDigital\HexideAdmin\Classes\ViewNames;
 use HexideDigital\HexideAdmin\Http\Controllers\BaseController;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\AjaxFieldRequest;
+use HexideDigital\HexideAdmin\Services\BackendService;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -23,24 +26,25 @@ use View;
 
 abstract class BackendController extends BaseController
 {
-    use FileUploadingTrait;
-
-    protected const Actions = [
+    private const Actions = [
         'index', 'show', 'create', 'store', 'edit', 'update', 'destroy',
         'ajaxFieldChange'
     ];
 
+    private ?Model $model = null;
     private ?string $module = null;
     private ?string $modelClass = null;
 
-    private ?Model $model = null;
+    private NotificationInterface $notificator;
+    private bool $showErrorNotification = true;
+
+    private ServiceInterface $service;
+    private ?string $serviceClass = null;
+
+    private FormRequest $formRequest;
+    private ?string $formRequestClassName = null;
 
     protected SecureActions $secureActions;
-
-    protected ServiceInterface $service;
-    protected NotificationInterface $notificator;
-    protected ?bool $showErrorNotification = true;
-
 
     public function __construct()
     {
@@ -69,6 +73,8 @@ abstract class BackendController extends BaseController
 
         $this->setModelClassName($modelClassName);
         $this->setModuleName();
+        $this->setServiceClassName();
+        $this->setFromRequestClassName();
     }
 
     protected function setModelClassName(string $modelClassName): void
@@ -78,14 +84,7 @@ abstract class BackendController extends BaseController
 
     protected function getModelClassName(): string
     {
-        return $this->modelClass ?: 'App\\Models\\' . str_singular(Str::studly($this->getModuleName()));
-    }
-
-    protected function getModelObject(): ?Model
-    {
-        $class = $this->getModelClassName();
-
-        return new $class;
+        return $this->modelClass ?: config('hexide-admin.namespaces.model') . str_singular(Str::studly($this->getModuleName()));
     }
 
     protected function setModuleName(string $name = null)
@@ -95,6 +94,7 @@ abstract class BackendController extends BaseController
         }
 
         $this->module = $name;
+
         $this->data('module', $name);
 
         $this->secureActions->setModuleName($name);
@@ -105,9 +105,83 @@ abstract class BackendController extends BaseController
         return $this->module;
     }
 
-    protected function getModelFromRoute(Request $request)
+    protected function getModel(): ?Model
+    {
+        return $this->model;
+    }
+
+    protected function setModel(?Model $model): void
+    {
+        $this->model = $model;
+    }
+
+    protected function getModelObject(): Model
+    {
+        $class = $this->getModelClassName();
+
+        return new $class;
+    }
+
+    protected function setServiceClassName(string $serviceClassName = null)
+    {
+        if (is_null($serviceClassName)) {
+            $serviceClassName = $this->getServiceClassName();
+        }
+
+        if (!class_exists($serviceClassName)) {
+            $serviceClassName = BackendService::class;
+        }
+
+        $this->serviceClass = $serviceClassName;
+    }
+
+    protected function getServiceClassName(): string
+    {
+        return $this->serviceClass ?: config('hexide-admin.namespaces.service') . str_singular(Str::studly($this->getModuleName())) . 'Service';
+    }
+
+    public function setService(ServiceInterface $service)
+    {
+        $this->service = $service;
+    }
+
+    protected function getService(): ?ServiceInterface
+    {
+        if (isset($this->service)) {
+            return $this->service;
+        }
+
+        $class = $this->getServiceClassName();
+
+        return new $class;
+    }
+
+    protected function getModelFromRoute(Request $request, string $action = null): ?Model
     {
         return $this->getModelObject()::find($request->route(str_singular($this->getModuleName())));
+    }
+
+    protected function setFromRequestClassName(string $requestClassName = null)
+    {
+        if(is_null($requestClassName)){
+            $requestClassName = $this->getFormRequestClassName();
+        }
+
+        if (!class_exists($requestClassName)) {
+            $requestClassName = Request::class; // laravel base request
+        }
+
+        $this->formRequestClassName = $requestClassName;
+    }
+
+    protected function getFormRequestClassName(string $action = null): string
+    {
+        return $this->formRequestClassName ?: config('hexide-admin.namespaces.request') . str_singular(Str::studly($this->getModuleName())) . 'Request';
+    }
+
+    protected function getFormRequest(string $action = null): FormRequest
+    {
+        return App::make($this->getFormRequestClassName($action));
     }
 
     /* ------------ Backend actions ------------ */
@@ -119,7 +193,7 @@ abstract class BackendController extends BaseController
 
     public function showAction(Request $request)
     {
-        $this->dataModel($this->getModelFromRoute($request));
+        $this->dataModel($this->getModelFromRoute($request, ActionNames::Show));
 
         return $this->render(ViewNames::Show);
     }
@@ -129,11 +203,112 @@ abstract class BackendController extends BaseController
         return $this->render(ViewNames::Create);
     }
 
+    /** @throws \Throwable */
+    public function storeAction(Request $request): RedirectResponse
+    {
+        DB::beginTransaction();
+
+        $request = $this->getFormRequest(ActionNames::Create) ?: $request;
+
+        try {
+            $model = $this->storeModel($request);
+
+            $this->notify(ActionNames::Edit);
+
+            DB::commit();
+
+            return $this->nextAction($model);
+        } catch (\Exception $e) {
+            $this->notify(ActionNames::Edit, $e->getMessage(), 'error');
+
+            DB::rollBack();
+
+            return back();
+        }
+    }
+
+    protected function storeModel(Request $request): Model
+    {
+        $service = $this->getService();
+
+        return $service->handleRequest(
+            $request,
+            $this->getModelObject()
+        );
+    }
+
     public function editAction(Request $request)
     {
-        $this->dataModel($this->getModelFromRoute($request));
+        $this->dataModel($this->getModelFromRoute($request, ActionNames::Edit));
 
         return $this->render(ViewNames::Edit);
+    }
+
+    /** @throws \Throwable */
+    public function updateAction(Request $request): RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            $model = $this->updateModel($request);
+
+            $this->notify(ActionNames::Edit);
+
+            DB::commit();
+
+            return $this->nextAction($model);
+        } catch (\Exception $e) {
+            $this->notify(ActionNames::Edit, $e->getMessage(), 'error');
+
+            DB::rollBack();
+
+            return back();
+        }
+    }
+
+    protected function updateModel(Request $request): Model
+    {
+        $service = $this->getService();
+
+        return $service->handleRequest(
+            $this->getFormRequest(ActionNames::Edit) ?: $request,
+            $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject()
+        );
+    }
+
+    /** @throws \Throwable */
+    public function destroyAction(Request $request): RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            $this->destroyModel($request);
+
+            $this->notify(ActionNames::Delete);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            $this->notify(ActionNames::Delete, $e->getMessage(), 'error');
+
+            DB::rollBack();
+        }
+
+        return back();
+    }
+
+    /** @throws \Exception */
+    protected function destroyModel(Request $request)
+    {
+        $model = $this->getModelFromRoute($request, ActionNames::Delete);
+
+        if (!isset($model) || !$this->canDestroyModel($model) || !$model->delete()) {
+            throw new \Exception('Model not deleted');
+        };
+    }
+
+    protected function canDestroyModel(Model $model): bool
+    {
+        return true;
     }
 
     /* ------------ Ajax field action ------------ */
@@ -197,7 +372,8 @@ abstract class BackendController extends BaseController
 
     protected function dataModel(?Model $model)
     {
-        $this->model = $model;
+        $this->setModel($model);
+
         $this->data('model', $model);
     }
 
@@ -255,6 +431,16 @@ abstract class BackendController extends BaseController
 
     /* ------------ Notifications ------------ */
 
+    protected function hideErrorNotifications()
+    {
+        $this->showErrorNotification = false;
+    }
+
+    protected function showErrorNotification()
+    {
+        $this->showErrorNotification = true;
+    }
+
     protected function setNotifier(NotificationInterface $notification): void
     {
         $this->notificator = $notification;
@@ -291,18 +477,18 @@ abstract class BackendController extends BaseController
 
     /* ------------ Breadcrumbs ------------ */
 
-    protected function addToBreadcrumbs($method)
+    protected function createBreadcrumb(?string $method)
     {
-        if (isset($method) && $this->withBreadcrumbs) {
+        if (isset($method) && $this->canAddToBreadcrumbs()) {
             $module = $this->getModuleName();
 
             if ($method == $module) {
-                $this->breadcrumbs->push(
+                $this->addToBreadcrumbs(
                     trans_choice("models.$module.name", 2),
                     route("admin.$module.index")
                 );
             } else if (!empty($method)) {
-                $this->breadcrumbs->push(
+                $this->addToBreadcrumbs(
                     __("models.$method"),
                     route("admin.$module.$method", $this->model ?? '')
                 );
@@ -315,7 +501,7 @@ abstract class BackendController extends BaseController
 
     public function callAction($action, $parameters)
     {
-        $this->addToBreadCrumbs($this->getModuleName());
+        $this->createBreadcrumb($this->getModuleName());
 
         $result = $this->protectAction($action);
 
@@ -329,7 +515,7 @@ abstract class BackendController extends BaseController
         if (in_array($action, self::Actions) && !method_exists($this, $action)) {
             $action = $action . 'Action';
 
-            return \App::call([$this, $action]);
+            return App::call([$this, $action]);
         }
 
         return parent::callAction($action, $parameters);
@@ -338,21 +524,21 @@ abstract class BackendController extends BaseController
     /**
      * @param string|null $view View type or View path
      * @param array $data
-     * @param string|null $force_type
-     * @return Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @param string|null $forceActionType
+     * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory|Application
      */
-    protected function render(?string $view = null, array $data = [], string $force_type = null)
+    protected function render(?string $view = null, array $data = [], string $forceActionType = null)
     {
         if (empty($view)) $view = ViewNames::Index;
 
-        if (in_array($force_type, [ViewNames::Edit, ViewNames::Create]) ||
+        if (in_array($forceActionType, [ViewNames::Edit, ViewNames::Create]) ||
             in_array($view, [ViewNames::Edit, ViewNames::Create])) {
 
-            $force_type = $force_type ?? $view;
+            $forceActionType = $forceActionType ?? $view;
 
-            $this->notifyIfExistsErrors($force_type);
+            $this->notifyIfExistsErrors($forceActionType);
 
-            $this->data('layout_type', $force_type);
+            $this->data('layout_type', $forceActionType);
         } else {
             $this->notifyIfExistsErrors();
         }
@@ -360,7 +546,7 @@ abstract class BackendController extends BaseController
         $module = $this->getModuleName();
         $view = View::exists("admin.view.$module.$view") ? "admin.view.$module.$view" : $view;
 
-        $this->addToBreadcrumbs($force_type ?: array_last(explode('.', $view)));
+        $this->createBreadcrumb($forceActionType ?: array_last(explode('.', $view)));
 
         $this->data('next_actions', $this->getActionsForView());
 
