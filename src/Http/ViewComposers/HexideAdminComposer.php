@@ -17,15 +17,18 @@ class HexideAdminComposer
 
     public function compose(View $view)
     {
-        if(!$view->offsetExists('locales')){
-            $view->offsetSet('locales', config('translatable.locales'));
-        }
-
-        $view->with([
-            'hexideAdmin' => $this->hexideAdmin,
+        $data = [
+            'hexide_admin' => $this->hexideAdmin,
             'breadcrumbs' => $this->hexideAdmin->getBreadcrumbs()->get(),
             'toggle_attributes' => $this->getToggleAttributes(),
-        ]);
+        ];
+
+        if (!$view->offsetExists('locales')) {
+            $data['locales'] = config('translatable.locales');
+        }
+
+        \View::share($data);
+        $view->with($data);
     }
 
     public function getToggleAttributes(): Collection
@@ -49,5 +52,4 @@ class HexideAdminComposer
             ],
         ]);
     }
-
 }
