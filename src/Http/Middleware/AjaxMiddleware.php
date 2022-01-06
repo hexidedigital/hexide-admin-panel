@@ -20,10 +20,6 @@ class AjaxMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (!$request->ajax() && !$request->wantsJson()) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['status' => 'error'], 403);
-            }
-
             return redirect()->route('home');
         }
 

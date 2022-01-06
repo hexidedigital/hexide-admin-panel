@@ -1,6 +1,6 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Classes;
+namespace HexideDigital\HexideAdmin\Http;
 
 abstract class ActionNames
 {
@@ -12,6 +12,8 @@ abstract class ActionNames
     public const Edit = 'edit';
     public const Create = 'create';
     public const Delete = 'delete';
+    public const Restore = 'restore';
+    public const ForceDelete = 'force_delete';
 
     public const ALLOWED = [
         self::Action,
@@ -20,6 +22,8 @@ abstract class ActionNames
         self::Edit,
         self::Create,
         self::Delete,
+        self::Restore,
+        self::ForceDelete,
     ];
 
     public static function isAllowed(?string $action): bool

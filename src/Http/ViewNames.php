@@ -1,6 +1,6 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Classes;
+namespace HexideDigital\HexideAdmin\Http;
 
 abstract class ViewNames
 {

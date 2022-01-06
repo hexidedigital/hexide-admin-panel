@@ -3,12 +3,12 @@
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
 // use HexideDigital\AdminConfigurations\Models\AdminConfiguration;
-use HexideDigital\HexideAdmin\Classes\ActionNames;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\SecureActions;
-use HexideDigital\HexideAdmin\Classes\ViewNames;
+use HexideDigital\HexideAdmin\Http\ActionNames;
 use HexideDigital\HexideAdmin\Http\Controllers\BaseController;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\AjaxFieldRequest;
+use HexideDigital\HexideAdmin\Http\ViewNames;
 use HexideDigital\HexideAdmin\Services\BackendService;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
 use Illuminate\Contracts\Foundation\Application;
@@ -28,7 +28,7 @@ abstract class BackendController extends BaseController
 {
     private const Actions = [
         'index', 'show', 'create', 'store', 'edit', 'update', 'destroy',
-        'ajaxFieldChange'
+        'ajaxFieldChange',
     ];
 
     private ?Model $model = null;
@@ -163,7 +163,7 @@ abstract class BackendController extends BaseController
 
     protected function setFromRequestClassName(string $requestClassName = null)
     {
-        if(is_null($requestClassName)){
+        if (is_null($requestClassName)) {
             $requestClassName = $this->getFormRequestClassName();
         }
 
@@ -347,10 +347,10 @@ abstract class BackendController extends BaseController
             'default' => [
                 'index' => __('next_action.index'),
             ],
-            'menu' => [
-                'edit' => __('next_action.edit'),
+            'menu'    => [
+                'edit'   => __('next_action.edit'),
                 'create' => __('next_action.create'),
-                'show' => __('next_action.show'),
+                'show'   => __('next_action.show'),
             ],
         ];
     }
@@ -421,6 +421,7 @@ abstract class BackendController extends BaseController
 
     /**
      * @param array<string, string|bool|null>|null $array
+     *
      * @return void
      */
     protected function mergeAccessMap(?array $array): void
@@ -525,11 +526,14 @@ abstract class BackendController extends BaseController
      * @param string|null $view View type or View path
      * @param array $data
      * @param string|null $forceActionType
+     *
      * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory|Application
      */
     protected function render(?string $view = null, array $data = [], string $forceActionType = null)
     {
-        if (empty($view)) $view = ViewNames::Index;
+        if (empty($view)) {
+            $view = ViewNames::Index;
+        }
 
         if (in_array($forceActionType, [ViewNames::Edit, ViewNames::Create]) ||
             in_array($view, [ViewNames::Edit, ViewNames::Create])) {
@@ -555,7 +559,9 @@ abstract class BackendController extends BaseController
 
     protected function redirect(string $action = null, array $params = []): RedirectResponse
     {
-        if (empty($action)) $action = ActionNames::Index;
+        if (empty($action)) {
+            $action = ActionNames::Index;
+        }
 
         $module = $this->getModuleName();
         $route = Route::has("admin.$module.$action") ? "admin.$module.$action" : $action;

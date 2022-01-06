@@ -14,19 +14,23 @@ return [
     ],
 
     'success' => [
-        'title'   => 'Success',
-        'action'  => 'Action completed successfully',
-        'create'  => 'Object :model created',
-        'edit'    => 'Object :model edited',
-        'delete'  => 'Object :model deleted',
+        'title'         => 'Success',
+        'action'        => 'Action completed successfully',
+        'create'        => 'Object :model created',
+        'edit'          => 'Object :model edited',
+        'delete'        => 'Object :model deleted',
+        'restore'       => 'Object :model restored',
+        'force_delete'  => 'Object :model totally deleted',
     ],
 
     'error' => [
-        'title'   => 'Error',
-        'action'  => 'Action not performed',
-        'create'  => 'Error creating object :model',
-        'edit'    => 'Error editing object :model',
-        'delete'  => 'Error deleting object :model',
+        'title'         => 'Error',
+        'action'        => 'Action not performed',
+        'create'        => 'Error creating object :model',
+        'edit'          => 'Error editing object :model',
+        'delete'        => 'Error deleting object :model',
+        'restore'       => 'Error restoring object :model',
+        'force_delete'  => 'Error erasing object :model',
     ],
 
     'info' => [

@@ -18,13 +18,11 @@ trait WithTranslationsTrait
 {
     public function scopeWithTranslations(Builder $query): Builder
     {
-        return $query->with(
-            [
-                'translations' => function ($query) {
-                    $query->where('locale', app()->getLocale());
-                },
-            ]
-        );
+        return $query->with([
+            'translations' => function ($query) {
+                $query->where('locale', app()->getLocale());
+            },
+        ]);
     }
 
     public function scopeJoinTranslations(

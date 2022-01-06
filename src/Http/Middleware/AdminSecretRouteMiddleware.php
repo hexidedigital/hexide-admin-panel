@@ -5,7 +5,7 @@ namespace HexideDigital\HexideAdmin\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class AdminSecretLogin
+class AdminSecretRouteMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
