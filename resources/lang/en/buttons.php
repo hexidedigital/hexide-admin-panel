@@ -15,5 +15,6 @@ return [
     'select_all'        => 'Select all',
     'deselect_all'      => 'Deselect all',
     'generate'          => 'generate',
-
+    'restore'           => 'Restore',
+    'forceDelete'       => 'Remove permanently',
 ];

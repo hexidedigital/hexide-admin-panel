@@ -13,6 +13,7 @@ use HexideDigital\HexideAdmin\Services\BackendService;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +29,16 @@ abstract class BackendController extends BaseController
 {
     private const Actions = [
         'index', 'show', 'create', 'store', 'edit', 'update', 'destroy',
+        'restore', 'forceDelete',
         'ajaxFieldChange',
+    ];
+
+    private const DatabaseAction = [
+        'store'       => ActionNames::Create,
+        'update'      => ActionNames::Edit,
+        'destroy'     => ActionNames::Delete,
+        'restore'     => ActionNames::Restore,
+        'forceDelete' => ActionNames::ForceDelete,
     ];
 
     private ?Model $model = null;
@@ -158,7 +168,11 @@ abstract class BackendController extends BaseController
 
     protected function getModelFromRoute(Request $request, string $action = null): ?Model
     {
-        return $this->getModelObject()::find($request->route(str_singular($this->getModuleName())));
+        if ($this->modelUsesSoftDeletesTrait()) {
+            return $this->getModelObject()::withTrashed()->find($request->route(str_singular($this->getModuleName())));
+        }
+
+        return $this->getModelObject()::findOrFail($request->route(str_singular($this->getModuleName())));
     }
 
     protected function setFromRequestClassName(string $requestClassName = null)
@@ -203,40 +217,6 @@ abstract class BackendController extends BaseController
         return $this->render(ViewNames::Create);
     }
 
-    /** @throws \Throwable */
-    public function storeAction(Request $request): RedirectResponse
-    {
-        DB::beginTransaction();
-
-        $request = $this->getFormRequest(ActionNames::Create) ?: $request;
-
-        try {
-            $model = $this->storeModel($request);
-
-            $this->notify(ActionNames::Edit);
-
-            DB::commit();
-
-            return $this->nextAction($model);
-        } catch (\Exception $e) {
-            $this->notify(ActionNames::Edit, $e->getMessage(), 'error');
-
-            DB::rollBack();
-
-            return back();
-        }
-    }
-
-    protected function storeModel(Request $request): Model
-    {
-        $service = $this->getService();
-
-        return $service->handleRequest(
-            $request,
-            $this->getModelObject()
-        );
-    }
-
     public function editAction(Request $request)
     {
         $this->dataModel($this->getModelFromRoute($request, ActionNames::Edit));
@@ -245,71 +225,74 @@ abstract class BackendController extends BaseController
     }
 
     /** @throws \Throwable */
-    public function updateAction(Request $request): RedirectResponse
-    {
-        DB::beginTransaction();
-
-        try {
-            $model = $this->updateModel($request);
-
-            $this->notify(ActionNames::Edit);
-
-            DB::commit();
-
-            return $this->nextAction($model);
-        } catch (\Exception $e) {
-            $this->notify(ActionNames::Edit, $e->getMessage(), 'error');
-
-            DB::rollBack();
-
-            return back();
-        }
-    }
-
-    protected function updateModel(Request $request): Model
+    public function storeAction(Request $request): RedirectResponse
     {
         $service = $this->getService();
 
-        return $service->handleRequest(
-            $this->getFormRequest(ActionNames::Edit) ?: $request,
-            $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject()
-        );
+        $model = $service->handleRequest($request, $this->getModelObject());
+
+        return $this->nextAction($model);
     }
 
     /** @throws \Throwable */
+    public function updateAction(Request $request): RedirectResponse
+    {
+        $service = $this->getService();
+
+        $model = $service->handleRequest(
+            $this->getFormRequest(ActionNames::Edit) ?: $request,
+            $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject()
+        );
+
+        return $this->nextAction($model);
+    }
+
     public function destroyAction(Request $request): RedirectResponse
     {
-        DB::beginTransaction();
+        $model = $this->getModelFromRoute($request, ActionNames::Delete);
 
-        try {
-            $this->destroyModel($request);
-
-            $this->notify(ActionNames::Delete);
-
-            DB::commit();
-        } catch (\Exception $e) {
-            $this->notify(ActionNames::Delete, $e->getMessage(), 'error');
-
-            DB::rollBack();
-        }
+        if (!$model->delete()) {
+            throw new \Exception('Model not deleted');
+        };
 
         return back();
     }
 
-    /** @throws \Exception */
-    protected function destroyModel(Request $request)
+    public function restoreAction(Request $request): RedirectResponse
     {
-        $model = $this->getModelFromRoute($request, ActionNames::Delete);
+        if (!$this->modelUsesSoftDeletesTrait()) {
+            throw new \Exception('Model class not uses SoftDeletes trait');
+        }
 
-        if (!isset($model) || !$this->canDestroyModel($model) || !$model->delete()) {
-            throw new \Exception('Model not deleted');
+        $model = $this->getModelFromRoute($request, ActionNames::Restore);
+
+        if (!$model->restore()) {
+            throw new \Exception('Model not restored');
         };
+
+        return back();
     }
 
-    protected function canDestroyModel(Model $model): bool
+    public function forceDeleteAction(Request $request): RedirectResponse
     {
-        return true;
+        if (!$this->modelUsesSoftDeletesTrait()) {
+            throw new \Exception('Model class not uses SoftDeletes trait');
+        }
+
+        $model = $this->getModelFromRoute($request, ActionNames::ForceDelete);
+
+        if (!$model->forceDelete()) {
+            throw new \Exception('Model not permanently deleted');
+        };
+
+        return back();
     }
+
+    private function modelUsesSoftDeletesTrait(): bool
+    {
+        return in_array(SoftDeletes::class, class_uses($this->modelClass));
+    }
+
 
     /* ------------ Ajax field action ------------ */
 
@@ -409,22 +392,24 @@ abstract class BackendController extends BaseController
         return true;
     }
 
-    protected function setResourceAccessMap(): void
+    protected function setResourceAccessMap(array $merge = []): void
     {
         $this->secureActions->setResourceAccessMap();
+        $this->mergeAccessMap($merge);
     }
 
-    protected function setFullAccessMap(): void
+    protected function setFullAccessMap(array $merge = []): void
     {
         $this->secureActions->setFullAccessMap();
+        $this->mergeAccessMap($merge);
     }
 
     /**
-     * @param array<string, string|bool|null>|null $array
+     * @param array<string, string|bool|null> $array
      *
      * @return void
      */
-    protected function mergeAccessMap(?array $array): void
+    protected function mergeAccessMap(array $array = []): void
     {
         $this->secureActions->merge($array);
     }
@@ -454,7 +439,7 @@ abstract class BackendController extends BaseController
         }
     }
 
-    protected function notify(string $action = '', string $message = null, string $type = 'success', string $title = '', array $options = []): \Yoeunes\Toastr\Toastr
+    protected function notify(string $action = '', string $message = null, string $type = 'success', string $title = '', array $options = []): self
     {
         if (!ActionNames::isAllowed($action)) {
             $action = ActionNames::Action;
@@ -472,7 +457,9 @@ abstract class BackendController extends BaseController
             }
         }
 
-        return $this->notificator->notify($message, $type, $title, $options);
+        $this->notificator->notify($message, $type, $title, $options);
+
+        return $this;
     }
 
 
@@ -513,13 +500,56 @@ abstract class BackendController extends BaseController
             return $result;
         }
 
-        if (in_array($action, self::Actions) && !method_exists($this, $action)) {
-            $action = $action . 'Action';
+        return $this->getActionResult($action, $parameters);
+    }
 
-            return App::call([$this, $action]);
+    protected function getActionResult(string $action, $parameters)
+    {
+        if (in_array($action, self::Actions)) {
+            if ($this->isDatabaseAction($action)) {
+                return $this->dbTransactionAction($action);
+            }
+
+            if (method_exists($this, $action)) {
+                return parent::callAction($action, $parameters);
+            }
+
+            return App::call([$this, $action . 'Action']);
         }
 
         return parent::callAction($action, $parameters);
+    }
+
+    private function dbTransactionAction(string $action)
+    {
+        DB::beginTransaction();
+
+        try {
+            if (!method_exists($this, $action)) {
+                $result = App::call([$this, $action . 'Action']);
+            } else {
+                $result = App::call([$this, $action]);
+            }
+
+            $this->notify(self::DatabaseAction[$action]);
+
+            DB::commit();
+
+            return $result;
+        } catch (\Throwable $e) {
+            $this
+                ->notify(self::DatabaseAction[$action], null, 'error')
+                ->notify(self::DatabaseAction[$action], $e->getMessage(), 'error');
+
+            DB::rollBack();
+
+            return back();
+        }
+    }
+
+    private function isDatabaseAction(string $action): bool
+    {
+        return in_array($action, array_keys(self::DatabaseAction));
     }
 
     /**
