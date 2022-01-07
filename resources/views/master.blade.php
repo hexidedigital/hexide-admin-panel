@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section("title-suffix"){{config('adminlte.title')}}@endsection
+@section("title-suffix", config('adminlte.title'))
 
 @push("css")
     <link rel="stylesheet" href="{{asset('/vendor/flag-icon-css/css/flag-icon.min.css')}}">
@@ -30,7 +30,7 @@
             @stack("content_header_add")
         </div>
         <div class="col-sm-6">
-            @include('hexide_admin::partials.breadcrumbs')
+            @include('hexide-admin::partials.breadcrumbs')
         </div>
     </div>
 @endsection

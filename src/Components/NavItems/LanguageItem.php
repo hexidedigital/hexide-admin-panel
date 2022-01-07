@@ -64,6 +64,6 @@ class LanguageItem extends Component
      */
     public function render()
     {
-        return view('hexide_admin::components.nav-items.language-item');
+        return view('hexide-admin::components.nav-items.language-item');
     }
 }

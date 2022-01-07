@@ -39,7 +39,7 @@ class {{ class }} extends DefaultTable
                 ]))
                 ->asHtml()
             ,
-            Column::make(__("hexide_admin::buttons.actions"))
+            Column::make(__("hexide-admin::buttons.actions"))
                 ->addAttributes([
                     'style' => 'width: 95px'
                 ])

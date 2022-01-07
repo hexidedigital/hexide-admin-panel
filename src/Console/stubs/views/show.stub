@@ -1,4 +1,4 @@
-@extends("hexide_admin::show")
+@extends("hexide-admin::show")
 
 @php
     /**

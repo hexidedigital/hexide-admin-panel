@@ -1,4 +1,4 @@
-@extends("hexide_admin::master")
+@extends("hexide-admin::master")
 
 @php
     $layout_type = $layout_type ?? (isset($model->id) ? 'edit' : 'create');

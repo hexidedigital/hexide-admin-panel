@@ -331,11 +331,11 @@ abstract class BackendController extends BaseController
             $model->{$field} = $request->get('value');
 
             if ($model->save()) {
-                return response()->json(['message' => __('hexide_admin::messages.success.action'),]);
+                return response()->json(['message' => __('hexide-admin::messages.success.action'),]);
             }
         }
 
-        return response()->json(['message' => __('hexide_admin::messages.error.action'),], 422);
+        return response()->json(['message' => __('hexide-admin::messages.error.action'),], 422);
     }
 
 
@@ -461,12 +461,12 @@ abstract class BackendController extends BaseController
         }
 
         if (empty($title)) {
-            $title = __("hexide_admin::messages.$type.title");
+            $title = __("hexide-admin::messages.$type.title");
         }
 
         if (empty($message)) {
             if (in_array($type, ['error', 'success'])) {
-                $message = __("hexide_admin::messages.$type.$action",
+                $message = __("hexide-admin::messages.$type.$action",
                     ['model' => trans_choice("models.{$this->getModuleName()}.name", 1)]
                 );
             }
@@ -507,7 +507,7 @@ abstract class BackendController extends BaseController
         $result = $this->protectAction($action);
 
         if ($result !== true) {
-            $message = __('hexide_admin::messages.forbidden', ['key' => $this->module . '.' . $action]);
+            $message = __('hexide-admin::messages.forbidden', ['key' => $this->module . '.' . $action]);
             $this->notify(ActionNames::Action, $message, 'error');
 
             return $result;

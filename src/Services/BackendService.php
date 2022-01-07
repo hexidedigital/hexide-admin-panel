@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Services;
 
-use HexideDigital\FileUploader\Facades\FileUploader;
+use HexideDigital\HexideAdmin\Facades\FileUploader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
@@ -15,6 +15,7 @@ class BackendService implements ServiceInterface
     /**
      * @param FormRequest|Request $request
      * @param Model $model
+     *
      * @return Model
      */
     public function handleRequest(Request $request, Model $model): Model
@@ -48,7 +49,7 @@ class BackendService implements ServiceInterface
 
     public function postHandle(Request $request, Model $model)
     {
-
+        // stub
     }
 
     /**
@@ -92,6 +93,7 @@ class BackendService implements ServiceInterface
      * @param string|null $old_path to delete old photo
      * @param string|null $type default is `images`
      * @param string|null $module
+     *
      * @return string|null
      */
     public function saveImage($image,

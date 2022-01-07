@@ -7,6 +7,7 @@ use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotification;
 use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
+use HexideDigital\HexideAdmin\Components\Tabs\TabsComponent;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
@@ -25,7 +26,8 @@ class HexideAdminServiceProvider extends ServiceProvider
     ];
 
     private array $components = [
-        LanguageItem::class,
+        'language-item'  => LanguageItem::class,
+        'tabs-component' => TabsComponent::class,
     ];
 
     public function register()
@@ -60,21 +62,19 @@ class HexideAdminServiceProvider extends ServiceProvider
     private function loadPublishes()
     {
         $this->publishes([
-            $this->packagePath("config/hexide-admin.php")      => config_path('hexide-admin.php'),
-            $this->packagePath("config/model-permissions.php") => config_path('model-permissions.php'),
-            $this->packagePath("config/translatable.php")      => config_path('translatable.php'),
+            $this->packagePath("config/hexide-admin.php") => config_path('hexide-admin.php'),
         ], 'hexide-admin-configs');
 
         $this->publishes([
-            $this->packagePath("resources/lang") => resource_path('lang/vendor/hexide_admin'),
+            $this->packagePath("resources/lang") => resource_path('lang/vendor/hexide-admin'),
         ], 'hexide-admin-translations');
 
         $this->publishes([
-            $this->packagePath("resources/views") => resource_path('views/vendor/hexide_admin'),
+            $this->packagePath("resources/views") => resource_path('views/vendor/hexide-admin'),
         ], 'hexide-admin-translations');
 
         $this->publishes([
-            $this->packagePath("src/Console/stubs") => base_path('stubs/hexide_admin'),
+            $this->packagePath("src/Console/stubs") => base_path('stubs/hexide-admin'),
         ], 'hexide-admin-stubs');
     }
 
@@ -97,17 +97,17 @@ class HexideAdminServiceProvider extends ServiceProvider
 
     private function loadConfig()
     {
-        $this->mergeConfigFrom($this->packagePath("config/hexide-admin.php"), 'hexide_admin');
+        $this->mergeConfigFrom($this->packagePath("config/hexide-admin.php"), 'hexide-admin');
     }
 
     private function loadTranslations()
     {
-        $this->loadTranslationsFrom($this->packagePath('resources/lang'), 'hexide_admin');
+        $this->loadTranslationsFrom($this->packagePath('resources/lang'), 'hexide-admin');
     }
 
     private function loadViews()
     {
-        $this->loadViewsFrom($this->packagePath('resources/views'), 'hexide_admin');
+        $this->loadViewsFrom($this->packagePath('resources/views'), 'hexide-admin');
     }
 
     private function registerCommands()
@@ -120,7 +120,7 @@ class HexideAdminServiceProvider extends ServiceProvider
     private function registerViewComposers(Factory $view)
     {
         $view->composer('admin.*', HexideAdminComposer::class);
-        $view->composer('hexide_admin::*', HexideAdminComposer::class);
+        $view->composer('hexide-admin::*', HexideAdminComposer::class);
     }
 
     private function registerComponents()
@@ -133,6 +133,7 @@ class HexideAdminServiceProvider extends ServiceProvider
             return;
         }
 
+//        \Illuminate\Support\Facades\Blade::componentNamespace('HexideDigital\\HexideAdmin\\Components', 'hexide-admin');
         $this->loadViewComponentsAs('hdadmin', $this->components);
     }
 

@@ -1,4 +1,4 @@
-@extends("hexide_admin::master")
+@extends("hexide-admin::master")
 
 @section("title_prefix", __("models.$module.show"))
 @section("header_title", __("models.$module.show"))
