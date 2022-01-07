@@ -15,7 +15,7 @@
         : Form::open(['route' => "admin.$module.store", 'files' => View::getSection('with_files', false)])
     )
 
-    @yield('form-body')
+    @yield('form-body', view("admin.view.$module.partials._form"))
 
     <div class="row mb-3">
         @include("admin.partials.buttons.line__cancel_save")
