@@ -2,13 +2,14 @@
 
 namespace HexideDigital\HexideAdmin\Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Astrotomic\Translatable\Translatable;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 /**
  * @mixin Factory
-*/
+ */
 trait FactoryWithTranslations
 {
     public function configure(): self
@@ -37,12 +38,14 @@ trait FactoryWithTranslations
         $translatableModel = new $translatableModel();
 
         foreach (config('translatable.locales') as $locale) {
-            $item['title'] = "$title $locale";
-            $item['name'] = $this->getNameTranslation() . ' ' . $locale;
-            $item['content'] = $this->getDescriptionTranslation();
-            $item['description'] = $this->getDescriptionTranslation();
+            $item = [
+                'name'        => $this->getNameTranslation() . ' ' . $locale,
+                'title'       => "$title $locale",
+                'content'     => $this->getDescriptionTranslation(),
+                'description' => $this->getDescriptionTranslation(),
+            ];
 
-            $item = \Arr::only($item, $translatableModel->getFillable());
+            $item = Arr::only($item, $translatableModel->getFillable());
 
             $translations[$locale] = $item;
         }

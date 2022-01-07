@@ -6,10 +6,11 @@ use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotification;
+use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
+use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
-use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\ServiceProvider;
@@ -20,6 +21,7 @@ class HexideAdminServiceProvider extends ServiceProvider
     private array $commands = [
         HexideAdminCommand::class,
         CreateAdminUser::class,
+        PrepareDeployCommand::class,
     ];
 
     private array $components = [
@@ -36,7 +38,7 @@ class HexideAdminServiceProvider extends ServiceProvider
             return new Breadcrumbs();
         });
 
-        $this->app->bind(NotificationInterface::class, function (){
+        $this->app->bind(NotificationInterface::class, function () {
             return new ToastrNotification();
         });
     }
@@ -58,30 +60,29 @@ class HexideAdminServiceProvider extends ServiceProvider
     private function loadPublishes()
     {
         $this->publishes([
-            $this->packagePath("config/hexide-admin.php") => config_path('hexide-admin.php'),
+            $this->packagePath("config/hexide-admin.php")      => config_path('hexide-admin.php'),
             $this->packagePath("config/model-permissions.php") => config_path('model-permissions.php'),
-            $this->packagePath("config/translatable.php") => config_path('translatable.php'),
+            $this->packagePath("config/translatable.php")      => config_path('translatable.php'),
         ], 'hexide-admin-configs');
 
         $this->publishes([
-            $this->packagePath("resources/lang") => resource_path('lang/vendor/hexide_admin')
+            $this->packagePath("resources/lang") => resource_path('lang/vendor/hexide_admin'),
         ], 'hexide-admin-translations');
 
         $this->publishes([
-            $this->packagePath("resources/views") => resource_path('views/vendor/hexide_admin')
+            $this->packagePath("resources/views") => resource_path('views/vendor/hexide_admin'),
         ], 'hexide-admin-translations');
 
         $this->publishes([
-            $this->packagePath("src/Console/stubs") => base_path('stubs/hexide_admin')
+            $this->packagePath("src/Console/stubs") => base_path('stubs/hexide_admin'),
         ], 'hexide-admin-stubs');
-
     }
 
     private function loadRoutes()
     {
         $routesCfg = [
-            'as' => 'admin.',
-            'prefix' => 'admin',
+            'as'         => 'admin.',
+            'prefix'     => 'admin',
             'middleware' => ['web', 'auth:admin'],
         ];
 
@@ -126,13 +127,9 @@ class HexideAdminServiceProvider extends ServiceProvider
     {
         // Support of x-components is only available for Laravel >= 7.x
         // versions. So, we check if we can load components.
+        $canLoadComponents = method_exists(ServiceProvider::class, 'loadViewComponentsAs');
 
-        $canLoadComponents = method_exists(
-            'Illuminate\Support\ServiceProvider',
-            'loadViewComponentsAs'
-        );
-
-        if (! $canLoadComponents) {
+        if (!$canLoadComponents) {
             return;
         }
 
@@ -143,6 +140,7 @@ class HexideAdminServiceProvider extends ServiceProvider
      * Get the absolute path to some package resource.
      *
      * @param string $path The relative path to the resource
+     *
      * @return string
      */
     private function packagePath(string $path): string
