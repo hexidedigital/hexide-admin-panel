@@ -14,6 +14,7 @@ use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Route;
 
@@ -133,8 +134,9 @@ class HexideAdminServiceProvider extends ServiceProvider
             return;
         }
 
-//        \Illuminate\Support\Facades\Blade::componentNamespace('HexideDigital\\HexideAdmin\\Components', 'hexide-admin');
-        $this->loadViewComponentsAs('hdadmin', $this->components);
+        $this->loadViewComponentsAs('hexide-admin', $this->components);
+
+        Blade::componentNamespace('HexideDigital\\HexideAdmin\\Components', 'hexide-admin');
     }
 
     /**

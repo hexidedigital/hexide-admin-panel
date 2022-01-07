@@ -18,7 +18,7 @@
 @endpush
 
 @section("content_top_nav_right")
-    <x-hdadmin-language-item/>
+    <x-hexide-admin-language-item/>
 @endsection
 
 @section("content_header")

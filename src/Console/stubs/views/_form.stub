@@ -5,7 +5,7 @@
 @endphp
 
 <x-adminlte-card theme="navy" class="shadow" collapsible maximizable>
-    <x-hdadmin-tabs-component
+    <x-hexide-admin-tabs-component
         :show-locale-tabs="{{ show_locale_tabs }}"
         :show-general-tab="true"
         :general-tab-errors="['name', 'etc']"
