@@ -18,7 +18,7 @@
     @yield('form-body', view("admin.view.$module.partials._form"))
 
     <div class="row mb-3">
-        @include("admin.partials.buttons.line__cancel_save")
+        @include("hexide-admin::partials.buttons.line__cancel_save")
     </div>
 
     @yield('form-close', Form::close())

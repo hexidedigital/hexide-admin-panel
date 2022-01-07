@@ -43,7 +43,7 @@ class {{ class }} extends DefaultTable
                 ->addAttributes([
                     'style' => 'width: 95px'
                 ])
-                ->format(fn($value, $column, $row) => view('admin.partials.control_buttons', [
+                ->format(fn($value, $column, $row) => view('hexide-admin::partials.control_buttons', [
                     'model' => $row,
                     'module' => $this->module,
                 ]))
