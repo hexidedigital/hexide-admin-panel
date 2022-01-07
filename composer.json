@@ -22,7 +22,6 @@
         "php": "^7.4|^8.0",
         "astrotomic/laravel-translatable": "^11.9",
         "hexide-digital/admin-configurations": "^1|dev-main",
-        "hexide-digital/file-uploader": "^1|dev-main",
         "hexide-digital/meta-tags-laravel": "^1|dev-main",
         "hexide-digital/model-permissions": "^2|dev-main",
         "jeroennoten/laravel-adminlte": "^3.6",
@@ -37,8 +36,14 @@
     "extra": {
         "laravel": {
             "providers": [
-                "HexideDigital\\HexideAdmin\\Providers\\HexideAdminServiceProvider"
-            ]
+                "HexideDigital\\HexideAdmin\\Providers\\HexideAdminServiceProvider",
+                "HexideDigital\\HexideAdmin\\Providers\\ThumbServiceProvider",
+                "HexideDigital\\HexideAdmin\\Providers\\FileUploaderServiceProvider"
+            ],
+            "aliases": {
+                "Thumb": "HexideDigital\\HexideAdmin\\Facades\\Thumb",
+                "FileUploader": "HexideDigital\\HexideAdmin\\Facades\\FileUploader"
+            }
         }
     }
 }

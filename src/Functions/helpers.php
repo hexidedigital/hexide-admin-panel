@@ -1,5 +1,7 @@
 <?php
 
+require_once 'fileUploader.php';
+
 use Astrotomic\Translatable\Validation\RuleFactory;
 use HexideDigital\HexideAdmin\Http\Middleware\LanguageMiddleware;
 
@@ -47,9 +49,6 @@ if (!function_exists('declension_word')) {
 if (!function_exists('thumb_adapt')) {
     /**
      * Create image thumbnail for given dimension
-     *
-     * @param string $path
-     * @param int $dim
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\UrlGenerator|string
      */
