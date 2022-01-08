@@ -4,6 +4,7 @@ namespace HexideDigital\HexideAdmin\Services;
 
 use HexideDigital\HexideAdmin\Facades\FileUploader;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -49,7 +50,7 @@ class BackendService implements ServiceInterface
 
     public function postHandle(Request $request, Model $model)
     {
-        // stub
+
     }
 
     /**
@@ -96,11 +97,7 @@ class BackendService implements ServiceInterface
      *
      * @return string|null
      */
-    public function saveImage($image,
-                              string $uniq_id = null,
-                              string $old_path = null,
-                              string $type = null,
-                              string $module = null): ?string
+    public function saveImage($image, string $uniq_id = null, string $old_path = null, string $type = null, string $module = null): ?string
     {
         if (!empty($old_path)) {
             Storage::disk('public')->delete($old_path);
@@ -115,5 +112,39 @@ class BackendService implements ServiceInterface
         }
 
         return FileUploader::put($image, $type, $module, $uniq_id) ?? null;
+    }
+
+    public function deleteModel(Request $request, Model $model)
+    {
+        if (!$model->delete()) {
+            throw new \Exception('Model not deleted');
+        }
+    }
+
+    public function restoreModel(Request $request, Model $model)
+    {
+        if (!$this->modelUsesSoftDeletesTrait($model)) {
+            throw new \Exception('Model class not uses SoftDeletes trait');
+        }
+
+        if (!$model->restore()) {
+            throw new \Exception('Model not restored');
+        }
+    }
+
+    public function forceDeleteModel(Request $request, Model $model)
+    {
+        if (!$this->modelUsesSoftDeletesTrait($model)) {
+            throw new \Exception('Model class not uses SoftDeletes trait');
+        }
+
+        if (!$model->forceDelete()) {
+            throw new \Exception('Model not permanently deleted');
+        }
+    }
+
+    protected function modelUsesSoftDeletesTrait(Model $model): bool
+    {
+        return in_array(SoftDeletes::class, class_uses($model));
     }
 }

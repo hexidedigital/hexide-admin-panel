@@ -8,9 +8,11 @@ use Illuminate\Http\Request;
 
 interface ServiceInterface
 {
+
     /**
      * @param FormRequest|Request $request
      * @param Model $model
+     *
      * @return Model
      */
     public function handleRequest(Request $request, Model $model): Model;
@@ -20,4 +22,7 @@ interface ServiceInterface
     public function prepareAttributes(array &$inputs, Model $model): void;
 
     public function postHandle(Request $request, Model $model);
+
+    public function deleteModel(Request $request, Model $model);
+
 }

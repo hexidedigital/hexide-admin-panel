@@ -3,6 +3,7 @@
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
 // use HexideDigital\AdminConfigurations\Models\AdminConfiguration;
+use Eloquent;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\SecureActions;
 use HexideDigital\HexideAdmin\Http\ActionNames;
@@ -43,15 +44,17 @@ abstract class BackendController extends BaseController
 
     private ?Model $model = null;
     private ?string $module = null;
+    /** @var class-string<Model|Eloquent|SoftDeletes>|string|null */
     private ?string $modelClass = null;
 
     private NotificationInterface $notificator;
     private bool $showErrorNotification = true;
 
     private ServiceInterface $service;
+    /** @var class-string<ServiceInterface|BackendService>|string|null */
     private ?string $serviceClass = null;
 
-    private FormRequest $formRequest;
+    /** @var class-string<FormRequest|Request>|string|null */
     private ?string $formRequestClassName = null;
 
     protected SecureActions $secureActions;
@@ -60,7 +63,7 @@ abstract class BackendController extends BaseController
     {
         parent::__construct();
 
-        $this->secureActions = new SecureActions();
+        $this->secureActions = App::get(SecureActions::class);
 
         $this->setNotifier(app(NotificationInterface::class));
 
@@ -71,6 +74,156 @@ abstract class BackendController extends BaseController
 //        }
     }
 
+
+    /* ------------ Backend actions ------------ */
+
+    public function indexAction()
+    {
+        return $this->render();
+    }
+
+    public function showAction(Request $request)
+    {
+        $this->dataModel($this->getModelFromRoute($request, ActionNames::Show));
+
+        return $this->render(ViewNames::Show);
+    }
+
+    public function createAction()
+    {
+        return $this->render(ViewNames::Create);
+    }
+
+    public function editAction(Request $request)
+    {
+        $this->dataModel($this->getModelFromRoute($request, ActionNames::Edit));
+
+        return $this->render(ViewNames::Edit);
+    }
+
+    public function storeAction(Request $request): RedirectResponse
+    {
+        $service = $this->getService();
+
+        $model = $service->handleRequest($request, $this->getModelObject());
+
+        return $this->nextAction($model);
+    }
+
+    public function updateAction(Request $request): RedirectResponse
+    {
+        $service = $this->getService();
+
+        $model = $service->handleRequest(
+            $this->getFormRequest(ActionNames::Edit) ?: $request,
+            $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject()
+        );
+
+        return $this->nextAction($model);
+    }
+
+    public function destroyAction(Request $request): RedirectResponse
+    {
+        $service = $this->getService();
+
+        $model = $this->getModelFromRoute($request, ActionNames::Delete);
+
+        $service->deleteModel($request, $model);
+
+        return back();
+    }
+
+    public function restoreAction(Request $request): RedirectResponse
+    {
+        $service = $this->getService();
+
+        $model = $this->getModelFromRoute($request, ActionNames::Restore);
+
+        $service->restoreModel($request, $model);
+
+        return back();
+    }
+
+    public function forceDeleteAction(Request $request): RedirectResponse
+    {
+        $service = $this->getService();
+
+        $model = $this->getModelFromRoute($request, ActionNames::ForceDelete);
+
+        $service->forceDeleteModel($request, $model);
+
+        return back();
+    }
+
+    /**
+     * change field = $field of record with id = $id
+     * url for controller: (POST) module_name/ajax_field/{id}
+     *
+     * @param AjaxFieldRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function ajaxFieldChangeAction(AjaxFieldRequest $request): JsonResponse
+    {
+        $model = $this->getModelObject()::find($request->get('id'));
+
+        if ($model) {
+            $field = $request->get('field');
+
+            $model->{$field} = $request->get('value');
+
+            if ($model->save()) {
+                return response()->json(['message' => __('hexide-admin::messages.success.action'),]);
+            }
+        }
+
+        return response()->json(['message' => __('hexide-admin::messages.error.action'),], 422);
+    }
+
+
+    protected function getActionResult(string $action, $parameters)
+    {
+        if (in_array($action, self::Actions)) {
+            if ($this->isDatabaseAction($action)) {
+                return $this->dbTransactionAction($action, $parameters);
+            }
+
+            if (method_exists($this, $action)) {
+                return parent::callAction($action, $parameters);
+            }
+
+            return App::call([$this, $action . 'Action']);
+        }
+
+        return parent::callAction($action, $parameters);
+    }
+
+    protected function dbTransactionAction(string $action, $parameters)
+    {
+        DB::beginTransaction();
+
+        try {
+            if (method_exists($this, $action)) {
+                $result = parent::callAction($action, $parameters);
+            } else {
+                $result = App::call([$this, $action . 'Action']);
+            }
+
+            $this->notify(self::DatabaseAction[$action]);
+
+            DB::commit();
+
+            return $result;
+        } catch (\Throwable $e) {
+            $this
+                ->notify(self::DatabaseAction[$action], null, 'error')
+                ->notify(self::DatabaseAction[$action], $e->getMessage(), 'error');
+
+            DB::rollBack();
+        }
+
+        return back();
+    }
 
     /* ------------ Model and module ------------ */
 
@@ -92,6 +245,7 @@ abstract class BackendController extends BaseController
         $this->modelClass = $modelClassName;
     }
 
+    /** @return class-string<Model|Eloquent>|string */
     protected function getModelClassName(): string
     {
         return $this->modelClass ?: config('hexide-admin.namespaces.model') . str_singular(Str::studly($this->getModuleName()));
@@ -125,6 +279,7 @@ abstract class BackendController extends BaseController
         $this->model = $model;
     }
 
+    /** @return Model|Eloquent|SoftDeletes */
     protected function getModelObject(): Model
     {
         $class = $this->getModelClassName();
@@ -145,16 +300,20 @@ abstract class BackendController extends BaseController
         $this->serviceClass = $serviceClassName;
     }
 
+    /** @return class-string<ServiceInterface|BackendService>|string */
     protected function getServiceClassName(): string
     {
         return $this->serviceClass ?: config('hexide-admin.namespaces.service') . str_singular(Str::studly($this->getModuleName())) . 'Service';
     }
 
-    public function setService(ServiceInterface $service)
+    protected function setService(ServiceInterface $service)
     {
         $this->service = $service;
     }
 
+    /**
+     * @return ServiceInterface|BackendService|null
+     */
     protected function getService(): ?ServiceInterface
     {
         if (isset($this->service)) {
@@ -166,9 +325,15 @@ abstract class BackendController extends BaseController
         return new $class;
     }
 
+    /**
+     * @param Request $request
+     * @param string|null $action
+     *
+     * @return Model|Eloquent|SoftDeletes|null
+     */
     protected function getModelFromRoute(Request $request, string $action = null): ?Model
     {
-        if ($this->modelUsesSoftDeletesTrait()) {
+        if (in_array(SoftDeletes::class, class_uses($this->modelClass))) {
             return $this->getModelObject()::withTrashed()->find($request->route(str_singular($this->getModuleName())));
         }
 
@@ -188,137 +353,24 @@ abstract class BackendController extends BaseController
         $this->formRequestClassName = $requestClassName;
     }
 
+    /**
+     * @param string|null $action
+     *
+     * @return class-string<FormRequest|Request>|string
+     */
     protected function getFormRequestClassName(string $action = null): string
     {
         return $this->formRequestClassName ?: config('hexide-admin.namespaces.request') . str_singular(Str::studly($this->getModuleName())) . 'Request';
     }
 
-    protected function getFormRequest(string $action = null): FormRequest
+    /**
+     * @param string|null $action
+     *
+     * @return FormRequest|Request
+     */
+    protected function getFormRequest(string $action = null): Request
     {
         return App::make($this->getFormRequestClassName($action));
-    }
-
-    /* ------------ Backend actions ------------ */
-
-    public function indexAction()
-    {
-        return $this->render();
-    }
-
-    public function showAction(Request $request)
-    {
-        $this->dataModel($this->getModelFromRoute($request, ActionNames::Show));
-
-        return $this->render(ViewNames::Show);
-    }
-
-    public function createAction()
-    {
-        return $this->render(ViewNames::Create);
-    }
-
-    public function editAction(Request $request)
-    {
-        $this->dataModel($this->getModelFromRoute($request, ActionNames::Edit));
-
-        return $this->render(ViewNames::Edit);
-    }
-
-    /** @throws \Throwable */
-    public function storeAction(Request $request): RedirectResponse
-    {
-        $service = $this->getService();
-
-        $model = $service->handleRequest($request, $this->getModelObject());
-
-        return $this->nextAction($model);
-    }
-
-    /** @throws \Throwable */
-    public function updateAction(Request $request): RedirectResponse
-    {
-        $service = $this->getService();
-
-        $model = $service->handleRequest(
-            $this->getFormRequest(ActionNames::Edit) ?: $request,
-            $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject()
-        );
-
-        return $this->nextAction($model);
-    }
-
-    public function destroyAction(Request $request): RedirectResponse
-    {
-        $model = $this->getModelFromRoute($request, ActionNames::Delete);
-
-        if (!$model->delete()) {
-            throw new \Exception('Model not deleted');
-        };
-
-        return back();
-    }
-
-    public function restoreAction(Request $request): RedirectResponse
-    {
-        if (!$this->modelUsesSoftDeletesTrait()) {
-            throw new \Exception('Model class not uses SoftDeletes trait');
-        }
-
-        $model = $this->getModelFromRoute($request, ActionNames::Restore);
-
-        if (!$model->restore()) {
-            throw new \Exception('Model not restored');
-        };
-
-        return back();
-    }
-
-    public function forceDeleteAction(Request $request): RedirectResponse
-    {
-        if (!$this->modelUsesSoftDeletesTrait()) {
-            throw new \Exception('Model class not uses SoftDeletes trait');
-        }
-
-        $model = $this->getModelFromRoute($request, ActionNames::ForceDelete);
-
-        if (!$model->forceDelete()) {
-            throw new \Exception('Model not permanently deleted');
-        };
-
-        return back();
-    }
-
-    private function modelUsesSoftDeletesTrait(): bool
-    {
-        return in_array(SoftDeletes::class, class_uses($this->modelClass));
-    }
-
-
-    /* ------------ Ajax field action ------------ */
-
-    /**
-     * change field = $field of record with id = $id
-     * url for controller: (POST) module_name/ajax_field/{id}
-     *
-     * @param AjaxFieldRequest $request
-     *
-     * @return JsonResponse
-     */
-    public function ajaxFieldChangeAction(AjaxFieldRequest $request): JsonResponse
-    {
-        $model = $this->getModelObject()::find($request->get('id'));
-
-        if ($model) {
-            $field = $request->get('field');
-
-            $model->{$field} = $request->get('value');
-
-            if ($model->save()) {
-                return response()->json(['message' => __('hexide-admin::messages.success.action'),]);
-            }
-        }
-
-        return response()->json(['message' => __('hexide-admin::messages.error.action'),], 422);
     }
 
 
@@ -330,7 +382,8 @@ abstract class BackendController extends BaseController
             'default' => [
                 'index' => __('next_action.index'),
             ],
-            'menu'    => [
+
+            'menu' => [
                 'edit'   => __('next_action.edit'),
                 'create' => __('next_action.create'),
                 'show'   => __('next_action.show'),
@@ -360,6 +413,7 @@ abstract class BackendController extends BaseController
         $this->data('model', $model);
     }
 
+    /** set url parameters for some links on page */
     protected function dataUrlParams(array $data)
     {
         $this->data('url_params', $data);
@@ -468,20 +522,33 @@ abstract class BackendController extends BaseController
     protected function createBreadcrumb(?string $method)
     {
         if (isset($method) && $this->canAddToBreadcrumbs()) {
-            $module = $this->getModuleName();
-
-            if ($method == $module) {
-                $this->addToBreadcrumbs(
-                    trans_choice("models.$module.name", 2),
-                    route("admin.$module.index")
-                );
-            } else if (!empty($method)) {
-                $this->addToBreadcrumbs(
-                    __("models.$method"),
-                    route("admin.$module.$method", $this->model ?? '')
-                );
-            }
+            $this->addToBreadcrumbs(
+                $this->getNameForBreadcrumb($method),
+                $this->getRouteForBreadcrumb($method),
+            );
         }
+    }
+
+    protected function getNameForBreadcrumb(string $method): string
+    {
+        $module = $this->getModuleName();
+
+        if ($method == $module) {
+            return trans_choice("models.$module.name", 2);
+        }
+
+        return __("models.$method");
+    }
+
+    protected function getRouteForBreadcrumb(string $method): string
+    {
+        $module = $this->getModuleName();
+
+        if ($method == $module) {
+            return route("admin.$module.index");
+        }
+
+        return route("admin.$module.$method", $this->model ?? '');
     }
 
 
@@ -501,55 +568,6 @@ abstract class BackendController extends BaseController
         }
 
         return $this->getActionResult($action, $parameters);
-    }
-
-    protected function getActionResult(string $action, $parameters)
-    {
-        if (in_array($action, self::Actions)) {
-            if ($this->isDatabaseAction($action)) {
-                return $this->dbTransactionAction($action);
-            }
-
-            if (method_exists($this, $action)) {
-                return parent::callAction($action, $parameters);
-            }
-
-            return App::call([$this, $action . 'Action']);
-        }
-
-        return parent::callAction($action, $parameters);
-    }
-
-    private function dbTransactionAction(string $action)
-    {
-        DB::beginTransaction();
-
-        try {
-            if (!method_exists($this, $action)) {
-                $result = App::call([$this, $action . 'Action']);
-            } else {
-                $result = App::call([$this, $action]);
-            }
-
-            $this->notify(self::DatabaseAction[$action]);
-
-            DB::commit();
-
-            return $result;
-        } catch (\Throwable $e) {
-            $this
-                ->notify(self::DatabaseAction[$action], null, 'error')
-                ->notify(self::DatabaseAction[$action], $e->getMessage(), 'error');
-
-            DB::rollBack();
-
-            return back();
-        }
-    }
-
-    private function isDatabaseAction(string $action): bool
-    {
-        return in_array($action, array_keys(self::DatabaseAction));
     }
 
     /**
@@ -577,14 +595,36 @@ abstract class BackendController extends BaseController
             $this->notifyIfExistsErrors();
         }
 
-        $module = $this->getModuleName();
-        $view = View::exists("admin.view.$module.$view") ? "admin.view.$module.$view" : $view;
+        $view = $this->guessViewName($view);
 
         $this->createBreadcrumb($forceActionType ?: array_last(explode('.', $view)));
 
         $this->data('next_actions', $this->getActionsForView());
 
         return parent::render($view, $data);
+    }
+
+    protected function guessViewName(string $view): string
+    {
+        $module = $this->getModuleName();
+
+        if (View::exists($viewPath = "admin.view.$module.$view.index")) {
+            return $viewPath;
+        }
+
+        if (View::exists($viewPath = "admin.view.$module.$view")) {
+            return $viewPath;
+        }
+
+        if (View::exists($viewPath = "admin.view.$view")) {
+            return $viewPath;
+        }
+
+        if (View::exists($viewPath = "admin.$view")) {
+            return $viewPath;
+        }
+
+        return $view;
     }
 
     protected function redirect(string $action = null, array $params = []): RedirectResponse
@@ -598,4 +638,10 @@ abstract class BackendController extends BaseController
 
         return redirect()->route($route, $params);
     }
+
+    private function isDatabaseAction(string $action): bool
+    {
+        return in_array($action, array_keys(self::DatabaseAction));
+    }
+
 }
