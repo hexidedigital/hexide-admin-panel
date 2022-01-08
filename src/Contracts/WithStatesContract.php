@@ -4,6 +4,7 @@ namespace HexideDigital\HexideAdmin\Contracts;
 
 interface WithStatesContract
 {
+
     public static function getStates(): array;
 
     public static function getStatesKeys(): array;
@@ -12,11 +13,12 @@ interface WithStatesContract
      * @param int|string|null $type
      * @return int|string|null
      */
-    public static function getValueByKey($type);
+    public static function getValueByStateKey($type);
 
     /**
      * @param int|string|null $value
      * @return int|string|null
      */
-    public static function getKeyByValue($value);
+    public static function getStateKeyByValue($value);
+
 }

@@ -25,7 +25,7 @@ trait WithStates
     {
         if (is_array($state)) return $this->ofStates($builder, $state, $field);
 
-        return $builder->where($this->getTable() . '.' . $field, $this->getValueByKey($state));
+        return $builder->where($this->getTable() . '.' . $field, $this->getValueByStateKey($state));
     }
 
     public function scopeOfStates(Builder $builder, array $states, string $field = 'state'): Builder
@@ -33,7 +33,7 @@ trait WithStates
         $_states = [];
 
         foreach ($states as $_state) {
-            $_states[] = $this->getValueByKey($_state);
+            $_states[] = $this->getValueByStateKey($_state);
         }
 
         return $builder->whereIn($this->getTable() . '.' . $field, $_states);
@@ -53,7 +53,7 @@ trait WithStates
      * @param int|string|null $key
      * @return int|string|null
      */
-    public static function getValueByKey($key = null)
+    public static function getValueByStateKey($key = null)
     {
         return Arr::get(static::getStates(), $key, null);
     }

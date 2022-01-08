@@ -24,7 +24,7 @@ trait WithTypes
     {
         if (is_array($type)) return $this->ofTypes($builder, $type, $field);
 
-        return $builder->where($this->getTable() . '.' . $field, $this->getValueByKey($type));
+        return $builder->where($this->getTable() . '.' . $field, $this->getValueByTypeKey($type));
     }
 
     public function scopeOfTypes(Builder $builder, array $types, string $field = 'type'): Builder
@@ -32,7 +32,7 @@ trait WithTypes
         $_types = [];
 
         foreach ($types as $_type) {
-            $_types[] = $this->getValueByKey($_type);
+            $_types[] = $this->getValueByTypeKey($_type);
         }
 
         return $builder->whereIn($this->getTable() . '.' . $field, $_types);
@@ -52,7 +52,7 @@ trait WithTypes
      * @param int|string|null $key
      * @return int|string|null
      */
-    public static function getValueByKey($key = null)
+    public static function getValueByTypeKey($key = null)
     {
         return Arr::get(static::getTypes(), $key, null);
     }
