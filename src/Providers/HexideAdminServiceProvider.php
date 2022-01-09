@@ -93,8 +93,8 @@ class HexideAdminServiceProvider extends ServiceProvider
 
         $this->publishes([
             $this->packagePath('resources/build') => public_path('vendor/hexide-admin/build'),
-            $this->packagePath('resources/js') => public_path('vendor/hexide-admin/js'),
-            $this->packagePath('resources/img') => public_path('vendor/hexide-admin/img'),
+            $this->packagePath('resources/js') => resource_path('js'),
+            $this->packagePath('resources/img') => resource_path('img'),
             $this->packagePath('resources/sass') => resource_path('sass'),
         ], 'hexide-admin:public');
 
