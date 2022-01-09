@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
-// use HexideDigital\AdminConfigurations\Models\AdminConfiguration;
+// use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 use Eloquent;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\SecureActions;

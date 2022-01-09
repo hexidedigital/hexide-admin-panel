@@ -11,11 +11,16 @@ use HexideDigital\HexideAdmin\Components\Tabs\TabsComponent;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\ConfigurationTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\PermissionTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\RoleTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use Route;
 
 class HexideAdminServiceProvider extends ServiceProvider
@@ -27,8 +32,19 @@ class HexideAdminServiceProvider extends ServiceProvider
     ];
 
     private array $components = [
-        'language-item'  => LanguageItem::class,
+        'language-item' => LanguageItem::class,
         'tabs-component' => TabsComponent::class,
+    ];
+
+    private array $livewire = [
+        'admin' => [
+            'tables' => [
+                'configuration-table' => ConfigurationTable::class,
+                'permission-table' => PermissionTable::class,
+                'role-table' => RoleTable::class,
+                'user-table' => UserTable::class,
+            ],
+        ],
     ];
 
     public function register()
@@ -58,6 +74,7 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->registerComponents();
         $this->registerViewComposers($view);
+        $this->registerLivewireComponents();
     }
 
     private function loadPublishes()
@@ -77,13 +94,18 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->publishes([
             $this->packagePath("src/Console/stubs") => base_path('stubs/hexide-admin'),
         ], 'hexide-admin-stubs');
+
+        $this->publishes([
+            $this->packagePath('database/migrations') => database_path('migrations'),
+            $this->packagePath('database/seeders') => database_path('seeders'),
+        ], 'hexide-admin-database');
     }
 
     private function loadRoutes()
     {
         $routesCfg = [
-            'as'         => 'admin.',
-            'prefix'     => 'admin',
+            'as' => 'admin.',
+            'prefix' => 'admin',
             'middleware' => ['web', 'auth:admin'],
         ];
 
@@ -137,6 +159,13 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->loadViewComponentsAs('hexide-admin', $this->components);
 
         Blade::componentNamespace('HexideDigital\\HexideAdmin\\Components', 'hexide-admin');
+    }
+
+    private function registerLivewireComponents()
+    {
+        foreach (array_dot($this->livewire) as $alias => $component) {
+            Livewire::component('hexide-admin::' . $alias, $component);
+        }
     }
 
     /**
