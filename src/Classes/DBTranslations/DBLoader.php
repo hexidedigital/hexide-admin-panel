@@ -5,13 +5,9 @@ namespace HexideDigital\HexideAdmin\Classes\DBTranslations;
 use App\Models\Translation;
 use Exception;
 use Illuminate\Contracts\Translation\Loader;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Log;
-use function app;
-use function cache;
-use function request;
 
 class DBLoader implements Loader
 {
@@ -74,7 +70,7 @@ class DBLoader implements Loader
      */
     public function addNamespace($namespace, $hint)
     {
-        // TODO: Implement addNamespace() method.
+        //
     }
 
     /**
@@ -86,7 +82,7 @@ class DBLoader implements Loader
      */
     public function addJsonPath($path)
     {
-        // TODO: Implement addJsonPath() method.
+        //
     }
 
     /**
@@ -96,7 +92,7 @@ class DBLoader implements Loader
      */
     public function namespaces()
     {
-        // TODO: Implement namespaces() method.
+        //
     }
 
     /**

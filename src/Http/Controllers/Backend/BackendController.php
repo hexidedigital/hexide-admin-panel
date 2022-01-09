@@ -217,7 +217,9 @@ abstract class BackendController extends BaseController
         } catch (\Throwable $e) {
             $this
                 ->notify(self::DatabaseAction[$action], null, 'error')
-                ->notify(self::DatabaseAction[$action], $e->getMessage(), 'error');
+                ->notify(self::DatabaseAction[$action],
+                    "{$e->getFile()}: {$e->getLine()} "
+                    , 'error', $e->getMessage());
 
             DB::rollBack();
         }
