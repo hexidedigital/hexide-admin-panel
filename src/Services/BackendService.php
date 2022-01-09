@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Services;
 
-use HexideDigital\HexideAdmin\Facades\FileUploader;
+use FileUploader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Http\FormRequest;
@@ -13,25 +13,44 @@ use Illuminate\Support\Facades\Storage;
 
 class BackendService implements ServiceInterface
 {
+    protected array $locales;
+    protected ?Model $model;
+    protected Request $request;
+    protected array $inputData;
+
+    public function __construct()
+    {
+        $this->locales = config('translatable.locales');
+    }
+
+    public function handleRequest(Request $request, Model $model): Model
+    {
+        $this->request = $request;
+
+        $this->inputData = $this->processInputData($this->request, $model);
+
+        $this->model = $this->saveModel($this->inputData, $model);
+
+        $this->model = $this->postHandle($this->request, $model);
+
+        return $this->model;
+    }
+
     /**
      * @param FormRequest|Request $request
      * @param Model $model
      *
-     * @return Model
+     * @return array
      */
-    public function handleRequest(Request $request, Model $model): Model
+    public function processInputData(Request $request, Model $model): array
     {
-        $attributes = $request instanceof FormRequest
+        $inputs = $request instanceof FormRequest
             ? $request->validated()
             : $request->all();
 
-        $this->prepareAttributes($attributes, $model);
+        $inputs['status'] = $inputs['status'] ?? false;
 
-        $model = $this->saveModel($attributes, $model);
-
-        $this->postHandle($request, $model);
-
-        return $model;
+        return $inputs;
     }
 
     public function saveModel(array $attributes, Model $model): Model
@@ -43,56 +62,48 @@ class BackendService implements ServiceInterface
         return $model->refresh();
     }
 
-    public function prepareAttributes(array &$inputs, Model $model): void
+    public function postHandle(Request $request, Model $model): Model
     {
-        $inputs['status'] = $inputs['status'] ?? false;
-    }
-
-    public function postHandle(Request $request, Model $model)
-    {
-
+        return $model;
     }
 
     /**
-     * @param Request $request
-     * @param Model|null $model
+     * @param array $imageInput
      * @param array $options <table>
      *  <tr>    <th>key of option</th>        <th>Default</th>        </tr>
      *  <tr>    <td>field_key</td>      <td>image</td>      </tr>
      *  <tr>    <td>folder</td>     <td>images</td>     </tr>
-     *  <tr>    <td>module</td>     <td>NULL</td>       </tr>
+     *  <tr>    <td>module</td>     <td>table of model</td>       </tr>
      * </table>
      *
-     * @return false|string|null
+     * @return string|null
      */
-    public function handleOneImage(Request $request, Model $model, array $options = [])
+    public function handleOneImage(array $imageInput, array $options = []): ?string
     {
-        $path = false;
-
         $options['field_key'] = Arr::get($options, 'field_key', 'image');
         $options['folder'] = Arr::get($options, 'folder', 'images');
-        $options['module'] = Arr::get($options, 'module', $model->getTable());
+        $options['module'] = Arr::get($options, 'module', $this->model->getTable());
 
-        $old_path = $model->{$options['field_key']} ?? null;
+        $image = Arr::get($imageInput, $options['field_key']);
 
-        if ($request->hasFile('image') || $request->input('isRemoveImage', false)) {
-            $path = $this->saveImage(
-                $request->file('image'),
-                $request->input('slug'),
-                $old_path,
+        if ((isset($image) && $image instanceof UploadedFile) || Arr::get($imageInput, 'isRemoveImage', false)) {
+            return $this->saveImage(
+                $image,
+                $this->model->getKey() ?? null,
+                $this->model->{$options['field_key']} ?? null,
                 $options['folder'],
                 $options['module'] ?? null,
             );
         }
 
-        return $path;
+        return null;
     }
 
     /**
      * @param UploadedFile|mixed|null $image
-     * @param string|null $uniq_id to place in the same folder
-     * @param string|null $old_path to delete old photo
-     * @param string|null $type default is `images`
+     * @param string|null $uniq_id
+     * @param string|null $old_path
+     * @param string|null $type
      * @param string|null $module
      *
      * @return string|null
@@ -104,7 +115,7 @@ class BackendService implements ServiceInterface
         }
 
         if (empty($module)) {
-            $module = $this->module ?? null;
+            $module = $this->model->getTable() ?? null;
         }
 
         if (empty($type)) {
@@ -114,14 +125,21 @@ class BackendService implements ServiceInterface
         return FileUploader::put($image, $type, $module, $uniq_id) ?? null;
     }
 
-    public function deleteModel(Request $request, Model $model)
+    public function deleteModel(Request $request, Model $model): void
     {
         if (!$model->delete()) {
             throw new \Exception('Model not deleted');
         }
     }
 
-    public function restoreModel(Request $request, Model $model)
+    /**
+     * @param Request $request
+     * @param Model|SoftDeletes $model
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function restoreModel(Request $request, Model $model): void
     {
         if (!$this->modelUsesSoftDeletesTrait($model)) {
             throw new \Exception('Model class not uses SoftDeletes trait');
@@ -132,7 +150,14 @@ class BackendService implements ServiceInterface
         }
     }
 
-    public function forceDeleteModel(Request $request, Model $model)
+    /**
+     * @param Request $request
+     * @param Model|SoftDeletes $model
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function forceDeleteModel(Request $request, Model $model): void
     {
         if (!$this->modelUsesSoftDeletesTrait($model)) {
             throw new \Exception('Model class not uses SoftDeletes trait');
