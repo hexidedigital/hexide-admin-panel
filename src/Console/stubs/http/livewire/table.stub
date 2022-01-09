@@ -25,7 +25,7 @@ class {{ class }} extends DefaultTable
 
             Column::make(__('admin_labels.attributes.position'), 'position')
                 ->sortable()
-                ->format(fn($value, $column, $row) => view('admin.partials.ajax.input', [
+                ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.input', [
                     'model' => $row, 'module' => $this->module,
                     'field' => 'position', 'type' => 'number',
                 ]))
@@ -33,7 +33,7 @@ class {{ class }} extends DefaultTable
             ,
             Column::make(__('admin_labels.attributes.status'), 'status')
                 ->sortable()
-                ->format(fn($value, $column, $row) => view('admin.partials.ajax.toggler', [
+                ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.toggler', [
                     'model' => $row, 'module' => $this->module,
                     'field' => 'status',
                 ]))

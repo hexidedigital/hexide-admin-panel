@@ -28,7 +28,7 @@
     <tr>
         <th>{{__('admin_labels.attributes.visible')}}</th>
         <td>
-            @include('admin.partials.ajax.toggler', ['field' => 'status'])
+            @include('hexide-admin::admin.partials.ajax.toggler', ['field' => 'status'])
         </td>
     </tr>
 @endsection

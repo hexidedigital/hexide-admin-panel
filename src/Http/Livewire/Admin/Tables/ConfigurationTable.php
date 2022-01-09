@@ -49,7 +49,7 @@ class ConfigurationTable extends DefaultTable
             ,
             Column::make(__('admin_labels.attributes.in_group_position'), 'in_group_position')
                 ->sortable()
-                ->format(fn($value, $column, $row) => view('admin.partials.ajax.input', [
+                ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.input', [
                     'model' => $row, 'module' => $this->module,
                     'field' => 'in_group_position', 'type' => 'number',
                 ]))

@@ -4,6 +4,8 @@ require_once 'fileUploader.php';
 
 use Astrotomic\Translatable\Validation\RuleFactory;
 use HexideDigital\HexideAdmin\Http\Middleware\LanguageMiddleware;
+use HexideDigital\ModelPermissions\Models\Permission;
+use Illuminate\Database\Eloquent\Model;
 
 
 if (!function_exists('lang_rules')) {
@@ -32,6 +34,14 @@ if (!function_exists('locale_prefix')) {
     }
 }
 
+if (!function_exists('permission_can')) {
+    function permission_can(string $permission, ?string $module = null, ?Model $model = null): bool
+    {
+        $key = Permission::key($module, $permission);
+
+        return !Gate::has($key) || Gate::allows($key);
+    }
+}
 
 if (!function_exists('declension_word')) {
     /**
