@@ -5,12 +5,20 @@ require_once 'fileUploader.php';
 use Astrotomic\Translatable\Validation\RuleFactory;
 use HexideDigital\HexideAdmin\Http\Middleware\LanguageMiddleware;
 
+
 if (!function_exists('lang_rules')) {
+    /**
+     * @param array<string, string|array<string|string[]|\Illuminate\Validation\Rule>> $rules one-level attribute => $rules array of rules
+     * @param array|null $locales
+     *
+     * @return array<string, string|array<string|string[]|\Illuminate\Validation\Rule>>
+     */
     function lang_rules(array $rules, array $locales = null): array
     {
         return RuleFactory::make($rules, null, null, null, $locales);
     }
 }
+
 
 if (!function_exists('locale_prefix')) {
     function locale_prefix(): string
@@ -19,9 +27,11 @@ if (!function_exists('locale_prefix')) {
         if (!empty($locale_prefix) || $locale_prefix === config('app.locale')) {
             $locale_prefix = '';
         }
+
         return '/' . $locale_prefix;
     }
 }
+
 
 if (!function_exists('declension_word')) {
     /**
@@ -31,17 +41,35 @@ if (!function_exists('declension_word')) {
      * <p>declension_word(36, ['елемент', 'елемента', 'елементів']) = елементів</p>
      *
      * @param int $number число, от которого будет зависеть форма нужного слова;
-     * @param array $words массив склоняемого слова в трех вариантах (1, 2, багато)
+     * @param array<string> $words массив склоняемого слова в трех вариантах (1, 2, багато)
+     *
      * @return string
      */
     function declension_word(int $number, array $words): string
     {
-        $ar = array(2, 0, 1, 1, 1, 2); // індекси в масив слів
+        $indexes = [2, 0, 1, 1, 1, 2]; // індекси в масив слів
 
-        return $words[(4 < $number % 100 && $number % 100 < 20)
+        $index = (4 < ($number % 100) && ($number % 100) < 20)
             ? 2                         // 5 - 19
-            : $ar[min($number % 10, 5)]   // *1-*5
-        ];
+            : $indexes[min($number % 10, 5)];   // *1 - *5
+
+        return $words[$index];
+    }
+}
+
+if (!function_exists('declension_key')) {
+    /** Translation based declension function */
+    function declension_key(int $number, string $key, ?string $locale = null): string
+    {
+        $locale = $locale ?: app()->getLocale();
+
+        $words = trans('declensions.' . $key, null, $locale);
+
+        if (is_string($words)) {
+            $words = explode('|', $words);
+        }
+
+        return declension_word($number, $words);
     }
 }
 
@@ -58,7 +86,9 @@ if (!function_exists('thumb_adapt')) {
 
         $path = clear_filepath($path);
 
-        if (URL::isValidUrl($path)) return $path;
+        if (URL::isValidUrl($path)) {
+            return $path;
+        }
 
         $path = 'storage/' . $path;
 
@@ -89,7 +119,9 @@ if (!function_exists('clear_filepath')) {
      */
     function clear_filepath(?string $path): string
     {
-        if (empty($path)) return $path;
+        if (empty($path)) {
+            return $path;
+        }
 
         return str_replace([
             config('app.url') . '/',
