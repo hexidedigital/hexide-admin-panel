@@ -21,8 +21,8 @@
     "require": {
         "php": "^7.4|^8.0",
         "astrotomic/laravel-translatable": "^11.9",
-        "hexide-digital/meta-tags-laravel": "^1|dev-main",
-        "hexide-digital/model-permissions": "^2|dev-main",
+        "hexide-digital/meta-tags-laravel": "^1.0",
+        "hexide-digital/model-permissions": "^2.0",
         "jeroennoten/laravel-adminlte": "^3.6",
         "laravel/framework": "^8.0",
         "laravelcollective/html": "^6.2",
