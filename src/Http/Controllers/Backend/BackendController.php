@@ -12,8 +12,10 @@ use HexideDigital\HexideAdmin\Http\Requests\Backend\AjaxFieldRequest;
 use HexideDigital\HexideAdmin\Http\ViewNames;
 use HexideDigital\HexideAdmin\Services\BackendService;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
+use http\Exception\InvalidArgumentException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
@@ -218,8 +220,9 @@ abstract class BackendController extends BaseController
             $this
                 ->notify(self::DatabaseAction[$action], null, 'error')
                 ->notify(self::DatabaseAction[$action],
-                    "{$e->getFile()}: {$e->getLine()} "
-                    , 'error', $e->getMessage());
+                      class_basename($e) . " -- {$e->getFile()}: {$e->getLine()} ",
+                    'error',
+                    class_basename($e) .  $e->getMessage());
 
             DB::rollBack();
         }
@@ -608,17 +611,17 @@ abstract class BackendController extends BaseController
 
     protected function guessViewName(string $view): string
     {
-        $module = $this->getModuleName();
-
-        if (View::exists($viewPath = "admin.view.$module.$view.index")) {
-            return $viewPath;
-        }
+        $module = Str::snake($this->getModuleName());
 
         if (View::exists($viewPath = "admin.view.$module.$view")) {
             return $viewPath;
         }
 
         if (View::exists($viewPath = "admin.view.$view")) {
+            return $viewPath;
+        }
+
+        if (View::exists($viewPath = "hexide-admin::admin.view.$view")) {
             return $viewPath;
         }
 

@@ -2,13 +2,13 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend\Configurations;
 
-use App\Http\Controllers\Backend\BackendController;
+use HexideDigital\HexideAdmin\Http\Controllers\Backend\HexideAdminBaseController;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\Configurations\ListUpdateRequest;
 use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 use HexideDigital\HexideAdmin\Services\Backend\ListConfigurationService;
 use Illuminate\Http\RedirectResponse;
 
-class ListConfigurationController extends BackendController
+class ListConfigurationController extends HexideAdminBaseController
 {
     public function __construct()
     {

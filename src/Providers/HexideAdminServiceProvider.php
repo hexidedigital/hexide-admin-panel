@@ -81,24 +81,31 @@ class HexideAdminServiceProvider extends ServiceProvider
     {
         $this->publishes([
             $this->packagePath("config/hexide-admin.php") => config_path('hexide-admin.php'),
-        ], 'hexide-admin-configs');
+        ], 'hexide-admin:configs');
 
         $this->publishes([
             $this->packagePath("resources/lang") => resource_path('lang/vendor/hexide-admin'),
-        ], 'hexide-admin-translations');
+        ], 'hexide-admin:translations');
 
         $this->publishes([
             $this->packagePath("resources/views") => resource_path('views/vendor/hexide-admin'),
-        ], 'hexide-admin-translations');
+        ], 'hexide-admin:views');
+
+        $this->publishes([
+            $this->packagePath('resources/build') => public_path('vendor/hexide-admin/build'),
+            $this->packagePath('resources/js') => public_path('vendor/hexide-admin/js'),
+            $this->packagePath('resources/img') => public_path('vendor/hexide-admin/img'),
+            $this->packagePath('resources/sass') => resource_path('sass'),
+        ], 'hexide-admin:public');
 
         $this->publishes([
             $this->packagePath("src/Console/stubs") => base_path('stubs/hexide-admin'),
-        ], 'hexide-admin-stubs');
+        ], 'hexide-admin:stubs');
 
         $this->publishes([
             $this->packagePath('database/migrations') => database_path('migrations'),
             $this->packagePath('database/seeders') => database_path('seeders'),
-        ], 'hexide-admin-database');
+        ], 'hexide-admin:database');
     }
 
     private function loadRoutes()

@@ -1,6 +1,6 @@
 <?php
 
-namespace HexideDigital\HexideAdmin\Http\Api;
+namespace HexideDigital\HexideAdmin\Http\Controllers\Api;
 
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;

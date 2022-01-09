@@ -281,8 +281,6 @@ class HexideAdminCommand extends BaseCommand
         $this->makeDir($dir_path . '/partials', $force);
 
         $stubs = array_filter([
-            'create.stub'       => 'create.blade.php',
-            'edit.stub'         => 'edit.blade.php',
             'index.stub'        => 'index.blade.php',
             'show.stub'         => 'show.blade.php',
             '_form.stub'        => 'partials/_form.blade.php',

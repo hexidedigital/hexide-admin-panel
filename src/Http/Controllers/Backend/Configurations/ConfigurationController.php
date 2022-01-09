@@ -2,11 +2,11 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend\Configurations;
 
-use App\Http\Controllers\Backend\BackendController;
+use HexideDigital\HexideAdmin\Http\Controllers\Backend\HexideAdminBaseController;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\Configurations\BaseRequest;
 use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 
-class ConfigurationController extends BackendController
+class ConfigurationController extends HexideAdminBaseController
 {
     public function __construct()
     {
