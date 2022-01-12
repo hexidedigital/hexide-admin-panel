@@ -14,7 +14,7 @@ class {{ class }} extends FormRequest
 
     public function rules()
     {
-        $model = $this->{{ model }} ?? '';
+        $model = $this->{{ model_name }} ?? '';
         if(isset($model->id) && ($model instanceof {{ ModelName }})){$model = $model->id;}
 
         $rules = [

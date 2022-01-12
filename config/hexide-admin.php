@@ -28,10 +28,10 @@ return [
 
     // in this place you can edit recommended namespaces for files
     'namespaces' => [
-        'model' => 'App\\Models\\',
-        'request' => 'App\\Http\\Requests\\Backend\\',
-        'service' => 'App\\Services\\Backend\\',
-        'controller' => 'App\\Http\\Controllers\\Backend\\',
+        'model' => 'App\\Models',
+        'request' => 'App\\Http\\Requests\\Backend',
+        'service' => 'App\\Services\\Backend',
+        'controller' => 'App\\Http\\Controllers\\Backend',
         'livewire-table' => 'App\\Http\\Livewire\\Admin\\Tables',
     ],
 

@@ -22,14 +22,12 @@ class {{ class }} extends Migration
         Schema::create('{{ table_singular }}_translations', function (Blueprint $table) {
             $table->id();
             $table->string('locale');
-            $table->unsignedBigInteger('{{ table_singular }}_id');
+            $table->foreignId('{{ table_singular }}_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
             $table->string('title')->nullable();
             $table->text('content')->nullable();
 
             $table->unique(['locale', '{{ table_singular }}_id']);
-
-            $table->foreign('{{ table_singular }}_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
         });
 
         PermissionRelation::touch('{{ table }}')->addCustomSet()->addResourceSet();

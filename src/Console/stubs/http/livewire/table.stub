@@ -3,6 +3,7 @@
 namespace {{ namespace }};
 
 use {{ model_namespace }};
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\DefaultTable;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 

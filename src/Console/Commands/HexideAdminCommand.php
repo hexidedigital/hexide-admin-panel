@@ -22,23 +22,22 @@ class HexideAdminCommand extends BaseCommand
 
     /** @var array<string, string> */
     protected array $stubPaths = [
-        'migration'  => 'database',
-        'model'      => 'models',
-        'request'    => 'http/requests',
-        'service'    => 'service',
+        'migration' => 'database',
+        'model' => 'models',
+        'request' => 'http/requests',
+        'service' => 'service',
         'controller' => 'http/controllers',
-        'livewire'   => 'http/livewire',
+        'livewire' => 'http/livewire',
 
-        'lang'      => 'lang',
-        'views'     => 'views',
-        'routes'    => 'routes',
+        'lang' => 'lang',
+        'views' => 'views',
+        'routes' => 'routes',
         'menu_item' => 'menu_item',
     ];
 
     protected Repository $config;
     protected Filesystem $filesystem;
 
-    protected bool $withInteract;
     protected array $forceTypes;
 
     /** Camel cased ModuleName */
@@ -61,7 +60,6 @@ class HexideAdminCommand extends BaseCommand
     {
         $this->namespaces = collect($this->config->get('hexide-admin.namespaces'));
 
-        $this->withInteract = !$this->option('no-interaction');
         $this->setForceTypesOption();
 
         $this->info('Start: creating module files...');
@@ -73,7 +71,7 @@ class HexideAdminCommand extends BaseCommand
         $this->createFiles();
         $this->prepareResources();
 
-        $this->info('Finish: files are created and ');
+        $this->info('Finish: module files are created.');
 
         return self::SUCCESS;
     }
@@ -120,13 +118,13 @@ class HexideAdminCommand extends BaseCommand
         $this->info('Creating files...');
 
         $methods = array_filter([
-            'createModels'     => ['start' => 'Models', 'finish' => 'Models',],
+            'createModels' => ['start' => 'Models', 'finish' => 'Models',],
             'createMigrations' => ['start' => 'Migrations', 'finish' => 'Migrations',],
-            'createService'    => $this->option('service') ? ['start' => 'Service', 'finish' => 'Service',] : false,
-            'createRequest'    => ['start' => 'Request', 'finish' => 'Request',],
+            'createService' => $this->option('service') ? ['start' => 'Service', 'finish' => 'Service',] : false,
+            'createRequest' => ['start' => 'Request', 'finish' => 'Request',],
             'createController' => ['start' => 'Controller', 'finish' => 'Controller',],
-            'createViews'      => ['start' => 'Views', 'finish' => 'Views',],
-            'createLivewire'   => ['start' => 'Livewire table', 'finish' => 'Livewire table',],
+            'createViews' => ['start' => 'Views', 'finish' => 'Views',],
+            'createLivewire' => ['start' => 'Livewire table', 'finish' => 'Livewire table',],
         ]);
 
         foreach ($methods as $method => $points) {
@@ -152,7 +150,7 @@ class HexideAdminCommand extends BaseCommand
 
         $content = $this->getContentWithReplace($this->resolveStubPath('model', "model$type.stub"), [
             '{{ namespace }}' => $this->getNamespace('model'),
-            '{{ class }}'     => $class,
+            '{{ class }}' => $class,
         ]);
 
         if ($this->translatable) {
@@ -171,7 +169,7 @@ class HexideAdminCommand extends BaseCommand
 
         $content = $this->getContentWithReplace($this->resolveStubPath('model', 'model.translation.stub'), [
             '{{ namespace }}' => $this->getNamespace('model'),
-            '{{ class }}'     => $class,
+            '{{ class }}' => $class,
         ]);
 
         $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('model'));
@@ -193,7 +191,7 @@ class HexideAdminCommand extends BaseCommand
                 '{{ class }}' => $class,
             ]);
 
-            $this->makeFile($path . date('Y_m_d_His') . '_' . Str::snake($class) . '.php', $content, $this->isForced('migration'));
+            $this->makeFileOrPutContent($path . date('Y_m_d_His') . '_' . Str::snake($class) . '.php', $content, $this->isForced('migration'));
         }
 
         if ($this->option('populate')) {
@@ -206,7 +204,7 @@ class HexideAdminCommand extends BaseCommand
                     '{{ class }}' => $class,
                 ]);
 
-                $this->makeFile($path . date('Y_m_d_His') . '_' . Str::snake($class) . '.php', $content, $this->isForced('migration'));
+                $this->makeFileOrPutContent($path . date('Y_m_d_His') . '_' . Str::snake($class) . '.php', $content, $this->isForced('migration'));
             }
         }
     }
@@ -224,7 +222,7 @@ class HexideAdminCommand extends BaseCommand
 
         $content = $this->getContentWithReplace($this->resolveStubPath('service', "/service.stub"), [
             '{{ namespace }}' => $this->getNamespace('service'),
-            '{{ class }}'     => $class,
+            '{{ class }}' => $class,
         ]);
 
         $this->makeDir($path);
@@ -243,7 +241,7 @@ class HexideAdminCommand extends BaseCommand
 
         $content = $this->getContentWithReplace($this->resolveStubPath('request', "/request.admin$type.stub"), [
             '{{ namespace }}' => $this->getNamespace('request'),
-            '{{ class }}'     => $class,
+            '{{ class }}' => $class,
         ]);
 
         $this->makeDir($path);
@@ -260,7 +258,7 @@ class HexideAdminCommand extends BaseCommand
 
         $content = $this->getContentWithReplace($this->resolveStubPath('controller', "/controller.admin.stub"), [
             '{{ namespace }}' => $this->getNamespace('controller'),
-            '{{ class }}'     => $class,
+            '{{ class }}' => $class,
         ]);
 
         $this->makeClass($class, $path . $class . '.php', $content, $this->isForced('controller'));
@@ -281,19 +279,17 @@ class HexideAdminCommand extends BaseCommand
         $this->makeDir($dir_path . '/partials', $force);
 
         $stubs = array_filter([
-            'index.stub'        => 'index.blade.php',
-            'show.stub'         => 'show.blade.php',
-            '_form.stub'        => 'partials/_form.blade.php',
+            'show.stub' => 'show.blade.php',
+            '_form.stub' => 'partials/_form.blade.php',
             'tabs/general.stub' => 'tabs/general.blade.php',
-            'tabs/locale.stub'  => $this->translatable ? 'tabs/locale.blade.php' : false,
+            'tabs/locale.stub' => $this->translatable ? 'tabs/locale.blade.php' : false,
         ]);
 
         $replaces = [
-            'index.stub'        => [],
-            '_form.stub'        => ['{{ show_locale_tabs }}' => $this->translatable ? "true" : "false",],
-            'show.stub'         => [],
+            '_form.stub' => ['{{ show_locale_tabs }}' => $this->translatable ? "true" : "false",],
+            'show.stub' => [],
             'tabs/general.stub' => [],
-            'tabs/locale.stub'  => [],
+            'tabs/locale.stub' => [],
         ];
 
         foreach ($stubs as $stub => $name) {
@@ -303,7 +299,7 @@ class HexideAdminCommand extends BaseCommand
                 $content = $this->getContentWithReplace($content, $replaces[$stub]);
             }
 
-            $this->makeFile($dir_path . '/' . $name, $content, $force);
+            $this->makeFileOrPutContent($dir_path . '/' . $name, $content, $force);
         }
     }
 
@@ -316,7 +312,7 @@ class HexideAdminCommand extends BaseCommand
 
         $content = $this->getContentWithReplace($this->resolveStubPath('livewire', "/table.stub"), [
             '{{ namespace }}' => $this->getNamespace('livewire-table'),
-            '{{ class }}'     => $class,
+            '{{ class }}' => $class,
         ]);
 
         $this->makeDir($path);
@@ -335,20 +331,20 @@ class HexideAdminCommand extends BaseCommand
         $this->info('Start preparing resources...');
 
         $methods = array_filter([
-            'appendRoutes'               => [
-                'start'  => 'model routes into admin route file',
+            'appendRoutes' => [
+                'start' => 'model routes into admin route file',
                 'finish' => 'Routes',
             ],
-            'appendMenuItem'             => [
-                'start'  => 'MenuItem',
+            'appendMenuItem' => [
+                'start' => 'MenuItem',
                 'finish' => 'MenuItem',
             ],
             'appendMenuItemTranslations' => [
-                'start'  => 'MenuItemTranslations',
+                'start' => 'MenuItemTranslations',
                 'finish' => 'MenuItemTranslations',
             ],
-            'appendTranslations'         => [
-                'start'  => 'Translations',
+            'appendTranslations' => [
+                'start' => 'Translations',
                 'finish' => 'Translations',
             ],
         ]);
@@ -377,21 +373,22 @@ class HexideAdminCommand extends BaseCommand
         }
 
         $stubs = [
-            'ajax.stub'     => '/*hexide_admin_stub-ajax*/',
+            'namespace.stub' => '/*hexide_admin_stub-namespace*/',
+            'ajax.stub' => '/*hexide_admin_stub-ajax*/',
             'resource.stub' => '/*hexide_admin_stub-resource*/',
-            'default.stub'  => '/*hexide_admin_stub*/',
+            'default.stub' => '/*hexide_admin_stub*/',
         ];
 
         $route_content = $this->getContent($path);
         foreach ($stubs as $stub => $replace) {
-            $content = $this->getContentWithReplace($this->resolveStubPath('routes', $stub));
+            $content = $this->getContentWithReplace($this->resolveStubPath('routes', $stub), [
+                '{{ use_controller }}' => $this->getNamespace('controller') . '\\' . $this->getModuleName() . 'Controller',
+            ]);
 
             $route_content = $this->getContentWithReplace($route_content, [$replace => $content,]);
         }
 
-        $this->makeFile($path, $route_content, true);
-
-        $this->info('Module routes appended.');
+        $this->makeFileOrPutContent($path, $route_content, true);
     }
 
     /** @throws FileNotFoundException */
@@ -399,7 +396,7 @@ class HexideAdminCommand extends BaseCommand
     {
         $path = config_path('adminlte.php');
 
-        if ($this->filesystem->isFile($path)) {
+        if (!$this->filesystem->isFile($path)) {
             $this->warn('Can`t add menu item to file config/adminlte.php - file does not exist');
 
             return;
@@ -409,9 +406,7 @@ class HexideAdminCommand extends BaseCommand
             '{{ module_name_access }}' => Permission::key($this->getSnakeCaseName(2), Permission::Access),
         ]);
 
-        $this->makeFile($path, $this->getContentWithReplace($path, ["/*hexide_admin_stub*/" => $content]), true);
-
-        $this->info('Menu item appended.');
+        $this->makeFileOrPutContent($path, $this->getContentWithReplace($path, ["/*hexide_admin_stub*/" => $content]), true);
     }
 
     /** @throws FileNotFoundException */
@@ -432,7 +427,7 @@ class HexideAdminCommand extends BaseCommand
 
             $content = $this->getContentWithReplace($this->resolveStubPath('menu_item', "menu_locale.stub"));
 
-            $this->makeFile($file_path, $this->getContentWithReplace($file_path, ["/*hexide_admin_stub*/" => $content]), true);
+            $this->makeFileOrPutContent($file_path, $this->getContentWithReplace($file_path, ["/*hexide_admin_stub*/" => $content]), true);
         }
     }
 
@@ -448,17 +443,14 @@ class HexideAdminCommand extends BaseCommand
             $file_path = $path . "$locale/$file_name";
 
             if (!$this->filesystem->isFile($file_path)) {
-                $this->warn('can`t append model translations for locale ' . $locale);
+                $this->warn('Can`t append model translations for locale ' . $locale);
 
                 continue;
             }
 
-            $content = $this->getContentWithReplace($this->resolveStubPath('lang', $locale . ".models.stub"), [
-                '{{ model_name }}' => $this->getSnakeCaseName(2),
-                '{{ ModelName }}'  => $this->getModuleName(),
-            ]);
+            $content = $this->getContentWithReplace($this->resolveStubPath('lang', $locale . ".models.stub"));
 
-            $this->makeFile($file_path, $this->getContentWithReplace($file_path, ["/*hexide_admin_stub*/" => $content]), true);
+            $this->makeFileOrPutContent($file_path, $this->getContentWithReplace($file_path, ["/*hexide_admin_stub*/" => $content]), true);
         }
     }
 
@@ -503,6 +495,15 @@ class HexideAdminCommand extends BaseCommand
         return $this->namespaces->get($type, $default);
     }
 
+    protected function directoryByNamespace($type)
+    {
+        $namespace = $this->getNamespace($type);
+
+
+
+
+    }
+
     protected function resolveStubPath($type, $stub): string
     {
         $stub = trim(Arr::get($this->stubPaths, $type), '/') . '/' . trim($stub, '/');
@@ -521,16 +522,14 @@ class HexideAdminCommand extends BaseCommand
         return false;
     }
 
-    protected function makeFile($file, $content, $force = false)
+    protected function makeFileOrPutContent(string $file, string $content, bool $force = false)
     {
         $exists = $this->filesystem->exists($file);
 
-        if ($exists) {
+        if ($exists && !$force) {
             $this->warn('File ' . $file . ' already exists');
 
-            if ($this->withInteract && !$force) {
-                $force = $this->confirm('Are you sure you want to overwrite this existing file?', false);
-            }
+            $force = $this->confirm('Are you sure you want to overwrite this existing file?', false);
         }
 
         if (!$exists || $force) {
@@ -542,8 +541,8 @@ class HexideAdminCommand extends BaseCommand
 
     protected function makeClass($class, $path, $content, $force = false)
     {
-        if ($this->makeFile($path, $content, $force)) {
-            $this->info($class . ' created.', 'vv');
+        if ($this->makeFileOrPutContent($path, $content, $force)) {
+            $this->info($class . ' created.', 'v');
         } else {
             $this->warn($class . ' not created.');
         }
@@ -613,21 +612,21 @@ class HexideAdminCommand extends BaseCommand
     protected function setGlobalReplaces()
     {
         $this->replaceMap = [
-            'model_namespace' => $this->getModelNamespace(),
+            '{{ model_namespace }}' => $this->getModelNamespace(),
 
-            'ModelName'  => $this->getModuleName(),
-            'ModelNames' => $this->getModuleName(2),
+            '{{ ModelName }}' => $this->getModuleName(),
+            '{{ ModelNames }}' => $this->getModuleName(2),
 
-            'model-name'  => $this->getKebabCaseName(),
-            'model-names' => $this->getKebabCaseName(2),
+            '{{ model-name }}' => $this->getKebabCaseName(),
+            '{{ model-names }}' => $this->getKebabCaseName(2),
 
-            'model_name'  => $this->getSnakeCaseName(),
-            'model_names' => $this->getSnakeCaseName(2),
+            '{{ model_name }}' => $this->getSnakeCaseName(),
+            '{{ model_names }}' => $this->getSnakeCaseName(2),
 
-            'table'          => $this->getSnakeCaseName(2),
-            'table_singular' => $this->getSnakeCaseName(),
+            '{{ table }}' => $this->getSnakeCaseName(2),
+            '{{ table_singular }}' => $this->getSnakeCaseName(),
 
-            'parent_model' => $this->getSnakeCaseName(),
+            '{{ parent_model }}' => $this->getSnakeCaseName(),
         ];
     }
 
