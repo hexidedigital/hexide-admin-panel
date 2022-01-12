@@ -495,6 +495,7 @@ class HexideAdminCommand extends BaseCommand
         return $this->namespaces->get($type, $default);
     }
 
+    // todo
     protected function directoryByNamespace($type)
     {
         $namespace = $this->getNamespace($type);
@@ -508,7 +509,7 @@ class HexideAdminCommand extends BaseCommand
     {
         $stub = trim(Arr::get($this->stubPaths, $type), '/') . '/' . trim($stub, '/');
 
-        return file_exists($customPath = $this->laravel->basePath('stubs/hexide_admin/' . $stub))
+        return file_exists($customPath = $this->laravel->basePath('stubs/hexide-admin/' . $stub))
             ? $customPath
             : __DIR__ . "/../stubs/" . $stub;
     }
