@@ -56,9 +56,7 @@ class ConfigurationTable extends DefaultTable
                 ->asHtml()
             ,
             Column::make(__("hexide-admin::buttons.actions"))
-                ->addAttributes([
-                    'style' => 'width: 95px'
-                ])
+                ->addAttributes(['style' => 'width: 95px'])
                 ->format(fn($value, $column, $row) => view('hexide-admin::partials.control_buttons', [
                     'model' => $row,
                     'module' => $this->module,

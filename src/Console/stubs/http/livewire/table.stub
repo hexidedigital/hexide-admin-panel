@@ -27,23 +27,24 @@ class {{ class }} extends DefaultTable
             Column::make(__('admin_labels.attributes.position'), 'position')
                 ->sortable()
                 ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.input', [
-                    'model' => $row, 'module' => $this->module,
-                    'field' => 'position', 'type' => 'number',
+                    'model' => $row,
+                    'module' => $this->module,
+                    'field' => 'position', '
+                    type' => 'number',
                 ]))
                 ->asHtml()
             ,
             Column::make(__('admin_labels.attributes.status'), 'status')
                 ->sortable()
                 ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.toggler', [
-                    'model' => $row, 'module' => $this->module,
+                    'model' => $row,
+                    'module' => $this->module,
                     'field' => 'status',
                 ]))
                 ->asHtml()
             ,
             Column::make(__("hexide-admin::buttons.actions"))
-                ->addAttributes([
-                    'style' => 'width: 95px'
-                ])
+                ->addAttributes(['style' => 'width: 95px'])
                 ->format(fn($value, $column, $row) => view('hexide-admin::partials.control_buttons', [
                     'model' => $row,
                     'module' => $this->module,
@@ -55,8 +56,8 @@ class {{ class }} extends DefaultTable
 
     public function query(): Builder
     {
-        // return {{ ModelName }}::joinTranslations()
-        //     ->select(['{{ table }}.*', '{{ table_singular }}_translations.title as title']);
+        return {{ ModelName }}::joinTranslations()
+            ->select(['{{ table }}.*', '{{ table_singular }}_translations.title as title']);
         // return {{ ModelName }}::query()->select();
     }
 }

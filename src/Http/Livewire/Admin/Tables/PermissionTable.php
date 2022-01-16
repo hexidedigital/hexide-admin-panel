@@ -4,23 +4,28 @@ namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
 use App\Models\Permission;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class PermissionTable extends DefaultTable
 {
     public ?string $module = 'permissions';
+    public Collection $modules;
+
+    public function mount()
+    {
+        $permissions = Permission::get('title');
+
+        $modules = $permissions->groupBy(fn(Permission $permission) => $permission->module)->keys();
+
+        $this->modules = $modules->combine($modules);
+    }
 
     public function filters(): array
     {
-        $roles = Permission::all()->pluck('title');
-
-        $modules = $roles->groupBy(fn(string $title) => Arr::first(explode('_', $title)))->keys();
-        $modules = $modules->combine($modules);
-
         return [
-            'modules' => Filter::make(__('Modules'))->multiSelect($modules->toArray()),
+            'modules' => Filter::make(__('Modules'))->multiSelect($this->modules->toArray()),
         ];
     }
 
@@ -36,9 +41,7 @@ class PermissionTable extends DefaultTable
                 ->searchable()
             ,
             Column::make(__("hexide-admin::buttons.actions"))
-                ->addAttributes([
-                    'style' => 'width: 95px'
-                ])
+                ->addAttributes(['style' => 'width: 95px'])
                 ->format(fn($value, $column, $row) => view('hexide-admin::partials.control_buttons', [
                     'model' => $row,
                     'module' => $this->module,

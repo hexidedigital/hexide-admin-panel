@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use HexideDigital\ModelPermissions\Models\Permission as HDPermission;
 
-class {{ class }} extends Migration
+return new class extends Migration
 {
     public function up()
     {
@@ -26,4 +26,4 @@ class {{ class }} extends Migration
     {
         Schema::dropIfExists('{{ table }}');
     }
-}
+};
