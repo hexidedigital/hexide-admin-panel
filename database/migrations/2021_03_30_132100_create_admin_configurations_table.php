@@ -4,13 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAdminConfigurationsTable extends Migration
+return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('admin_configurations', function (Blueprint $table) {
@@ -42,14 +37,9 @@ class CreateAdminConfigurationsTable extends Migration
         PermissionRelation::touch('admin_configurations')->addCustomSet()->addResourceSet();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('admin_configuration_translations');
         Schema::dropIfExists('admin_configurations');
     }
-}
+};
