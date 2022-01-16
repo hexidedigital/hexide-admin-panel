@@ -3,7 +3,7 @@
 namespace HexideDigital\HexideAdmin\Classes;
 
 use HexideDigital\ModelPermissions\Models\Permission;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
 class SecureActions
@@ -11,43 +11,31 @@ class SecureActions
     /**
      * <p>pair: 'action' => 'permission'</p>
      * <p>if key of action if 'all' = full actions for all actions</p>
-     * <p>['all' => 'access'] or ['all' => true]</p>
+     * <p>['all' => 'viewAny'] or ['all' => true]</p>
      *
-     * @var array<string, string|bool|null>|null
+     * @var Collection<string, string|bool|null>
      */
-    protected ?array $accessMap;
-    protected ?string $moduleName;
+    protected Collection $accessMap;
+    protected string $moduleName;
 
-    public function __construct(string $moduleName = null, array $accessMap = null)
-    {
-        $this->moduleName = $moduleName;
-        $this->accessMap = $accessMap;
-    }
-
-    public function getModuleName(): ?string
+    public function getModuleName(): string
     {
         return $this->moduleName;
     }
 
-    public function setModuleName(?string $moduleName): void
+    public function setModuleName(string $moduleName): void
     {
         $this->moduleName = $moduleName;
     }
 
-    /**
-     * @return array<string, string|bool|null>|null
-     */
-    public function getAccessMap(): ?array
+    public function getAccessMap(): Collection
     {
         return $this->accessMap;
     }
 
-    /**
-     * @param array<string, string|bool|null>|null $accessMap
-     */
-    public function setAccessMap(?array $accessMap): void
+    public function setAccessMap($accessMap): void
     {
-        $this->accessMap = $accessMap;
+        $this->accessMap = collect($accessMap);
     }
 
     public function removeAccessMap(): void
@@ -55,40 +43,15 @@ class SecureActions
         $this->setAccessMap(null);
     }
 
-    /**
-     * @param string $action
-     * @return string|bool|null
-     */
-    public function getPermissionForAction(string $action)
-    {
-        $permission = Arr::get($this->accessMap, $action);
-
-        if (!isset($permission)) {
-            $permission = Arr::get($this->accessMap, 'all');
-        }
-
-        return $permission;
-    }
-
-    public function issetPermission(string $action): bool
-    {
-        return boolval($this->getPermissionForAction($action));
-    }
-
-    public function hasPermissions(): bool
-    {
-        return is_array($this->accessMap) && sizeof($this->accessMap) > 0;
-    }
-
     public function setResourceAccessMap(): void
     {
         $this->setAccessMap([
-            'index' => Permission::Access,
+            'index' => Permission::ViewAny,
             'show' => Permission::View,
             'create' => Permission::Create,
             'store' => Permission::Create,
-            'edit' => Permission::Edit,
-            'update' => Permission::Edit,
+            'edit' => Permission::Update,
+            'update' => Permission::Update,
             'destroy' => Permission::Delete,
         ]);
     }
@@ -102,33 +65,68 @@ class SecureActions
         ]);
     }
 
+    public function __construct()
+    {
+        $this->accessMap = collect();
+    }
+
     /**
      * @param array<string, string|bool|null>|null $array
+     *
      * @return void
      */
     public function merge(?array $array): void
     {
-        $this->accessMap = array_merge($this->accessMap, $array ?? []);
+        $this->accessMap = $this->accessMap->merge($array);
     }
 
-    public function check(string $action): bool
+    public function checkWithAbort(string $action, $model = null)
     {
+//        abort_if(!$this->check($action, $model), 403);
+    }
+
+    public function check(string $action, $model = null): bool
+    {
+        if ($this->accessMap->isEmpty()) {
+            return true;
+        }
+
         $permission = $this->getPermissionForAction($action);
 
-        return !$this->hasPermissions() || (!empty($permission) && $this->checkPermission($permission));
+        return $permission === true
+            // not empty string '' OR not NULL or not FALSE
+            || (!empty($permission) && $this->gateCheck($permission, $model));
     }
 
     /**
-     * @param string|bool $permission
-     * @return bool
+     * @param string $action
+     *
+     * @return string|bool|null
      */
-    private function checkPermission($permission): bool
+    public function getPermissionForAction(string $action)
     {
-        return $permission === true || $this->gateCheck($permission);
+        $permission = $this->accessMap->get($action);
+
+        if (isset($permission)) {
+            return $permission;
+        }
+
+        return $this->accessMap->get('all');
     }
 
-    private function gateCheck(string $permission): bool
+    private function gateCheck(string $permission, $model): bool
     {
-        return !Gate::has($permission) || Gate::allows(Permission::key($this->moduleName, $permission)) || Gate::allows($permission);
+        $args = $model;
+
+        if ($model && in_array($permission, [Permission::ViewAny, Permission::Create])) {
+            $args = get_class($model);
+        }
+
+        return
+            Gate::allows(Permission::key($this->moduleName, $permission), $args)
+
+            // if false, that can be means permission with module prefix not exits,
+            // so try without prefix
+            || Gate::allows($permission, $args);
     }
 }

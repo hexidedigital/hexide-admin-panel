@@ -34,15 +34,6 @@ if (!function_exists('locale_prefix')) {
     }
 }
 
-if (!function_exists('permission_can')) {
-    function permission_can(string $permission, ?string $module = null, ?Model $model = null): bool
-    {
-        $key = Permission::key($module, $permission);
-
-        return !Gate::has($key) || Gate::allows($key);
-    }
-}
-
 if (!function_exists('declension_word')) {
     /**
      * <p>приклад                  0           1           2                </p>

@@ -20,7 +20,7 @@ class ListConfigurationController extends HexideAdminBaseController
 
         $this->setServiceClassName(ListConfigurationService::class);
         $this->setFromRequestClassName(ListUpdateRequest::class);
-        $this->setModule(AdminConfiguration::class);
+        $this->initModule(AdminConfiguration::class);
     }
 
     public function index()

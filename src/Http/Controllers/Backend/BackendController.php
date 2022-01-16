@@ -12,10 +12,8 @@ use HexideDigital\HexideAdmin\Http\Requests\Backend\AjaxFieldRequest;
 use HexideDigital\HexideAdmin\Http\ViewNames;
 use HexideDigital\HexideAdmin\Services\BackendService;
 use HexideDigital\HexideAdmin\Services\ServiceInterface;
-use http\Exception\InvalidArgumentException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
@@ -26,7 +24,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use View;
 
 abstract class BackendController extends BaseController
 {
@@ -37,10 +34,10 @@ abstract class BackendController extends BaseController
     ];
 
     private const DatabaseAction = [
-        'store'       => ActionNames::Create,
-        'update'      => ActionNames::Edit,
-        'destroy'     => ActionNames::Delete,
-        'restore'     => ActionNames::Restore,
+        'store' => ActionNames::Create,
+        'update' => ActionNames::Edit,
+        'destroy' => ActionNames::Delete,
+        'restore' => ActionNames::Restore,
         'forceDelete' => ActionNames::ForceDelete,
     ];
 
@@ -81,30 +78,44 @@ abstract class BackendController extends BaseController
 
     public function indexAction()
     {
+        $this->secureActions->checkWithAbort(ActionNames::Index, $this->getModelClassName());
+
         return $this->render();
     }
 
     public function showAction(Request $request)
     {
-        $this->dataModel($this->getModelFromRoute($request, ActionNames::Show));
+        $model = $this->getModelFromRoute($request, ActionNames::Show);
+
+        $this->secureActions->checkWithAbort(ActionNames::Show, $model);
+
+        $this->dataModel($model);
 
         return $this->render(ViewNames::Show);
     }
 
     public function createAction()
     {
+        $this->secureActions->checkWithAbort(ActionNames::Create, $this->getModelClassName());
+
         return $this->render(ViewNames::Create);
     }
 
     public function editAction(Request $request)
     {
-        $this->dataModel($this->getModelFromRoute($request, ActionNames::Edit));
+        $model = $this->getModelFromRoute($request, ActionNames::Edit);
+
+        $this->secureActions->checkWithAbort(ActionNames::Edit, $model);
+
+        $this->dataModel($model);
 
         return $this->render(ViewNames::Edit);
     }
 
     public function storeAction(Request $request): RedirectResponse
     {
+        $this->secureActions->checkWithAbort(ActionNames::Index, $this->getModelClassName());
+
         $service = $this->getService();
 
         $model = $service->handleRequest($request, $this->getModelObject());
@@ -114,11 +125,15 @@ abstract class BackendController extends BaseController
 
     public function updateAction(Request $request): RedirectResponse
     {
+        $model = $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject();
+
+        $this->secureActions->checkWithAbort(ActionNames::Edit, $model);
+
         $service = $this->getService();
 
         $model = $service->handleRequest(
             $this->getFormRequest(ActionNames::Edit) ?: $request,
-            $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject()
+            $model
         );
 
         return $this->nextAction($model);
@@ -126,10 +141,11 @@ abstract class BackendController extends BaseController
 
     public function destroyAction(Request $request): RedirectResponse
     {
-        $service = $this->getService();
-
         $model = $this->getModelFromRoute($request, ActionNames::Delete);
 
+        $this->secureActions->checkWithAbort(ActionNames::Delete, $model);
+
+        $service = $this->getService();
         $service->deleteModel($request, $model);
 
         return back();
@@ -137,10 +153,11 @@ abstract class BackendController extends BaseController
 
     public function restoreAction(Request $request): RedirectResponse
     {
-        $service = $this->getService();
-
         $model = $this->getModelFromRoute($request, ActionNames::Restore);
 
+        $this->secureActions->checkWithAbort(ActionNames::Restore, $model);
+
+        $service = $this->getService();
         $service->restoreModel($request, $model);
 
         return back();
@@ -148,10 +165,11 @@ abstract class BackendController extends BaseController
 
     public function forceDeleteAction(Request $request): RedirectResponse
     {
-        $service = $this->getService();
-
         $model = $this->getModelFromRoute($request, ActionNames::ForceDelete);
 
+        $this->secureActions->checkWithAbort(ActionNames::ForceDelete, $model);
+
+        $service = $this->getService();
         $service->forceDeleteModel($request, $model);
 
         return back();
@@ -167,7 +185,9 @@ abstract class BackendController extends BaseController
      */
     public function ajaxFieldChangeAction(AjaxFieldRequest $request): JsonResponse
     {
-        $model = $this->getModelObject()::find($request->get('id'));
+        $model = $this->getModelObject()::findOrFail($request->get('id'));
+
+        $this->secureActions->checkWithAbort('ajaxFieldChange', $model);
 
         if ($model) {
             $field = $request->get('field');
@@ -183,6 +203,7 @@ abstract class BackendController extends BaseController
     }
 
 
+    /** @throws \Throwable */
     protected function getActionResult(string $action, $parameters)
     {
         if (in_array($action, self::Actions)) {
@@ -200,6 +221,7 @@ abstract class BackendController extends BaseController
         return parent::callAction($action, $parameters);
     }
 
+    /** @throws \Throwable */
     protected function dbTransactionAction(string $action, $parameters)
     {
         DB::beginTransaction();
@@ -220,9 +242,9 @@ abstract class BackendController extends BaseController
             $this
                 ->notify(self::DatabaseAction[$action], null, 'error')
                 ->notify(self::DatabaseAction[$action],
-                      class_basename($e) . " -- {$e->getFile()}: {$e->getLine()} ",
+                    class_basename($e) . " -- {$e->getFile()}: {$e->getLine()} ",
                     'error',
-                    class_basename($e) .  $e->getMessage());
+                    class_basename($e) . $e->getMessage());
 
             DB::rollBack();
         }
@@ -232,7 +254,7 @@ abstract class BackendController extends BaseController
 
     /* ------------ Model and module ------------ */
 
-    protected function setModule(string $modelClassName): void
+    protected function initModule(string $modelClassName): void
     {
         if (!class_exists($modelClassName)) {
             /* Will throw exception like `Class not found` */
@@ -243,6 +265,8 @@ abstract class BackendController extends BaseController
         $this->setModuleName();
         $this->setServiceClassName();
         $this->setFromRequestClassName();
+
+        $this->secureActions->setModuleName($this->getModuleName());
     }
 
     protected function setModelClassName(string $modelClassName): void
@@ -263,10 +287,6 @@ abstract class BackendController extends BaseController
         }
 
         $this->module = $name;
-
-        $this->data('module', $name);
-
-        $this->secureActions->setModuleName($name);
     }
 
     protected function getModuleName(): ?string
@@ -279,7 +299,7 @@ abstract class BackendController extends BaseController
         return $this->model;
     }
 
-    protected function setModel(?Model $model): void
+    protected function setModel(Model $model): void
     {
         $this->model = $model;
     }
@@ -338,11 +358,20 @@ abstract class BackendController extends BaseController
      */
     protected function getModelFromRoute(Request $request, string $action = null): ?Model
     {
-        if (in_array(SoftDeletes::class, class_uses($this->modelClass))) {
-            return $this->getModelObject()::withTrashed()->find($request->route(str_singular($this->getModuleName())));
+        if (in_array($action, [ActionNames::Index])) {
+            return $this->getModelObject();
         }
 
-        return $this->getModelObject()::findOrFail($request->route(str_singular($this->getModuleName())));
+        $id = $request->route(
+            str_singular($this->getModuleName()),
+            $request->get('id')
+        );
+
+        if (in_array(SoftDeletes::class, class_uses($this->modelClass))) {
+            return $this->getModelObject()::withTrashed()->findOrFail($id);
+        }
+
+        return $this->getModelObject()::findOrFail($id);
     }
 
     protected function setFromRequestClassName(string $requestClassName = null)
@@ -389,9 +418,9 @@ abstract class BackendController extends BaseController
             ],
 
             'menu' => [
-                'edit'   => __('next_action.edit'),
+                'edit' => __('next_action.edit'),
                 'create' => __('next_action.create'),
-                'show'   => __('next_action.show'),
+                'show' => __('next_action.show'),
             ],
         ];
     }
@@ -411,7 +440,7 @@ abstract class BackendController extends BaseController
 
     /* ------------ View data ------------ */
 
-    protected function dataModel(?Model $model)
+    protected function dataModel(Model $model)
     {
         $this->setModel($model);
 
@@ -434,7 +463,12 @@ abstract class BackendController extends BaseController
      */
     protected function protectAction(string $action)
     {
-        if (!$this->secureActions->check($action)) {
+        $type = $this->model;
+        if (empty($this->model) && !empty($this->modelClass)) {
+            $type = $this->getModelObject();
+        }
+
+        if (!$this->secureActions->check($action, $type)) {
             if (request()->ajax()) {
                 return response()
                     ->json(['message' => __('api_labels.forbidden'), 'type' => 'error'])
@@ -559,20 +593,20 @@ abstract class BackendController extends BaseController
 
     /* ------------ Controller methods ------------ */
 
-    public function callAction($action, $parameters)
+    public function callAction($method, $parameters)
     {
         $this->createBreadcrumb($this->getModuleName());
 
-        $result = $this->protectAction($action);
+        $result = $this->protectAction($method);
 
         if ($result !== true) {
-            $message = __('hexide-admin::messages.forbidden', ['key' => $this->module . '.' . $action]);
+            $message = __('hexide-admin::messages.forbidden', ['key' => $this->module . '.' . $method]);
             $this->notify(ActionNames::Action, $message, 'error');
 
             return $result;
         }
 
-        return $this->getActionResult($action, $parameters);
+        return $this->getActionResult($method, $parameters);
     }
 
     /**
@@ -605,6 +639,10 @@ abstract class BackendController extends BaseController
         $this->createBreadcrumb($forceActionType ?: array_last(explode('.', $view)));
 
         $this->data('next_actions', $this->getActionsForView());
+        $this->data('module', $this->getModuleName());
+        if (empty($this->model) && !empty($this->modelClass)) {
+            $this->dataModel($this->getModelObject());
+        }
 
         return parent::render($view, $data);
     }
@@ -613,19 +651,19 @@ abstract class BackendController extends BaseController
     {
         $module = Str::snake($this->getModuleName());
 
-        if (View::exists($viewPath = "admin.view.$module.$view")) {
+        if (\View::exists($viewPath = "admin.view.$module.$view")) {
             return $viewPath;
         }
 
-        if (View::exists($viewPath = "admin.view.$view")) {
+        if (\View::exists($viewPath = "admin.view.$view")) {
             return $viewPath;
         }
 
-        if (View::exists($viewPath = "hexide-admin::admin.view.$view")) {
+        if (\View::exists($viewPath = "hexide-admin::admin.view.$view")) {
             return $viewPath;
         }
 
-        if (View::exists($viewPath = "admin.$view")) {
+        if (\View::exists($viewPath = "admin.$view")) {
             return $viewPath;
         }
 

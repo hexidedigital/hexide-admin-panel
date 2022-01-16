@@ -19,7 +19,7 @@ class UserController extends HexideAdminBaseController
             'forceDelete' => Permission::ForceDelete,
         ]);
 
-        $this->setModule(User::class);
+        $this->initModule(User::class);
     }
 
     public function show(User $user)

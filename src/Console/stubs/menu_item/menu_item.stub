@@ -2,7 +2,8 @@
         [
             'text' => '{{ ModelName }}',
             'icon' => 'fas fa-file',
-            'can' => '{{ module_name_access }}',
+            'model' => \{{ model_namespace }}::class,
+            'can' => 'viewAny',
             'route' => 'admin.{{ model_names }}.index',
             'active' => ['regex:@^admin/{{ model_names }}/.+@'],
         ],/*hexide_admin_stub*/

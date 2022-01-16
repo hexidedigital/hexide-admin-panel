@@ -13,7 +13,7 @@ class RoleController extends HexideAdminBaseController
 
         $this->setResourceAccessMap();
 
-        $this->setModule(Role::class);
+        $this->initModule(Role::class);
 
         $this->data(['permissions' => Permission::pluck('title', 'id'),]);
     }

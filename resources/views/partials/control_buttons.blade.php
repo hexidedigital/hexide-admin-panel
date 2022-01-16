@@ -1,6 +1,5 @@
 @php
     use \Illuminate\Support\Str;
-    use \HexideDigital\ModelPermissions\Models\Permission;
     /**
      * @var string $module
      * @var \Illuminate\Database\Eloquent\Model $model
@@ -12,12 +11,11 @@
      * @var array|null $url_params
      */
 
-    $with_show = $with_show ?? true;
-    $with_edit = $with_edit ?? true;
-    $with_delete = $with_delete ?? true;
-    $with_restore = $with_restore ?? true;
-    $with_force_delete = $with_force_delete ?? true;
-
+    $with_show = ($with_show ?? true) && Route::has("admin.$module.show") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::View, $model);
+    $with_edit = ($with_edit ?? true) && Route::has("admin.$module.edit") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::Update, $model);
+    $with_delete = ($with_delete ?? true) && Route::has("admin.$module.destroy") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::Delete, $model);
+    $with_restore = ($with_restore ?? true) && Route::has("admin.$module.restore") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::Restore, $model);
+    $with_force_delete = ($with_force_delete ?? true) && Route::has("admin.$module.forceDelete") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::ForceDelete, $model);
     $url_params = $url_params ?? [];
     if(isset($model->id)) {
         $url_params = array_merge(
@@ -27,67 +25,67 @@
     }
 @endphp
 
-@isset($module)
+@if(isset($module) && isset($model))
     <div class="d-flex flex-nowrap">
 
-        @if($with_show && Route::has("admin.$module.show") && empty($model->deleted_at))
-            @if(permission_can(Permission::View, $module))
-                @include('hexide-admin::partials.buttons.control_button',
-                    [ "href" => route("admin.$module.show", $url_params), "title" => __("hexide-admin::buttons.show"), "color" => "indigo", "icon" => "fas fa-eye"]
-                )
-            @endif
-        @endif
+        @if(empty($model->deleted_at))
 
-        @if($with_edit && Route::has("admin.$module.edit") && empty($model->deleted_at))
-            @if(permission_can(Permission::Edit, $module, $model))
-                @include('hexide-admin::partials.buttons.control_button',
-                    [ "href" => route("admin.$module.edit", $url_params), "title" => __("hexide-admin::buttons.edit"), "color" => "warning", "icon" => "fas fa-pencil-alt"]
-                )
-            @endif
-        @endif
+            @if($with_show)
 
-        @if($with_delete && Route::has("admin.$module.destroy") && empty($model->deleted_at))
-            @if(permission_can(Permission::Delete, $module, $model))
+                @include('hexide-admin::partials.buttons.control_button', [
+                    "href" => route("admin.$module.show", $url_params), "title" => __("hexide-admin::buttons.show"),
+                    "color" => "indigo", "icon" => "fas fa-eye"
+                ])
+            @endif
+
+            @if($with_edit)
+                @include('hexide-admin::partials.buttons.control_button', [
+                    "href" => route("admin.$module.edit", $url_params), "title" => __("hexide-admin::buttons.edit"),
+                     "color" => "warning", "icon" => "fas fa-pencil-alt"
+                ])
+            @endif
+
+            @if($with_delete)
                 <form action="{{ route("admin.$module.destroy", $model->{$model->getKeyName()}) }}"
                       method="POST" style="display: inline-block;"
                       onsubmit="return confirm('{{__("hexide-admin::messages.confirm.delete")}}');">
                     @csrf
                     @method("DELETE")
 
-                    @include('hexide-admin::partials.buttons.control_button',
-                        [ "type" => "submit", "title" => __("hexide-admin::buttons.delete"), "color" => "danger", "icon" => "fas fa-trash",]
-                    )
+                    @include('hexide-admin::partials.buttons.control_button', [
+                        "type" => "submit", "title" => __("hexide-admin::buttons.delete"),
+                        "color" => "danger", "icon" => "fas fa-trash",
+                    ])
                 </form>
             @endif
-        @endif
 
+        @else
 
-        @if($with_force_delete && Route::has("admin.$module.restore") && !empty($model->deleted_at))
-            @if(permission_can(Permission::Restore, $module, $model))
+            @if($with_restore)
                 <form action="{{ route("admin.$module.restore", $model->{$model->getKeyName()}) }}"
                       method="POST" style="display: inline-block;"
                       onsubmit="return confirm('{{__("hexide-admin::messages.confirm.restore")}}');">
                     @csrf
                     @method("PUT")
 
-                    @include('hexide-admin::partials.buttons.control_button',
-                        [ "type" => "submit", "title" => __("hexide-admin::buttons.restore"), "color" => "success", "icon" => "fas fa-trash-restore",]
-                    )
+                    @include('hexide-admin::partials.buttons.control_button', [
+                        "type" => "submit", "title" => __("hexide-admin::buttons.restore"),
+                         "color" => "success", "icon" => "fas fa-trash-restore",
+                    ])
                 </form>
             @endif
-        @endif
 
-        @if($with_restore && Route::has("admin.$module.forceDelete") && !empty($model->deleted_at))
-            @if(permission_can(Permission::ForceDelete, $module, $model))
+            @if($with_force_delete)
                 <form action="{{ route("admin.$module.forceDelete", $model->{$model->getKeyName()}) }}"
                       method="POST" style="display: inline-block;"
                       onsubmit="return confirm('{{__("hexide-admin::messages.confirm.force_delete")}}');">
                     @csrf
                     @method("DELETE")
 
-                    @include('hexide-admin::partials.buttons.control_button',
-                        [ "type" => "submit", "title" => __("hexide-admin::buttons.forceDelete"), "color" => "danger", "icon" => "fas fa-eraser",]
-                    )
+                    @include('hexide-admin::partials.buttons.control_button', [
+                        "type" => "submit", "title" => __("hexide-admin::buttons.forceDelete"),
+                        "color" => "danger", "icon" => "fas fa-eraser",
+                    ])
                 </form>
             @endif
         @endif

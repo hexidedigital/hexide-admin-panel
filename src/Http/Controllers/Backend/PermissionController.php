@@ -12,6 +12,6 @@ class PermissionController extends HexideAdminBaseController
 
         $this->setFullAccessMap();
 
-        $this->setModule(Permission::class);
+        $this->initModule(Permission::class);
     }
 }

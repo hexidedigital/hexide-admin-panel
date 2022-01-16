@@ -15,7 +15,7 @@ class ConfigurationController extends HexideAdminBaseController
         $this->setFullAccessMap();
 
         $this->setFromRequestClassName(BaseRequest::class);
-        $this->setModule(AdminConfiguration::class);
+        $this->initModule(AdminConfiguration::class);
 
 
         $types = [];

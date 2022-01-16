@@ -20,7 +20,7 @@ class TranslationController extends HexideAdminBaseController
 
         $this->withoutBreadcrumbs();
 
-        $this->setModule(Translation::class);
+        $this->initModule(Translation::class);
 
         $service = new TranslationsService($request->route('group'));
         $this->setService($service);
