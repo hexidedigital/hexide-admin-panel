@@ -78,8 +78,6 @@ abstract class BackendController extends BaseController
 
     public function indexAction()
     {
-        $this->secureActions->checkWithAbort(ActionNames::Index, $this->getModelClassName());
-
         return $this->render();
     }
 
@@ -96,8 +94,6 @@ abstract class BackendController extends BaseController
 
     public function createAction()
     {
-        $this->secureActions->checkWithAbort(ActionNames::Create, $this->getModelClassName());
-
         return $this->render(ViewNames::Create);
     }
 
@@ -195,11 +191,11 @@ abstract class BackendController extends BaseController
             $model->{$field} = $request->get('value');
 
             if ($model->save()) {
-                return response()->json(['message' => __('hexide-admin::messages.success.action'),]);
+                return response()->json(['message' => trans('hexide-admin::messages.success.action'),]);
             }
         }
 
-        return response()->json(['message' => __('hexide-admin::messages.error.action'),], 422);
+        return response()->json(['message' => trans('hexide-admin::messages.error.action'),], 422);
     }
 
 
@@ -275,7 +271,7 @@ abstract class BackendController extends BaseController
     /** @return class-string<Model|Eloquent>|string */
     protected function getModelClassName(): string
     {
-        return $this->modelClass ?: config('hexide-admin.namespaces.model') . str_singular(Str::studly($this->getModuleName()));
+        return $this->modelClass ?: config('hexide-admin.namespaces.model') . '\\' . str_singular(Str::studly($this->getModuleName()));
     }
 
     protected function setModuleName(string $name = null)
@@ -328,7 +324,7 @@ abstract class BackendController extends BaseController
     /** @return class-string<ServiceInterface|BackendService>|string */
     protected function getServiceClassName(): string
     {
-        return $this->serviceClass ?: config('hexide-admin.namespaces.service') . str_singular(Str::studly($this->getModuleName())) . 'Service';
+        return $this->serviceClass ?: config('hexide-admin.namespaces.service') . '\\' . str_singular(Str::studly($this->getModuleName())) . 'Service';
     }
 
     protected function setService(ServiceInterface $service)
@@ -394,7 +390,7 @@ abstract class BackendController extends BaseController
      */
     protected function getFormRequestClassName(string $action = null): string
     {
-        return $this->formRequestClassName ?: config('hexide-admin.namespaces.request') . str_singular(Str::studly($this->getModuleName())) . 'Request';
+        return $this->formRequestClassName ?: config('hexide-admin.namespaces.request') . '\\' . str_singular(Str::studly($this->getModuleName())) . 'Request';
     }
 
     /**
@@ -414,13 +410,13 @@ abstract class BackendController extends BaseController
     {
         return [
             'default' => [
-                'index' => __('next_action.index'),
+                'index' => trans('next_action.index'),
             ],
 
             'menu' => [
-                'edit' => __('next_action.edit'),
-                'create' => __('next_action.create'),
-                'show' => __('next_action.show'),
+                'edit' => trans('next_action.edit'),
+                'create' => trans('next_action.create'),
+                'show' => trans('next_action.show'),
             ],
         ];
     }
@@ -471,7 +467,7 @@ abstract class BackendController extends BaseController
         if (!$this->secureActions->check($action, $type)) {
             if (request()->ajax()) {
                 return response()
-                    ->json(['message' => __('api_labels.forbidden'), 'type' => 'error'])
+                    ->json(['message' => trans('api_labels.forbidden'), 'type' => 'error'])
                     ->setStatusCode(SymfonyResponse::HTTP_FORBIDDEN);
             } else {
                 if ($action != 'index') {
@@ -539,12 +535,12 @@ abstract class BackendController extends BaseController
         }
 
         if (empty($title)) {
-            $title = __("hexide-admin::messages.$type.title");
+            $title = trans("hexide-admin::messages.$type.title");
         }
 
         if (empty($message)) {
             if (in_array($type, ['error', 'success'])) {
-                $message = __("hexide-admin::messages.$type.$action",
+                $message = trans("hexide-admin::messages.$type.$action",
                     ['model' => trans_choice("models.{$this->getModuleName()}.name", 1)]
                 );
             }
@@ -576,7 +572,7 @@ abstract class BackendController extends BaseController
             return trans_choice("models.$module.name", 2);
         }
 
-        return __("models.$method");
+        return trans("models.$method");
     }
 
     protected function getRouteForBreadcrumb(string $method): string
@@ -600,7 +596,7 @@ abstract class BackendController extends BaseController
         $result = $this->protectAction($method);
 
         if ($result !== true) {
-            $message = __('hexide-admin::messages.forbidden', ['key' => $this->module . '.' . $method]);
+            $message = trans('hexide-admin::messages.forbidden', ['key' => $this->module . '.' . $method]);
             $this->notify(ActionNames::Action, $message, 'error');
 
             return $result;

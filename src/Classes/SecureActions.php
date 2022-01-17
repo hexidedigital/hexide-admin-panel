@@ -82,7 +82,7 @@ class SecureActions
 
     public function checkWithAbort(string $action, $model = null)
     {
-//        abort_if(!$this->check($action, $model), 403);
+        abort_if(!$this->check($action, $model), 403);
     }
 
     public function check(string $action, $model = null): bool

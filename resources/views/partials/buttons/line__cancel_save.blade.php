@@ -19,14 +19,17 @@ $url_params = $url_params ?? [];
 
     <div class="col-sm-6 justify-content-end text-right">
         <div class="btn-group" :class="show && 'show'" x-data="{show: false}">
-            <button type="submit" name="next_action" value="index" class="btn btn-success">
-                <span class="mr-2"><i class="far fa-save"></i></span>
-                @isset($next_actions['default'])
+            @isset($next_actions['default'])
+                <button type="submit" name="next_action" value="{{ array_first(array_keys($next_actions['default'])) }}" class="btn btn-success">
+                    <span class="mr-2"><i class="far fa-save"></i></span>
                     {{ array_first($next_actions['default']) }}
-                @else
+                </button>
+            @else
+                <button type="submit" name="next_action" value="index" class="btn btn-success">
+                    <span class="mr-2"><i class="far fa-save"></i></span>
                     {{ __('hexide-admin::buttons.save') }}
-                @endif
-            </button>
+                </button>
+            @endif
 
             @isset($next_actions['menu'])
                 <a class="btn btn-success dropdown-toggle" @click.prevent="show = !show">
