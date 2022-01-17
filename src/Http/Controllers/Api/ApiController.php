@@ -3,26 +3,22 @@
 namespace HexideDigital\HexideAdmin\Http\Controllers\Api;
 
 use App\Models\User;
+use HexideDigital\HexideAdmin\Traits\Includeble;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as Controller;
 
 abstract class ApiController extends Controller
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
-    protected Request $request;
+    use Includeble;
 
     protected ?User $user;
 
     /** Message for responding. Can be the key of translations */
     protected string $message = '';
-
-    /** HTTP header status code */
-    protected int $statusCode = 200;
 
     public function __construct()
     {
@@ -30,20 +26,6 @@ abstract class ApiController extends Controller
             $this->user = $request->user();
             return $next($request);
         });
-    }
-
-    /** Getter for statusCode */
-    protected function getStatusCode(): int
-    {
-        return $this->statusCode;
-    }
-
-    /** Setter for statusCode */
-    protected function setStatusCode(int $statusCode): self
-    {
-        $this->statusCode = $statusCode;
-
-        return $this;
     }
 
     /** Set message for response */
@@ -54,117 +36,112 @@ abstract class ApiController extends Controller
         return $this;
     }
 
-    /**
-     * Response body: <br>
-     * [
-     *      'message'     => message,
-     *      'http_status' => statusCode,
-     * ]
-     */
-    protected function respondWithMessageStatus(string $message): JsonResponse
+    protected function respondMessage(string $message, int $status = 200): JsonResponse
     {
-        return $this->setMessage($message)->respondWithArray([
+        return $this->setMessage($message)->respondArray([
             'message' => $this->message,
-            'http_status' => $this->statusCode,
-        ]);
+        ], $status);
     }
 
     /** Respond with success status 200 and massage 'Success' */
-    protected function respondWithSuccess(string $message = 'success'): JsonResponse
+    protected function respondSuccess(string $message = 'success', int $status = 200): JsonResponse
     {
-        return $this->setStatusCode(200)->respondWithMessageStatus($message);
+        return $this->respondMessage($message, $status);
     }
 
     /** Respond with a given array of items */
-    protected function respondWithArray(array $array, array $headers = []): JsonResponse
+    protected function respondDataArray(array $array, int $status = 200, array $headers = []): JsonResponse
     {
-        return response()->json(['data' => $array], $this->statusCode, $headers);
+        return $this->respondArray(['data' => $array], $status, $headers);
+    }
+
+    /** Respond with a given array of items */
+    protected function respondArray(array $array, int $status = 200, array $headers = []): JsonResponse
+    {
+        return response()->json($array, $status, $headers);
     }
 
     /** Response with the current error */
-    protected function respondWithError(string $message): JsonResponse
+    protected function respondWithError(string $message, int $statusCode): JsonResponse
     {
-        return $this->setMessage($message)->respondWithArray([
+        return $this->setMessage($message)->respondArray([
             'message' => $this->message,
-            'error' => [
-                'http_code' => $this->statusCode,
-            ],
-        ]);
+        ], $statusCode);
     }
 
     /** Generate a Response with a 400 HTTP header and a given message. */
-    protected function errorWrongArgs(string $message = 'wrong arguments'): JsonResponse
+    protected function errorWrongArgs(string $message = 'wrong arguments', int $statusCode = 400): JsonResponse
     {
-        return $this->setStatusCode(400)->respondWithError($message);
+        return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 401 HTTP header and a given message */
-    protected function errorUnauthorized(string $message = 'unauthorized'): JsonResponse
+    protected function errorUnauthorized(string $message = 'unauthorized', int $statusCode = 401): JsonResponse
     {
-        return $this->setStatusCode(401)->respondWithError($message);
+        return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 403 HTTP header and a given message */
-    protected function errorForbidden(string $message = 'forbidden'): JsonResponse
+    protected function errorForbidden(string $message = 'forbidden', int $statusCode = 403): JsonResponse
     {
-        return $this->setStatusCode(403)->respondWithError($message);
+        return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 403 HTTP header and a given message */
-    protected function errorLocked(string $message = 'your account is locked'): JsonResponse
+    protected function errorLocked(string $message = 'your account is locked', int $statusCode = 403): JsonResponse
     {
-        return $this->setStatusCode(403)->respondWithError($message);
+        return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 404 HTTP header and a given message */
-    protected function errorNotFound(string $message = 'resource not found'): JsonResponse
+    protected function errorNotFound(string $message = 'resource not found', int $statusCode = 404): JsonResponse
     {
-        return $this->setStatusCode(404)->respondWithError($message);
+        return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 409 HTTP header and a given message */
-    protected function hasAlreadyExist(string $message = 'resource has already exist'): JsonResponse
+    protected function errorAlreadyExist(string $message = 'resource has already exist', int $statusCode = 409): JsonResponse
     {
-        return $this->setStatusCode(409)->respondWithError($message);
+        return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 418 HTTP header and a given message */
-    protected function errorAuth(string $message = 'auth failed'): JsonResponse
+    protected function errorAuth(string $message = 'auth failed', int $statusCode = 418): JsonResponse
     {
-        return $this->setStatusCode(418)->respondWithError($message);
+        return $this->respondWithError($message, $statusCode);
     }
 
     /** Response with 422 code */
-    protected function respondWithValidationErrors(array $errors, string $message = 'given data was invalid', array $headers = []): JsonResponse
+    protected function respondValidationErrors(array $errors, string $message = 'given data was invalid', int $statusCode = 422, array $headers = []): JsonResponse
     {
-        return $this->setStatusCode(422)->setMessage($message)->respondWithArray([
-            'message' => $message,
+        return $this->setMessage($message)->respondDataArray([
+            'message' => $this->message,
             'errors' => $errors
-        ], $headers);
+        ], $statusCode, $headers);
     }
 
     /** Generate a Response with a 500 HTTP header and a given message */
-    protected function errorInternalError(string $message = 'Internal error'): JsonResponse
+    protected function errorInternalError(string $message = 'Internal error', int $statusCode = 500): JsonResponse
     {
-        return $this->setStatusCode(500)->respondWithError($message);
+        return $this->respondWithError($message, $statusCode);
     }
 
     /** Get the token array structure */
-    protected function respondWithToken(string $token): JsonResponse
+    protected function respondToken(string $token): JsonResponse
     {
-        return $this->respondWithArray([
+        return $this->respondDataArray([
             'access_token' => $token,
-            'token_type' => 'bearer',
+            'token_type' => 'Bearer',
             'expires_in' => config('sanctum.expiration', 0) * 60
         ]);
     }
 
     /** Get the token array structure with message */
-    protected function respondWithTokenWithMessage($token, string $message = 'success'): JsonResponse
+    protected function respondTokenAndMessage($token, string $message = 'success'): JsonResponse
     {
-        return $this->setMessage($message)->respondWithArray([
+        return $this->setMessage($message)->respondDataArray([
             'access_token' => $token,
-            'token_type' => 'bearer',
+            'token_type' => 'Bearer',
             'expires_in' => config('sanctum.expiration', 0) * 60,
             'message' => $this->message,
         ]);

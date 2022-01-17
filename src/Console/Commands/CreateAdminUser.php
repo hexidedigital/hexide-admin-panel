@@ -18,7 +18,7 @@ class CreateAdminUser extends Command
         try {
             $email = $this->getEmail();
 
-            $name = $this->option('name') ?: $this->ask('Enter name', \Arr::first(explode('@', $email)));
+            $name = $this->option('name') ?: ($this->option('no-interaction') ? null : $this->ask('Enter name'));
             $name = $name ?: \Arr::first(explode('@', $email));
 
             $password = $this->getHashedPassword();

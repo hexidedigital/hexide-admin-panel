@@ -122,11 +122,9 @@ class SecureActions
             $args = get_class($model);
         }
 
-        return
-            Gate::allows(Permission::key($this->moduleName, $permission), $args)
-
-            // if false, that can be means permission with module prefix not exits,
-            // so try without prefix
-            || Gate::allows($permission, $args);
+        return Gate::any([
+            $permission,
+            Permission::key($this->moduleName, $permission),
+        ], $args);
     }
 }

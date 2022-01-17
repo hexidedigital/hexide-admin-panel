@@ -1,6 +1,7 @@
 
         [
             'text' => '{{ ModelName }}',
+            'key' => '{{ module_names }}',
             'icon' => 'fas fa-file',
             'model' => \{{ model_namespace }}::class,
             'can' => 'viewAny',

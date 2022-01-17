@@ -4,47 +4,13 @@ namespace App\Policies;
 
 use App\Models\User;
 use {{ model_namespace }};
-use HexideDigital\ModelPermissions\Models\Permission;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use HexideDigital\HexideAdmin\Policies\DefaultPolicy;
 
-class PermissionPolicy
+class PermissionPolicy extends DefaultPolicy
 {
-    use HandlesAuthorization;
-
-    private const ModuleName = '{{ module_names }}';
-
-    public function after(User $user, $ability): bool
+    protected function module(): string
     {
-        return $user->isRoleSuperAdmin();
-    }
-
-    private function key(string $ability): string
-    {
-        return Permission::key(self::ModuleName, $ability);
-    }
-
-    public function viewAny(User $user): bool
-    {
-        return $user->hasPermission($this->key(Permission::ViewAny));
-    }
-
-    public function view(User $user, {{ ModelName }} ${{ modelName }}): bool
-    {
-        return $user->hasPermission($this->key(Permission::View));
-    }
-
-    public function create(User $user): bool
-    {
-        return $user->hasPermission($this->key(Permission::Create));
-    }
-
-    public function update(User $user, {{ ModelName }} ${{ modelName }}): bool
-    {
-        return $user->hasPermission($this->key(Permission::Update));
-    }
-
-    public function delete(User $user, {{ ModelName }} ${{ modelName }}): bool
-    {
-        return $user->hasPermission($this->key(Permission::Delete));
+        return (new {{ ModelName }}())->getTable();
+        // return '{{ module_names }}';
     }
 }

@@ -3,5 +3,5 @@
 @endphp
 
 <x-adminlte-card theme="navy" class="shadow" collapsible maximizable>
-    @include('ahexide-admin::dmin.view.admin_configurations.tabs.general')
+    @include('hexide-admin::admin.view.admin_configurations.tabs.general')
 </x-adminlte-card>

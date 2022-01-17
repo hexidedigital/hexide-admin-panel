@@ -265,8 +265,6 @@ abstract class BackendController extends BaseController
         $this->setModuleName();
         $this->setServiceClassName();
         $this->setFromRequestClassName();
-
-        $this->secureActions->setModuleName($this->getModuleName());
     }
 
     protected function setModelClassName(string $modelClassName): void
@@ -287,6 +285,8 @@ abstract class BackendController extends BaseController
         }
 
         $this->module = $name;
+
+        $this->secureActions->setModuleName($name);
     }
 
     protected function getModuleName(): ?string

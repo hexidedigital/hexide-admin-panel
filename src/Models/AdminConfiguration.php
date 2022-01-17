@@ -147,8 +147,8 @@ class AdminConfiguration extends Model implements WithTypesContract
             $adminConfiguration->key = $adminConfiguration->attributes['key'];
         });
 
-        static::deleted(function (AdminConfiguration $adminConfiguration) {
-
+        static::saved(function (AdminConfiguration $adminConfiguration) {
+            // todo store to cache
         });
     }
 
@@ -264,18 +264,21 @@ class AdminConfiguration extends Model implements WithTypesContract
     /**
      * @param string|array $group
      *
+     * @todo store and get for cache
+     *
      * @return array
      */
-    public static function varGroups($group = []): array
+    public static function configurations($group = []): array
     {
         $collection = AdminConfiguration::visible()
+            ->sorted()
             ->joinTranslations()
+            ->forGroup($group)
+            ->with('translations')
             ->select([
                 'admin_configurations.*',
                 'admin_configuration_translations.text as text',
             ])
-            ->forGroup($group)
-            ->sorted()
             ->get()
             ->groupBy('group');
 
