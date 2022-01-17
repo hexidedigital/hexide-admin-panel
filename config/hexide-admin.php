@@ -2,7 +2,12 @@
 
 return [
 
-    'secret_key' => null, //env('ADMIN_SECRET', null)
+    'configurations' => [
+        'secret_key' => null, //env('ADMIN_SECRET', null),
+        'show_admin_header' => true,
+        'show_debug_footer_site' => false,
+        'show_debug_footer_admin' => true,
+    ],
 
     // -------------------------------
     // Localisation

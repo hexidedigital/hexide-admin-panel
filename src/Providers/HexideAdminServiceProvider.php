@@ -8,6 +8,7 @@ use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotification;
 use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
 use HexideDigital\HexideAdmin\Components\Tabs\TabsComponent;
+use HexideDigital\HexideAdmin\Console\Commands\CleanSeededStorageCommand;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
@@ -29,6 +30,7 @@ class HexideAdminServiceProvider extends ServiceProvider
         HexideAdminCommand::class,
         CreateAdminUser::class,
         PrepareDeployCommand::class,
+        CleanSeededStorageCommand::class,
     ];
 
     private array $components = [

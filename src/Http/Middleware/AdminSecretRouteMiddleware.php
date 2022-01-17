@@ -4,12 +4,16 @@ namespace HexideDigital\HexideAdmin\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminSecretRouteMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if ($request->user() || empty(config('hexide-admin.secret_key')) || $request->has(config('hexide-admin.secret_key'))){
+        if (Auth::check()
+            || empty(config('hexide-admin.configurations.secret_key'))
+            || $request->has(config('hexide-admin.configurations.secret_key'))
+        ){
             return $next($request);
         }
 

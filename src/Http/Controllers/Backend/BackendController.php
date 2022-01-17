@@ -2,7 +2,6 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
-// use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 use Eloquent;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\SecureActions;
@@ -68,9 +67,9 @@ abstract class BackendController extends BaseController
 
         $this->dataUrlParams([]);
 
-//        if (!(AdminConfiguration::where('key', 'show_debug_footer')->first()->status ?? true)) {
-//            \Debugbar::disable();
-//        }
+        if (!config('hexide-admin.configurations.show_debug_footer_admin', true)) {
+            \Debugbar::disable();
+        }
     }
 
 
