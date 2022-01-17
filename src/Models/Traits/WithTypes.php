@@ -3,13 +3,11 @@
 namespace HexideDigital\HexideAdmin\Models\Traits;
 
 use Arr;
-use HexideDigital\HexideAdmin\Contracts\WithTypesContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @implements WithTypesContract
- * @method static \Illuminate\Database\Eloquent\Builder|self ofTypes($builder, $state, $field)
+ * @method static Builder|self ofTypes($builder, $state, $field)
  * @mixin Model
  */
 trait WithTypes

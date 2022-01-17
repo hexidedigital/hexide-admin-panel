@@ -1,5 +1,7 @@
 <?php
 
+use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
+
 return [
 
     'configurations' => [
@@ -75,7 +77,7 @@ return [
         'key_1' => [
             // 'key' => 'key_1',
             'name' => 'Name',
-            'type' => \HexideDigital\HexideAdmin\Models\AdminConfiguration::TEXT,
+            'type' => Configuration::TEXT,
             // 'translatable' => true
             'localization' => [
                 'uk' => 'Some value or json string',

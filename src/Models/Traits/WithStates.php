@@ -3,12 +3,10 @@
 namespace HexideDigital\HexideAdmin\Models\Traits;
 
 use Arr;
-use HexideDigital\HexideAdmin\Contracts\WithStatesContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @implements WithStatesContract
  * @method static \Illuminate\Database\Eloquent\Builder|static ofStates($builder, $state, $field)
  * @mixin Model
  */

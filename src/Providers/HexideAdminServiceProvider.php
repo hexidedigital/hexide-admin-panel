@@ -2,6 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Providers;
 
+use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
 use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
@@ -17,6 +18,7 @@ use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\PermissionTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\RoleTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
+use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Blade;
@@ -61,6 +63,10 @@ class HexideAdminServiceProvider extends ServiceProvider
 
         $this->app->bind(NotificationInterface::class, function () {
             return new ToastrNotification();
+        });
+
+        $this->app->bind(Configuration::class, function () {
+            return new Configuration();
         });
     }
 

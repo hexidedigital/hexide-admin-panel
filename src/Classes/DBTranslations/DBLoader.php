@@ -14,9 +14,9 @@ class DBLoader implements Loader
     /**
      * Load the messages for the given locale.
      *
-     * @param  string $locale
-     * @param  string $group
-     * @param  string $namespace
+     * @param string $locale
+     * @param string $group
+     * @param string $namespace
      *
      * @return array
      */
@@ -25,10 +25,10 @@ class DBLoader implements Loader
         try {
             $group = $this->_getGroup($group);
 
-            $result = null;
-
-            if(Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
-                $result = cache()->tags('translations')->get($locale.'_'.$group, null);
+            if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
+                $result = cache()->tags('translations')->get($locale . '_' . $group, null);
+            } else {
+                $result = Cache::get('translations_' . $locale . '_' . $group, null);
             }
 
             if ($result === null) {
@@ -41,18 +41,20 @@ class DBLoader implements Loader
                     ->toArray();
 
                 if (App::isProduction() && Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
-                    cache()->tags('translations')->put($locale.'_'.$group, $result, 60);
+                    cache()->tags('translations')->put($locale . '_' . $group, $result, 60);
                 }
+
+                Cache::put('translations_' . $locale . '_' . $group, $result, 60);
             }
 
             return $result;
         } catch (Exception $e) {
             // just insure themselves in case of problems with the database
             Log::critical(
-                'message: '.$e->getMessage().', line: '.$e->getLine().', file: '.$e->getFile(),
+                'message: ' . $e->getMessage() . ', line: ' . $e->getLine() . ', file: ' . $e->getFile(),
                 [
                     'locale' => $locale,
-                    'group'  => $group,
+                    'group' => $group,
                 ]
             );
 
@@ -63,8 +65,8 @@ class DBLoader implements Loader
     /**
      * Add a new namespace to the loader.
      *
-     * @param  string $namespace
-     * @param  string $hint
+     * @param string $namespace
+     * @param string $hint
      *
      * @return void
      */
@@ -76,7 +78,7 @@ class DBLoader implements Loader
     /**
      * Add a new JSON path to the loader.
      *
-     * @param  string $path
+     * @param string $path
      *
      * @return void
      */

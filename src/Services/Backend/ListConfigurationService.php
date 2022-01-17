@@ -2,6 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Services\Backend;
 
+use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\Configurations\ListUpdateRequest;
 use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 use HexideDigital\HexideAdmin\Services\BackendService;
@@ -39,7 +40,7 @@ class ListConfigurationService extends BackendService
 
         // todo store files and images
         // code bellow is deprecated
-        if ($model->type === AdminConfiguration::IMAGE) {
+        if ($model->isType(Configuration::IMAGE)) {
 
             if ($model->translatable) {
 
