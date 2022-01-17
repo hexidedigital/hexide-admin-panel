@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Http\Requests\Backend\Configurations;
 
-use HexideDigital\HexideAdmin\Models\AdminConfiguration;
+use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BaseRequest extends FormRequest
@@ -15,7 +15,7 @@ class BaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type'              => 'required|string|in:' . implode(',', AdminConfiguration::getTypes()),
+            'type'              => 'required|string|in:' . app(Configuration::class)->implodeTypes(),
             'key'               => 'required|string|max:10000',
             'name'              => 'required|string|max:10000',
             'translatable'      => 'required|boolean',

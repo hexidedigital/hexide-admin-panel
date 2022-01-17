@@ -2,6 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend\Configurations;
 
+use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
 use HexideDigital\HexideAdmin\Http\Controllers\Backend\HexideAdminBaseController;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\Configurations\BaseRequest;
 use HexideDigital\HexideAdmin\Models\AdminConfiguration;
@@ -19,7 +20,7 @@ class ConfigurationController extends HexideAdminBaseController
 
 
         $types = [];
-        foreach (AdminConfiguration::getTypes() as $type) {
+        foreach (app(Configuration::class)::getTypes() as $type) {
             $types[$type] = __('models.admin_configurations.type.' . $type);
         }
 
