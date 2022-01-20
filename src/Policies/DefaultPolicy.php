@@ -59,5 +59,11 @@ abstract class DefaultPolicy
             && $user->hasAdminAccess();
     }
 
+    public function ajax(User $user, Model $model): bool
+    {
+        return $user->hasPermissionKey('ajax', $this->module())
+            && $user->hasAdminAccess();
+    }
+
     abstract protected function module(): string;
 }
