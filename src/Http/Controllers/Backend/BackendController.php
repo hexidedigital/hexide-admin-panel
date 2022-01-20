@@ -14,6 +14,7 @@ use HexideDigital\HexideAdmin\Services\ServiceInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,6 +27,8 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 abstract class BackendController extends BaseController
 {
+    use AuthorizesRequests;
+
     private const Actions = [
         'index', 'show', 'create', 'store', 'edit', 'update', 'destroy',
         'restore', 'forceDelete',
@@ -109,11 +112,14 @@ abstract class BackendController extends BaseController
 
     public function storeAction(Request $request): RedirectResponse
     {
-        $this->secureActions->checkWithAbort(ActionNames::Index, $this->getModelClassName());
+        $this->secureActions->checkWithAbort(ActionNames::Create, $this->getModelClassName());
 
         $service = $this->getService();
 
-        $model = $service->handleRequest($request, $this->getModelObject());
+        $model = $service->handleRequest(
+            $this->getFormRequest(ActionNames::Create) ?: $request,
+            $this->getModelObject()
+        );
 
         return $this->nextAction($model);
     }
@@ -259,6 +265,7 @@ abstract class BackendController extends BaseController
         $this->setModelClassName($modelClassName);
         $this->setModuleName();
         $this->setServiceClassName();
+        $this->setService($this->getService());
         $this->setFromRequestClassName();
     }
 
@@ -613,17 +620,12 @@ abstract class BackendController extends BaseController
      */
     protected function render(?string $view = null, array $data = [], string $forceActionType = null)
     {
-        if (empty($view)) {
-            $view = ViewNames::Index;
-        }
+        $view = $view ?: ViewNames::Index;
 
         if (in_array($forceActionType, [ViewNames::Edit, ViewNames::Create]) ||
             in_array($view, [ViewNames::Edit, ViewNames::Create])) {
-
             $forceActionType = $forceActionType ?? $view;
-
             $this->notifyIfExistsErrors($forceActionType);
-
             $this->data('layout_type', $forceActionType);
         } else {
             $this->notifyIfExistsErrors();

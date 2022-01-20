@@ -24,8 +24,6 @@ class TranslationController extends HexideAdminBaseController
 
         $service = new TranslationsService($request->route('group'));
         $this->setService($service);
-
-        $this->locales = $service->getLocales();
     }
 
     public function index(Request $request)
@@ -46,7 +44,7 @@ class TranslationController extends HexideAdminBaseController
         );
 
         $this->data([
-            'locales' => $this->locales,
+            'locales' => $service->getLocales(),
             'list' => $list,
             'group' => $group,
             'page' => $page,
@@ -63,27 +61,16 @@ class TranslationController extends HexideAdminBaseController
     /** @throws \Throwable */
     public function update(TranslationUpdateRequest $request): RedirectResponse
     {
-        DB::beginTransaction();
         /** @var TranslationsService $service */
         $service = $this->getService();
 
-        try {
-            $service->updateTranslations($request);
+        $service->updateTranslations($request);
 
-            $this->notify(ActionNames::Edit);
+        $request->flush();
 
-            DB::commit();
-        } catch (\Exception $e) {
-            $this->notify(ActionNames::Edit, $e->getMessage(), 'error');
-
-            DB::rollBack();
-        } finally {
-            $request->flush();
-
-            return $this->redirect('index', [
-                'group' => $service->getGroup(),
-                'page' => $request->input('page', 1),
-            ]);
-        }
+        return $this->redirect('index', [
+            'group' => $service->getGroup(),
+            'page' => $request->input('page', 1),
+        ]);
     }
 }
