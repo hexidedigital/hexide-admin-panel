@@ -59,6 +59,7 @@ abstract class BackendController extends BaseController
     private ?string $formRequestClassName = null;
 
     protected SecureActions $secureActions;
+    protected bool $catchExceptions = true;
 
     public function __construct()
     {
@@ -243,6 +244,10 @@ abstract class BackendController extends BaseController
 
             return $result;
         } catch (\Throwable $e) {
+            if ($this->catchExceptions) {
+                throw $e;
+            }
+
             $this
                 ->notify(self::DatabaseAction[$action], null, 'error')
                 ->notify(self::DatabaseAction[$action],
@@ -559,7 +564,7 @@ abstract class BackendController extends BaseController
     protected function getNotifyModelMessage(string $type = 'success', string $action = 'action'): string
     {
         return __("hexide-admin::messages.$type.$action", [
-            'model' => trans_choice("models.{$this->getModuleName()}.name", 1)
+            'model' => trans_choice("models.{$this->getModuleName()}.name", 1),
         ]);
     }
 
