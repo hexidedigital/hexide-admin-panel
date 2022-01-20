@@ -14,6 +14,8 @@
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 
+    <script src="{{ mix('/js/admin/alpine.min.js') }}"></script>
+
     @toastr_render
 @endpush
 
