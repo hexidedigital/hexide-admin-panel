@@ -5,14 +5,19 @@
      * @var string $module
      * @var string $type
      */
-$with_not_set = $with_not_set ?? true;
+@endphp
+
+@php
+    $with_not_set = $with_not_set ?? true;
+
+        $route = route("admin.ajax_field.$module", ['id' => $model->{$model->getKeyName()}]);
 @endphp
 
 <select name="{!! $field !!}" class="ajax_input form-control"
         data-id="{!! $model->{$model->getKeyName()} !!}"
         data-token="{!! csrf_token() !!}"
         data-field="{!! $field !!}"
-        data-url="{!! route('admin.' . $module . '.ajax_field', ['id' => $model->{$model->getKeyName()}]) !!}"
+        data-url="{!! $route !!}"
 >
     @if($with_not_set)
         <option
