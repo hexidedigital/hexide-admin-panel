@@ -8,7 +8,6 @@ use HexideDigital\HexideAdmin\Http\ActionNames;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\TranslationUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class TranslationController extends HexideAdminBaseController
 {

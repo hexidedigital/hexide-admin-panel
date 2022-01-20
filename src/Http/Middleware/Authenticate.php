@@ -10,16 +10,18 @@ class Authenticate extends Middleware
 {
     public function handle($request, Closure $next, ...$guards)
     {
-        if (in_array('admin', $guards)) {
-            if (!(Auth::check() && Auth::user()->hasAdminAccess())) {
-                Auth::logout();
+        if (!in_array('admin', $guards)) {
+            return parent::handle($request, $next, ...$guards);
+        }
 
-                return redirect(route('admin.login'));
-            }
-
+        if (Auth::check() && Auth::user()->hasAdminAccess()) {
             return $next($request);
         }
 
-        return parent::handle($request, $next, ...$guards);
+        Auth::logout();
+
+        session(['redirect_uri' => $request->getRequestUri()]);
+
+        return redirect(route('admin.login'));
     }
 }

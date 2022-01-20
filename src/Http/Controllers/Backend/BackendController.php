@@ -121,7 +121,7 @@ abstract class BackendController extends BaseController
             $this->getModelObject()
         );
 
-        return $this->nextAction($model);
+        return $this->nextActionRedirect($model);
     }
 
     public function updateAction(Request $request): RedirectResponse
@@ -137,7 +137,7 @@ abstract class BackendController extends BaseController
             $model
         );
 
-        return $this->nextAction($model);
+        return $this->nextActionRedirect($model);
     }
 
     public function destroyAction(Request $request): RedirectResponse
@@ -188,38 +188,41 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelObject()::findOrFail($request->get('id'));
 
-        $this->secureActions->checkWithAbort('ajaxFieldChange', $model);
+        $field = $request->get('field');
 
-        if ($model) {
-            $field = $request->get('field');
-
-            $model->{$field} = $request->get('value');
-
-            if ($model->save()) {
-                return response()->json(['message' => trans('hexide-admin::messages.success.action'),]);
-            }
+        if (!$model->isFillable($field)) {
+            return response()->json(['message' => trans('messages.error.action')], 422);
         }
 
-        return response()->json(['message' => trans('hexide-admin::messages.error.action'),], 422);
+        if ($model->update([$field => $request->get('value')])) {
+            return response()->json(['message' => $this->getNotifyModelMessage('success', ActionNames::Edit)]);
+        }
+
+        return response()->json(['message' => $this->getNotifyModelMessage('error', ActionNames::Edit)], 422);
     }
 
 
     /** @throws \Throwable */
     protected function getActionResult(string $action, $parameters)
     {
-        if (in_array($action, self::Actions)) {
-            if ($this->isDatabaseAction($action)) {
-                return $this->dbTransactionAction($action, $parameters);
-            }
+        if (!in_array($action, self::Actions)) {
+            return parent::callAction($action, $parameters);
+        }
 
-            if (method_exists($this, $action)) {
-                return parent::callAction($action, $parameters);
-            }
+        if ($this->isDatabaseAction($action)) {
+            return $this->dbTransactionAction($action, $parameters);
+        }
 
+        if (!method_exists($this, $action)) {
             return App::call([$this, $action . 'Action']);
         }
 
         return parent::callAction($action, $parameters);
+    }
+
+    protected function isDatabaseAction(string $action): bool
+    {
+        return in_array($action, array_keys(self::DatabaseAction));
     }
 
     /** @throws \Throwable */
@@ -228,10 +231,10 @@ abstract class BackendController extends BaseController
         DB::beginTransaction();
 
         try {
-            if (method_exists($this, $action)) {
-                $result = parent::callAction($action, $parameters);
-            } else {
+            if (!method_exists($this, $action)) {
                 $result = App::call([$this, $action . 'Action']);
+            } else {
+                $result = parent::callAction($action, $parameters);
             }
 
             $this->notify(self::DatabaseAction[$action]);
@@ -360,7 +363,7 @@ abstract class BackendController extends BaseController
      */
     protected function getModelFromRoute(Request $request, string $action = null): ?Model
     {
-        if (in_array($action, [ActionNames::Index])) {
+        if (in_array($action, $this->resourceMethodsWithoutModels())) {
             return $this->getModelObject();
         }
 
@@ -427,7 +430,7 @@ abstract class BackendController extends BaseController
         ];
     }
 
-    protected function nextAction(Model $model = null, array $params = []): RedirectResponse
+    protected function nextActionRedirect(Model $model = null, array $params = []): RedirectResponse
     {
         $nextAction = request('next_action', 'index');
         $module = $this->getModuleName();
@@ -544,12 +547,8 @@ abstract class BackendController extends BaseController
             $title = trans("hexide-admin::messages.$type.title");
         }
 
-        if (empty($message)) {
-            if (in_array($type, ['error', 'success'])) {
-                $message = trans("hexide-admin::messages.$type.$action",
-                    ['model' => trans_choice("models.{$this->getModuleName()}.name", 1)]
-                );
-            }
+        if (empty($message) && in_array($type, ['error', 'success'])) {
+            $message = $this->getNotifyModelMessage($type, $action);
         }
 
         $this->notificator->notify($message, $type, $title, $options);
@@ -557,6 +556,12 @@ abstract class BackendController extends BaseController
         return $this;
     }
 
+    protected function getNotifyModelMessage(string $type = 'success', string $action = 'action'): string
+    {
+        return __("hexide_admin::messages.$type.$action", [
+            'model' => trans_choice("models.{$this->getModuleName()}.name", 1)
+        ]);
+    }
 
     /* ------------ Breadcrumbs ------------ */
 
@@ -677,11 +682,6 @@ abstract class BackendController extends BaseController
         $route = Route::has("admin.$module.$action") ? "admin.$module.$action" : $action;
 
         return redirect()->route($route, $params);
-    }
-
-    private function isDatabaseAction(string $action): bool
-    {
-        return in_array($action, array_keys(self::DatabaseAction));
     }
 
 }

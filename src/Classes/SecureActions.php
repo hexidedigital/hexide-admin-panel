@@ -18,6 +18,11 @@ class SecureActions
     protected Collection $accessMap;
     protected string $moduleName;
 
+    public function __construct()
+    {
+        $this->accessMap = collect();
+    }
+
     public function getModuleName(): string
     {
         return $this->moduleName;
@@ -65,11 +70,6 @@ class SecureActions
         ]);
     }
 
-    public function __construct()
-    {
-        $this->accessMap = collect();
-    }
-
     /**
      * @param array<string, string|bool|null>|null $array
      *
@@ -105,13 +105,10 @@ class SecureActions
      */
     public function getPermissionForAction(string $action)
     {
-        $permission = $this->accessMap->get($action);
-
-        if (isset($permission)) {
-            return $permission;
-        }
-
-        return $this->accessMap->get('all');
+        return $this->accessMap->get(
+            $action,
+            $this->accessMap->get('all')
+        );
     }
 
     private function gateCheck(string $permission, $model): bool

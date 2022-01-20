@@ -23,17 +23,11 @@ class CreateAdminUser extends Command
 
             $password = $this->getHashedPassword();
 
-            $is_system = false;
-            $role = Role::Admin;
+            $user = User::make(compact('name', 'email', 'name', 'password'));
+            $user->is_system = $this->isSystem($email);
+            $user->save();
 
-            if (in_array('is_system', (new User)->getHidden()) && $email === 'super-admin@admin.com') {
-                $is_system = true;
-                $role = Role::SuperAdmin;
-            }
-
-            $user = User::create(compact('name', 'email', 'name', 'is_system', 'password'));
-
-            $user->roles()->attach($role);
+            $user->roles()->attach($user->is_system ? Role::SuperAdmin : Role::Admin);
 
             $this->info('New user for admin panel created');
             $this->table(['field', 'value'], [
@@ -49,6 +43,11 @@ class CreateAdminUser extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    protected function isSystem(string $email): bool
+    {
+        return in_array('is_system', (new User)->getHidden()) && $email === 'super-admin@admin.com';
     }
 
     protected function getEmail()
