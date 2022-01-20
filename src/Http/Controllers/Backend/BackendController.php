@@ -558,7 +558,7 @@ abstract class BackendController extends BaseController
 
     protected function getNotifyModelMessage(string $type = 'success', string $action = 'action'): string
     {
-        return __("hexide_admin::messages.$type.$action", [
+        return __("hexide-admin::messages.$type.$action", [
             'model' => trans_choice("models.{$this->getModuleName()}.name", 1)
         ]);
     }
