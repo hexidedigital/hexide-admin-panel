@@ -2,9 +2,9 @@
 
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
-use App\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use HexideDigital\ModelPermissions\Models\Role;
 
 class RoleTable extends DefaultTable
 {

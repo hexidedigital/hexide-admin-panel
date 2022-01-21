@@ -11,10 +11,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Eloquent;
 
 /**
  * @mixin AdminConfigurationTranslation
- * @mixin \Eloquent
+ * @mixin Eloquent
  *
  * @property int $id
  * @property string $key
@@ -139,7 +140,7 @@ class AdminConfiguration extends Model
 
             $value = $this->asJson($value);
 
-        } else if ($configuration->isArrayValueType($this->type)) {
+        } elseif ($configuration->isArrayValueType($this->type)) {
 
             if (empty($value)) {
                 $value = [];
@@ -147,7 +148,7 @@ class AdminConfiguration extends Model
 
             $value = $this->asJson($value);
 
-        } else if ($configuration->isObjectValueType($this->type)) {
+        } elseif ($configuration->isObjectValueType($this->type)) {
 
             $value = array_wrap($value);
 
@@ -158,7 +159,7 @@ class AdminConfiguration extends Model
                     'to' => array_get($value, 'to'),
                 ]);
 
-            } else if ($this->isType(Configuration::IMG_BUTTON)) {
+            } elseif ($this->isType(Configuration::IMG_BUTTON)) {
 
                 $value = $this->asJson([
                     'image' => array_get($value, 'image'),

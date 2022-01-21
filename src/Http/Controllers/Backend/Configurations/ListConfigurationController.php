@@ -5,7 +5,7 @@ namespace HexideDigital\HexideAdmin\Http\Controllers\Backend\Configurations;
 use HexideDigital\HexideAdmin\Http\Controllers\Backend\HexideAdminBaseController;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\Configurations\ListUpdateRequest;
 use HexideDigital\HexideAdmin\Models\AdminConfiguration;
-use HexideDigital\HexideAdmin\Services\Backend\ListConfigurationService;
+use HexideDigital\HexideAdmin\Services\Backend\Configurations\ListConfigurationService;
 use Illuminate\Http\RedirectResponse;
 
 class ListConfigurationController extends HexideAdminBaseController
@@ -18,9 +18,11 @@ class ListConfigurationController extends HexideAdminBaseController
 
         $this->setResourceAccessMap();
 
+        $this->setModelClassName(AdminConfiguration::class);
+        $this->setModuleName('admin_configurations');
         $this->setServiceClassName(ListConfigurationService::class);
+        $this->setService(new ListConfigurationService());
         $this->setFromRequestClassName(ListUpdateRequest::class);
-        $this->initModule(AdminConfiguration::class);
     }
 
     public function index()

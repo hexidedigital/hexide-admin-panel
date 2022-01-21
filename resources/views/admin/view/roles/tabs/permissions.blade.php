@@ -1,7 +1,7 @@
 @php
     /**
-     * @var \App\Models\Role|null $model
-     * @var \App\Models\Permission[]|\Illuminate\Database\Eloquent\Collection|null $permissions
+     * @var \HexideDigital\ModelPermissions\Models\Role|null $model
+     * @var \HexideDigital\ModelPermissions\Models\Permission[]|\Illuminate\Database\Eloquent\Collection|null $permissions
      */
 @endphp
 

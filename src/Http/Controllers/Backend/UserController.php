@@ -2,9 +2,12 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
-use App\Models\Role;
 use App\Models\User;
 use HexideDigital\ModelPermissions\Models\Permission;
+use App\Services\Backend\UserService;
+use HexideDigital\HexideAdmin\Http\Requests\Backend\UserRequest;
+use HexideDigital\HexideAdmin\Http\ViewNames;
+use HexideDigital\ModelPermissions\Models\Role;
 
 class UserController extends HexideAdminBaseController
 {
@@ -17,8 +20,19 @@ class UserController extends HexideAdminBaseController
             'forceDelete' => Permission::ForceDelete,
         ]);
 
-        $this->initModule(User::class);
+        $this->setModelClassName(User::class);
+        $this->setModuleName('users');
+        $this->setServiceClassName(UserService::class);
+        $this->setService(new UserService());
+        $this->setFromRequestClassName(UserRequest::class);
+    }
 
-        $this->data('roles', Role::pluck('title', 'id'));
+    protected function render(?string $view = null, array $data = [], string $forceActionType = null)
+    {
+        if (in_array($view, [ViewNames::Create, ViewNames::Edit])) {
+            $this->data('roles', Role::pluck('title', 'id'));
+        }
+
+        return parent::render($view, $data, $forceActionType);
     }
 }

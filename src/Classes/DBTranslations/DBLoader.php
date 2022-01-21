@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Classes\DBTranslations;
 
-use App\Models\Translation;
+use HexideDigital\HexideAdmin\Models\Translation;
 use Exception;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Support\Facades\App;

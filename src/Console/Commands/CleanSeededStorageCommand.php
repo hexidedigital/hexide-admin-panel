@@ -5,7 +5,6 @@ namespace HexideDigital\HexideAdmin\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
-use function info;
 
 class CleanSeededStorageCommand extends Command
 {
@@ -20,7 +19,7 @@ class CleanSeededStorageCommand extends Command
             return self::FAILURE;
         }
 
-        info('Start of deleting files.');
+        $this->info('Start of deleting files.');
 
         $storage = Storage::disk('public');
 

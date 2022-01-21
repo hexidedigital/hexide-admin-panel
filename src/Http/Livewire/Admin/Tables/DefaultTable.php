@@ -18,8 +18,13 @@ abstract class DefaultTable extends DataTableComponent
         'id' => [
             'asc' => '1-9',
             'desc' => '9-1',
-        ]
+        ],
     ];
+
+    public function getModuleName(): ?string
+    {
+        return $this->module;
+    }
 
     public function setTableClass(): string
     {

@@ -2,11 +2,11 @@
 
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
+use HexideDigital\ModelPermissions\Models\Role;
 
 class UserTable extends DefaultTable
 {
@@ -20,7 +20,7 @@ class UserTable extends DefaultTable
     {
         if (sizeof($this->selectedKeys()) > 0) {
             $this->selectedRowsQuery()->get()->each(fn(User $user) => $user
-                ->roles()->syncWithoutDetaching(Role::where('key', 'user')->first()));
+                ->roles()->syncWithoutDetaching([Role::User]));
         }
 
         $this->resetAll();
@@ -86,8 +86,8 @@ class UserTable extends DefaultTable
                 ->whereHas('roles', fn(Builder $query) => $query->whereIn('id', $roles)))
             ->when($this->getFilter('deleted'), function (Builder $query, string $filter) {
                 $query->when($filter == 'default', fn(Builder $query) => $query);
-                $query->when($filter == 'all', fn(Builder $query) => $query->withTrashed());
-                $query->when($filter == 'only_trashed', fn(Builder $query) => $query->onlyTrashed());
+                $query->when($filter == 'all', fn(Builder $query) => /** @var User $query */ $query->withTrashed());
+                $query->when($filter == 'only_trashed', fn(Builder $query) => /** @var User $query */  $query->onlyTrashed());
             })
             ->select();
     }

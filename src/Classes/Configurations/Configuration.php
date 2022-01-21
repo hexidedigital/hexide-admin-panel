@@ -215,7 +215,7 @@ class Configuration
         if (Configuration::FILE === $type) {
             return [
                 $attribute . '.file' => 'nullable|file',
-                $attribute . '.isRemoveImage' => 'nullable|boolean',
+                $attribute . '.isRemoveFile' => 'nullable|boolean',
             ];
         }
 

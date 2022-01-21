@@ -1,6 +1,6 @@
 @php
     /**
-     * @var \App\Models\Permission|null $model
+     * @var \HexideDigital\ModelPermissions\Models\Permission|null $model
      * @var Illuminate\Support\ViewErrorBag $errors
      */
 @endphp

@@ -2,7 +2,7 @@
 
 @php
     /**
-     * @var App\Models\Permission $model
+     * @var HexideDigital\ModelPermissions\Models\Permission $model
      */
 @endphp
 

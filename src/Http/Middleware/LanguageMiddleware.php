@@ -53,13 +53,13 @@ class LanguageMiddleware
             if (!in_array($locale, config('hexide-admin.locales'))) {
                 $locale = config('hexide-admin.locale');
             }
-        } else if (in_array('api', $args)) {
+        } elseif (in_array('api', $args)) {
             $locale = $request->header('X-localization', config('app.locale'));
 
             if (!in_array($locale, config('app.locales'))) {
                 $locale = config('app.locale');
             }
-        } else if (in_array('web', $args)) {
+        } elseif (in_array('web', $args)) {
             $locale = self::getLocaleFromUrl();
 
             if (!in_array($locale, config('app.locales'))) {

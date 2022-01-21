@@ -2,8 +2,8 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
-use App\Models\Translation;
-use App\Services\Backend\TranslationsService;
+use HexideDigital\HexideAdmin\Models\Translation;
+use HexideDigital\HexideAdmin\Services\Backend\TranslationsService;
 use HexideDigital\HexideAdmin\Http\ActionNames;
 use HexideDigital\HexideAdmin\Http\Requests\Backend\TranslationUpdateRequest;
 use Illuminate\Http\RedirectResponse;
@@ -19,10 +19,11 @@ class TranslationController extends HexideAdminBaseController
 
         $this->withoutBreadcrumbs();
 
-        $this->initModule(Translation::class);
-
-        $service = new TranslationsService($request->route('group'));
-        $this->setService($service);
+        $this->setModelClassName(Translation::class);
+        $this->setModuleName('translations');
+        $this->setServiceClassName(TranslationsService::class);
+        $this->setService(new TranslationsService($request->route('group')));
+        $this->setFromRequestClassName(TranslationUpdateRequest::class);
     }
 
     public function index(Request $request)

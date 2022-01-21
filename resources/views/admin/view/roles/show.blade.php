@@ -2,7 +2,7 @@
 
 @php
     /**
-     * @var App\Models\Role $model
+     * @var \HexideDigital\ModelPermissions\Models\Role $model
      * @var string $module
      */
 @endphp

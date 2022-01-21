@@ -361,6 +361,14 @@ abstract class BackendController extends BaseController
     }
 
     /**
+     * @return ServiceInterface|BackendService|null
+     */
+    protected function getBackendService(): ?ServiceInterface
+    {
+        return new BackendService;
+    }
+
+    /**
      * @param Request $request
      * @param string|null $action
      *

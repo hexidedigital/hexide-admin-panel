@@ -12,7 +12,7 @@ class {{ class }} extends FormRequest
     public function authorize()
     {
         if (isset($this->{{ model_name }})) {
-            return Gate::allows(Permission::Update, $this->{{ model_name }});
+            return Gate::allows(Permission::Update, {{ ModelName }}::find($this->{{ model_name }}));
         } else {
             return Gate::allows(Permission::Create, {{ ModelName }}::class);
         }
@@ -20,15 +20,12 @@ class {{ class }} extends FormRequest
 
     public function rules()
     {
-        $model = $this->{{ model_name }} ?? null;
-        if (isset($model->id) && ($model instanceof {{ ModelName }})) {
-            $model = $model->id;
-        }
+        $modelId = $this->{{ model_name }} ?? null;
 
         $rules = [
             'position'          => 'required|numeric|min:1',
             'status'            => 'boolean',
-            'slug'              => 'required|string|max:191|unique:{{ model_names }},slug,'.$model.',id',
+            'slug'              => 'required|string|max:191|unique:{{ model_names }},slug,'.$modelId.',id',
 
             '{{title}}'         => 'required|string|max:191',
             '{{content}}'       => 'nullable|string|max:10000',

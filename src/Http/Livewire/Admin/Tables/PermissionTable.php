@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
-use App\Models\Permission;
+use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Rappasoft\LaravelLivewireTables\Views\Column;

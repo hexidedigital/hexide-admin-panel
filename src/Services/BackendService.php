@@ -139,29 +139,62 @@ class BackendService implements ServiceInterface
      * @param array $imageInput
      * @param array $options <table>
      *  <tr>    <th>key of option</th>        <th>Default</th>        </tr>
-     *  <tr>    <td>field_key</td>      <td>image</td>      </tr>
+     *  <tr>    <td>image_field_key</td>      <td>image</td>      </tr>
      *  <tr>    <td>folder</td>     <td>images</td>     </tr>
      *  <tr>    <td>module</td>     <td>table of model</td>       </tr>
+     *  <tr>    <td>old_path</td>     <td>old path for image</td>       </tr>
+     *  <tr>    <td>is_remove_key</td>     <td>field name if remove existed image</td>       </tr>
      * </table>
      *
      * @return bool|string|null
      */
     public function handleOneImage(array $imageInput, array $options = [])
     {
-        $options['field_key'] = Arr::get($options, 'field_key', 'image');
-        $options['folder'] = Arr::get($options, 'folder', 'images');
-        $options['module'] = Arr::get($options, 'module', $this->model->getTable());
+        $fieldKey = Arr::get($options, 'image_field_key', 'image');
+        $folder = Arr::get($options, 'folder', 'images');
+        $module = Arr::get($options, 'module', $this->model->getTable());
+        $oldPath = Arr::get($options, 'old_path', $this->model->{$fieldKey} ?? null);
+        $isRemove = Arr::get($options, 'is_remove_key', 'isRemoveImage');
 
-        $image = Arr::get($imageInput, $options['field_key']);
+        $image = Arr::get($imageInput, $fieldKey);
 
-        if ((isset($image) && $image instanceof UploadedFile) || Arr::get($imageInput, 'isRemoveImage', false)) {
+        if (
+            (isset($image) && $image instanceof UploadedFile)
+            || Arr::get($imageInput, $isRemove, false)
+        ) {
             return $this->saveImage(
                 $image,
                 $this->model->getKey() ?? null,
-                $this->model->{$options['field_key']} ?? null,
-                $options['folder'],
-                $options['module'] ?? null,
+                $oldPath,
+                $folder,
+                $module ?? null,
             );
+        }
+
+        return false;
+    }
+
+    /**
+     * @param UploadedFile|null $file
+     * @param bool|null $isRemove
+     * @param array $options <table>
+     *  <tr>    <th>key of option</th>        <th>Default</th>        </tr>
+     *  <tr>    <td>folder</td>     <td>images</td>     </tr>
+     *  <tr>    <td>module</td>     <td>table of model</td>       </tr>
+     *  <tr>    <td>old_path</td>     <td>old path for image</td>       </tr>
+     * </table>
+     *
+     * @return bool|string|null
+     */
+    public function handleUploadedFile(?UploadedFile $file = null, ?bool $isRemove = false, array $options = [])
+    {
+        $folder = Arr::get($options, 'folder', 'images');
+        $module = Arr::get($options, 'module', $this->model ? $this->model->getTable() : null);
+        $oldPath = Arr::get($options, 'old_path');
+
+        if (isset($file) || $isRemove) {
+            $uniqId = $this->model->getKey() ?? null;
+            return $this->saveImage($file, $uniqId, $oldPath, $folder, $module);
         }
 
         return false;

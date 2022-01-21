@@ -2,10 +2,10 @@
 
 namespace HexideDigital\HexideAdmin\Console\Commands;
 
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
+use HexideDigital\ModelPermissions\Models\Role;
 
 class CreateAdminUser extends Command
 {

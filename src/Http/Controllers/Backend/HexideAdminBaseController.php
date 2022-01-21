@@ -24,13 +24,4 @@ abstract class HexideAdminBaseController extends BackendController
 
         return $view;
     }
-
-    protected function setFromRequestClassName(string $requestClassName = null)
-    {
-        if (is_null($requestClassName)) {
-            $requestClassName = "HexideDigital\\HexideAdmin\\Http\\Requests\\Backend\\" . str_singular(Str::studly($this->getModuleName())) . 'Request';
-        }
-
-        parent::setFromRequestClassName($requestClassName);
-    }
 }

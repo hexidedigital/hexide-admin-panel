@@ -2,7 +2,8 @@
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
-use App\Models\Permission;
+use HexideDigital\ModelPermissions\Models\Permission;
+use HexideDigital\HexideAdmin\Http\Requests\Backend\PermissionRequest;
 
 class PermissionController extends HexideAdminBaseController
 {
@@ -10,8 +11,12 @@ class PermissionController extends HexideAdminBaseController
     {
         parent::__construct();
 
-        $this->setFullAccessMap();
+        $this->setResourceAccessMap();
 
-        $this->initModule(Permission::class);
+        $this->setModelClassName(Permission::class);
+        $this->setModuleName('users');
+        $this->setServiceClassName();
+        $this->setService($this->getService());
+        $this->setFromRequestClassName(PermissionRequest::class);
     }
 }
