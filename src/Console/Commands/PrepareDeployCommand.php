@@ -2,7 +2,6 @@
 
 namespace HexideDigital\HexideAdmin\Console\Commands;
 
-use App\Console\Commands\BaseCommand;
 use ErrorException;
 use Exception;
 use Illuminate\Support\Arr;
@@ -15,8 +14,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class PrepareDeployCommand extends BaseCommand
 {
-    protected $name = 'hd-admin:project:deploy';
-    protected $description = 'Command description';
+    protected $name = 'hd-admin:utils:deploy';
+    protected $description = 'Command to prepare your deploy';
 
     protected int $step = 1;
     protected ProgressBar $bar;
@@ -31,11 +30,6 @@ class PrepareDeployCommand extends BaseCommand
     protected array $replaceMap = [];
     protected array $gitlabVars = [];
 
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
     public function handle(): int
     {
         $this->resourceDeployFile = fopen(base_path('deploy/dep.txt'), 'w');
