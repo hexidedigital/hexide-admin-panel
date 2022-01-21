@@ -1,7 +1,7 @@
 <div x-data="imagePreview('{{fu_url($inputValue ?? '')}}')">
     <div class="custom-file">
         <input type="file" class="custom-file-input" accept="image/*"
-               name="{{$nameInputCase.'[image]'}}" id="{{$nameDotCase}}"
+               name="{{"{$nameInputCase}[image]"}}" id="{{$nameDotCase}}"
                @change="setPreview($event)">
         <label class="custom-file-label" for="{{$nameDotCase}}" x-text="fileName"></label>
     </div>
@@ -13,6 +13,6 @@
                 @if(empty($inputValue)) style="display: none" @endif>
             {!! __('hexide-admin::buttons.delete') !!}
         </button>
-        <input type="hidden" name="{{$nameInputCase.'[isRemoveImage]'}}" :value="is_image_deleted">
+        <input type="hidden" name="{{"{$nameInputCase}[isRemoveImage]"}}" :value="is_image_deleted">
     </p>
 </div>
