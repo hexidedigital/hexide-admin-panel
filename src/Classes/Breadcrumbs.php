@@ -6,11 +6,7 @@ use Illuminate\Support\Collection;
 
 class Breadcrumbs
 {
-
-    /**
-     * @var Collection
-     */
-    protected $breadcrumbs;
+    protected Collection $breadcrumbs;
 
     public function __construct()
     {

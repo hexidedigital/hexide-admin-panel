@@ -15,4 +15,6 @@ return [
     'select_all'        => 'Вибрати все',
     'deselect_all'      => 'Скасувати вибір всіх',
     'generate'          => 'Генерувати',
+    'restore'           => 'Відновити',
+    'forceDelete'       => 'Остаточно видалити',
 ];

@@ -1,12 +1,12 @@
-@extends("hexide_admin::show")
+@extends("hexide-admin::show")
+
+@php
+    /**
+     * @var \{{ model_namespace }} $model
+     */
+@endphp
 
 @section("table-body")
-    @php
-        /**
-         * @var {{ model_namespace }} $model
-         */
-    @endphp
-
     <tr>
         <th>{{__('admin_labels.attributes.name')}}</th>
         <td>
@@ -28,8 +28,7 @@
     <tr>
         <th>{{__('admin_labels.attributes.visible')}}</th>
         <td>
-            @include('admin.partials.ajax.toggler', ['field' => 'status'])
+            @include('hexide-admin::admin.partials.ajax.toggler', ['field' => 'status'])
         </td>
     </tr>
-
 @endsection

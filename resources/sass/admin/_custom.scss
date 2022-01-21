@@ -1,0 +1,90 @@
+@import "./variables";
+
+// for alpine js
+[x-cloak] {
+  display: none !important;
+}
+
+.w-5.h-5 {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+div.flex.justify-between.flex-1 {
+  display: none !important;
+}
+
+.btn-group-xs > .btn,
+.btn-xs {
+  padding: 1px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+
+.message-container {
+  position: fixed;
+  bottom: 0;
+  right: 20px;
+  max-width: 400px;
+  z-index: 99999
+}
+
+.duplicate {
+  display: none
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: $blue !important;
+}
+
+.select2-selection__choice__remove {
+  color: #ff6e9d !important;
+}
+
+.select2.select2-container.select2-container--default {
+  width: 100% !important;
+}
+
+.select2 {
+  max-width: 100%;
+  width: 100%;
+}
+
+.select2-selection.select2-selection--single {
+  height: calc(2.25rem + 2px);
+}
+
+.form-group {
+  &.required {
+    label {
+      position: relative;
+      padding-right: 0.2rem;
+
+      &:first-child:after {
+        position: absolute;
+        right: -5px;
+        top: 0;
+        content: "*";
+        width: 5px;
+        height: 5px;
+        font-size: 12px;
+        color: $red;
+      }
+
+      &.error {
+        color: $red;
+      }
+    }
+  }
+}
+
+textarea {
+  .is-invalid {
+    &, & + .cke {
+      border-radius: .25rem;
+      border: 1px solid $red;
+      overflow: hidden;
+    }
+  }
+}

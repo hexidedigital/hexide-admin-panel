@@ -2,13 +2,14 @@
 
 namespace {{ namespace }};
 
-use HexideDigital\HexideAdmin\Models\Traits\VisibleTrait;
 use HexideDigital\HexideAdmin\Models\Traits\PositionSortTrait;
+use HexideDigital\HexideAdmin\Models\Traits\VisibleTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class {{ class }} extends Model
 {
-    use VisibleTrait, PositionSortTrait;
+    use VisibleTrait;
+    use PositionSortTrait;
 
     protected $fillable = [
         'position',

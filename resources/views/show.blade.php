@@ -1,4 +1,4 @@
-@extends("hexide_admin::master")
+@extends("hexide-admin::master")
 
 @section("title_prefix", __("models.$module.show"))
 @section("header_title", __("models.$module.show"))
@@ -23,6 +23,6 @@
     </x-adminlte-card>
 
     <div class="row mb-3">
-        @include("admin.partials.buttons.line__back_edit")
+        @include("hexide-admin::partials.buttons.line__back_edit")
     </div>
 @stop

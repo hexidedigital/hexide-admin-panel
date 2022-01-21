@@ -6,7 +6,6 @@ use Illuminate\Console\Command;
 
 abstract class BaseCommand extends Command
 {
-
     /**
      * Log console message
      *
@@ -14,7 +13,7 @@ abstract class BaseCommand extends Command
      * @param string $status
      * @param null|int|string $verbosity
      */
-    public function log($message, $status = 'info', $verbosity = null)
+    public function log(string $message, string $status = 'info', $verbosity = null)
     {
         $message = '[' . now() . '] ' . $message;
         $this->line($message, $status, $verbosity);
@@ -66,17 +65,13 @@ abstract class BaseCommand extends Command
         $this->log($message, 'question', $verbosity);
     }
 
-    /**
-     * Start command log
-     */
+    /** Start command log */
     public function start()
     {
         $this->log('Start: ' . $this->getDescription());
     }
 
-    /**
-     * Finish command log
-     */
+    /** Finish command log */
     public function end()
     {
         $this->log('Finish: ' . $this->getDescription() . "\n\n");

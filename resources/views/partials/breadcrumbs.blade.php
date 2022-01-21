@@ -3,6 +3,7 @@
      * @var \Illuminate\Support\Collection $breadcrumbs
      */
 @endphp
+
 @if($breadcrumbs->isNotEmpty())
     <ol class="breadcrumb float-sm-right bg-transparent {!! $ol_class ?? '' !!}">
         <li class="breadcrumb-item {{Route::currentRouteNamed('admin.home')?'active':''}}">

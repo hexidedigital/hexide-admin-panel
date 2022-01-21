@@ -1,1 +1,0 @@
-${{ modelVariable }} = $this->service->createModel($request);

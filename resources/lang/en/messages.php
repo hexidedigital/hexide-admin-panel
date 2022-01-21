@@ -1,7 +1,12 @@
 <?php
 
 return [
-    'are_you_shore_want_to_delete' => 'Are you sure you want to delete?',
+
+    'confirm' => [
+        'delete' => 'Are you sure you want to delete?',
+        'restore' => 'Are you sure you want to restore?',
+        'force_delete' => 'Are you sure you want to permanently delete?',
+    ],
 
     'translations_successfully_updated' => 'Translations saved successfully!',
 
@@ -14,19 +19,23 @@ return [
     ],
 
     'success' => [
-        'title'   => 'Success',
-        'action'  => 'Action completed successfully',
-        'create'  => 'Object :model created',
-        'edit'    => 'Object :model edited',
-        'delete'  => 'Object :model deleted',
+        'title'         => 'Success',
+        'action'        => 'Action completed successfully',
+        'create'        => 'Object :model created',
+        'edit'          => 'Object :model edited',
+        'delete'        => 'Object :model deleted',
+        'restore'       => 'Object :model restored',
+        'force_delete'  => 'Object :model permanently deleted',
     ],
 
     'error' => [
-        'title'   => 'Error',
-        'action'  => 'Action not performed',
-        'create'  => 'Error creating object :model',
-        'edit'    => 'Error editing object :model',
-        'delete'  => 'Error deleting object :model',
+        'title'         => 'Error',
+        'action'        => 'Action not performed',
+        'create'        => 'Error trying to create object :model',
+        'edit'          => 'Error trying to update object :model',
+        'delete'        => 'Error trying to delete object :model',
+        'restore'       => 'Error trying to restore object :model',
+        'force_delete'  => 'Error trying to permanently delete object :model',
     ],
 
     'info' => [

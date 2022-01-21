@@ -6,29 +6,17 @@ use Illuminate\Container\Container;
 
 class HexideAdmin
 {
-
-    /**
-     * @var Container
-     */
-    protected $container;
-
-    /**
-     * @var Breadcrumbs|mixed
-     */
-    protected $breadcrumbs;
+    protected Container $container;
+    protected Breadcrumbs $breadcrumbs;
 
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->breadcrumbs = app()->get(Breadcrumbs::class);
+        $this->breadcrumbs = app(Breadcrumbs::class);
     }
 
-    /**
-     * @return Breadcrumbs
-     */
     public function getBreadcrumbs(): Breadcrumbs
     {
         return $this->breadcrumbs;
     }
-
 }

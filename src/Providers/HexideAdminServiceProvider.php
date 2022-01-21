@@ -2,17 +2,28 @@
 
 namespace HexideDigital\HexideAdmin\Providers;
 
+use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
 use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
-use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotofication;
+use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotification;
+use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
+use HexideDigital\HexideAdmin\Components\Tabs\TabsComponent;
+use HexideDigital\HexideAdmin\Console\Commands\CleanSeededStorageCommand;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
+use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\ConfigurationTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\PermissionTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\RoleTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
-use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
+use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use Route;
 
 class HexideAdminServiceProvider extends ServiceProvider
@@ -20,10 +31,24 @@ class HexideAdminServiceProvider extends ServiceProvider
     private array $commands = [
         HexideAdminCommand::class,
         CreateAdminUser::class,
+        PrepareDeployCommand::class,
+        CleanSeededStorageCommand::class,
     ];
 
     private array $components = [
-        LanguageItem::class,
+        'language-item' => LanguageItem::class,
+        'tabs-component' => TabsComponent::class,
+    ];
+
+    private array $livewire = [
+        'admin' => [
+            'tables' => [
+                'configuration-table' => ConfigurationTable::class,
+                'permission-table' => PermissionTable::class,
+                'role-table' => RoleTable::class,
+                'user-table' => UserTable::class,
+            ],
+        ],
     ];
 
     public function register()
@@ -36,8 +61,12 @@ class HexideAdminServiceProvider extends ServiceProvider
             return new Breadcrumbs();
         });
 
-        $this->app->bind(NotificationInterface::class, function (){
-            return new ToastrNotofication();
+        $this->app->bind(NotificationInterface::class, function () {
+            return new ToastrNotification();
+        });
+
+        $this->app->bind(Configuration::class, function () {
+            return new Configuration();
         });
     }
 
@@ -53,28 +82,38 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->registerComponents();
         $this->registerViewComposers($view);
+        $this->registerLivewireComponents();
     }
 
     private function loadPublishes()
     {
         $this->publishes([
             $this->packagePath("config/hexide-admin.php") => config_path('hexide-admin.php'),
-            $this->packagePath("config/modelPermissions.php") => config_path('modelPermissions.php'),
-            $this->packagePath("config/translatable.php") => config_path('translatable.php'),
-        ], 'hexide-admin-configs');
+        ], 'hexide-admin:configs');
 
         $this->publishes([
-            $this->packagePath("resources/lang") => resource_path('lang/vendor/hexide_admin')
-        ], 'hexide-admin-translations');
+            $this->packagePath("resources/lang") => resource_path('lang/vendor/hexide-admin'),
+        ], 'hexide-admin:translations');
 
         $this->publishes([
-            $this->packagePath("resources/views") => resource_path('views/vendor/hexide_admin')
-        ], 'hexide-admin-translations');
+            $this->packagePath("resources/views") => resource_path('views/vendor/hexide-admin'),
+        ], 'hexide-admin:views');
 
         $this->publishes([
-            $this->packagePath("src/Console/stubs") => base_path('stubs/hexide_admin')
-        ], 'hexide-admin-stubs');
+            $this->packagePath('resources/build') => public_path('vendor/hexide-admin/build'),
+            $this->packagePath('resources/js') => resource_path('js'),
+            $this->packagePath('resources/img') => resource_path('img'),
+            $this->packagePath('resources/sass') => resource_path('sass'),
+        ], 'hexide-admin:public');
 
+        $this->publishes([
+            $this->packagePath("src/Console/stubs") => base_path('stubs/hexide-admin'),
+        ], 'hexide-admin:stubs');
+
+        $this->publishes([
+            $this->packagePath('database/migrations') => database_path('migrations'),
+            $this->packagePath('database/seeders') => database_path('seeders'),
+        ], 'hexide-admin:database');
     }
 
     private function loadRoutes()
@@ -96,17 +135,17 @@ class HexideAdminServiceProvider extends ServiceProvider
 
     private function loadConfig()
     {
-        $this->mergeConfigFrom($this->packagePath("config/hexide-admin.php"), 'hexide_admin');
+        $this->mergeConfigFrom($this->packagePath("config/hexide-admin.php"), 'hexide-admin');
     }
 
     private function loadTranslations()
     {
-        $this->loadTranslationsFrom($this->packagePath('resources/lang'), 'hexide_admin');
+        $this->loadTranslationsFrom($this->packagePath('resources/lang'), 'hexide-admin');
     }
 
     private function loadViews()
     {
-        $this->loadViewsFrom($this->packagePath('resources/views'), 'hexide_admin');
+        $this->loadViewsFrom($this->packagePath('resources/views'), 'hexide-admin');
     }
 
     private function registerCommands()
@@ -119,30 +158,36 @@ class HexideAdminServiceProvider extends ServiceProvider
     private function registerViewComposers(Factory $view)
     {
         $view->composer('admin.*', HexideAdminComposer::class);
-        $view->composer('hexide_admin::*', HexideAdminComposer::class);
+        $view->composer('hexide-admin::*', HexideAdminComposer::class);
     }
 
     private function registerComponents()
     {
         // Support of x-components is only available for Laravel >= 7.x
         // versions. So, we check if we can load components.
+        $canLoadComponents = method_exists(ServiceProvider::class, 'loadViewComponentsAs');
 
-        $canLoadComponents = method_exists(
-            'Illuminate\Support\ServiceProvider',
-            'loadViewComponentsAs'
-        );
-
-        if (! $canLoadComponents) {
+        if (!$canLoadComponents) {
             return;
         }
 
-        $this->loadViewComponentsAs('hdadmin', $this->components);
+        $this->loadViewComponentsAs('hexide-admin', $this->components);
+
+        Blade::componentNamespace('HexideDigital\\HexideAdmin\\Components', 'hexide-admin');
+    }
+
+    private function registerLivewireComponents()
+    {
+        foreach (array_dot($this->livewire) as $alias => $component) {
+            Livewire::component('hexide-admin::' . $alias, $component);
+        }
     }
 
     /**
      * Get the absolute path to some package resource.
      *
      * @param string $path The relative path to the resource
+     *
      * @return string
      */
     private function packagePath(string $path): string

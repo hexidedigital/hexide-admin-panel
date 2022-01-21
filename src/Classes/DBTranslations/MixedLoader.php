@@ -10,17 +10,10 @@ class MixedLoader implements Loader
     protected DBLoader $databaseLoader;
     protected FileLoader $fileLoader;
 
-    /**
-     * All the namespace hints.
-     */
+    /** All the namespace hints. */
     protected array $hints = [];
 
-    /**
-     *  Create a new mixed loader instance.
-     *
-     * @param DBLoader $databaseLoader
-     * @param FileLoader $fileLoader
-     */
+    /** Create a new mixed loader instance. */
     public function __construct(DBLoader $databaseLoader, FileLoader $fileLoader)
     {
         $this->databaseLoader = $databaseLoader;
@@ -67,7 +60,7 @@ class MixedLoader implements Loader
      */
     public function addJsonPath($path)
     {
-        // TODO: Implement addJsonPath() method.
+        $this->fileLoader->addJsonPath($path);
     }
 
     /**
@@ -75,8 +68,8 @@ class MixedLoader implements Loader
      *
      * @return array
      */
-    public function namespaces()
+    public function namespaces(): array
     {
-        // TODO: Implement namespaces() method.
+        return $this->fileLoader->namespaces();
     }
 }

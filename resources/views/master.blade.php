@@ -1,11 +1,11 @@
 @extends('adminlte::page')
 
-@section("title-suffix"){{config('adminlte.title')}}@endsection
+@section("title-suffix", config('adminlte.title'))
 
 @push("css")
     <link rel="stylesheet" href="{{asset('/vendor/flag-icon-css/css/flag-icon.min.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
 @endpush
 
 @push("js")
@@ -14,11 +14,13 @@
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 
+    <script src="{{ mix('/js/admin/alpine.min.js') }}"></script>
+
     @toastr_render
 @endpush
 
 @section("content_top_nav_right")
-    <x-hdadmin-language-item/>
+    <x-hexide-admin-language-item/>
 @endsection
 
 @section("content_header")
@@ -27,11 +29,10 @@
             <h1 class="d-inline">
                 @yield("header_title", trans_choice("models.$module.name", 2))
             </h1>
-            @yield("content_header_add")
             @stack("content_header_add")
         </div>
         <div class="col-sm-6">
-            @include('hexide_admin::partials.breadcrumbs')
+            @include('hexide-admin::partials.breadcrumbs')
         </div>
     </div>
 @endsection

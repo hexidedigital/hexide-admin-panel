@@ -7,10 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
- * Trail WithTranslationsTrait
  * Add translations scope to class
  *
- * @package HexideDigital\HexideAdmin\Models\Traits
  * @mixin Model
  *
  * @method static Builder|\Illuminate\Database\Query\Builder|self joinTranslations($modelTable = null, $translationsTable = null, $modelTableKey = null, $translationsTableKey = null)
@@ -18,38 +16,22 @@ use Illuminate\Support\Str;
  */
 trait WithTranslationsTrait
 {
-    /**
-     * @param Builder $query
-     *
-     * @return Builder
-     */
     public function scopeWithTranslations(Builder $query): Builder
     {
-        return $query->with(
-            [
-                'translations' => function ($query) {
-                    $query->where('locale', app()->getLocale());
-                },
-            ]
-        );
+        return $query->with([
+            'translations' => function ($query) {
+                $query->where('locale', app()->getLocale());
+            },
+        ]);
     }
 
-    /**
-     * @param Builder $query
-     * @param string|null $modelTable
-     * @param string|null $translationsTable
-     * @param string|null $modelTableKey
-     * @param string|null $translationsTableKey
-     *
-     * @return Builder|\Illuminate\Database\Query\Builder
-     */
     public function scopeJoinTranslations(
         Builder $query,
         ?string $modelTable = null,
         ?string $translationsTable = null,
         ?string $modelTableKey = null,
         ?string $translationsTableKey = null
-    )
+    ): Builder
     {
         if (!$modelTable) {
             $modelTable = $this->getTable();

@@ -1,8 +1,18 @@
 <?php
 
+use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
+
 return [
 
-    'secret_key' => null,
+    'configurations' => [
+        'secret_key' => null, //env('ADMIN_SECRET', null),
+        'show_admin_header' => true,
+        'show_debug_footer_site' => false,
+        'show_debug_footer_admin' => true,
+    ],
+
+    // -------------------------------
+    // Localisation
 
     'locale' => 'uk',
     'lang_cookie' => 'admin_locale',
@@ -10,7 +20,7 @@ return [
     // locales only for admin panel
     'locales' => [
         'uk',
-        'ru',
+        // 'ru',
         'en',
     ],
 
@@ -19,6 +29,9 @@ return [
     'locales_map' => [
 //        'uk' => 'ua',
     ],
+
+    // -------------------------------
+    // Generate command
 
     // in this place you can edit recommended namespaces for files
     'namespaces' => [
@@ -44,6 +57,33 @@ return [
         // no need to set stub-key
         // will simply be placed in this place module blade views
         'views' => 'resources/views/admin/view/',
+    ],
+
+    // -------------------------------
+    // Some design properties
+
+    'with_preloader' => true,
+    'preloader' => [
+        'image' => 'img/HexideDigitalLogo.png',
+        'height' => 90,
+        'width' => 90,
+        'animate_name' => 'bounceOut animate__infinite',
+    ],
+
+    // -------------------------------
+    // Variables, admin configurations
+
+    'variables' => [
+        'key_1' => [
+            // 'key' => 'key_1',
+            'name' => 'Name',
+            'type' => Configuration::TEXT,
+            // 'translatable' => true
+            'localization' => [
+                'uk' => 'Some value or json string',
+            ],
+            // 'plain_value' => 'Plain text or html',
+        ],
     ],
 
 ];

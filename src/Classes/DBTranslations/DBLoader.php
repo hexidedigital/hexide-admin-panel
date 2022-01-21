@@ -2,29 +2,21 @@
 
 namespace HexideDigital\HexideAdmin\Classes\DBTranslations;
 
-use App\Models\Translation;
+use HexideDigital\HexideAdmin\Models\Translation;
 use Exception;
 use Illuminate\Contracts\Translation\Loader;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Log;
-use function app;
-use function cache;
-use function request;
 
-/**
- * Class DBLoader
- * @package App\Classes
- */
 class DBLoader implements Loader
 {
-
     /**
      * Load the messages for the given locale.
      *
-     * @param  string $locale
-     * @param  string $group
-     * @param  string $namespace
+     * @param string $locale
+     * @param string $group
+     * @param string $namespace
      *
      * @return array
      */
@@ -33,10 +25,10 @@ class DBLoader implements Loader
         try {
             $group = $this->_getGroup($group);
 
-            $result = null;
-
-            if(Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
-                $result = cache()->tags('translations')->get($locale.'_'.$group, null);
+            if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
+                $result = cache()->tags('translations')->get($locale . '_' . $group, null);
+            } else {
+                $result = Cache::get('translations_' . $locale . '_' . $group, null);
             }
 
             if ($result === null) {
@@ -45,33 +37,24 @@ class DBLoader implements Loader
                     ->whereNotNull('value')
                     ->where('value', '<>', '')
                     ->get(['key', 'value'])
-                    ->keyBy('key')
-                    ->map(
-                        function ($item) {
-                            return $item['value'];
-                        }
-                    )
+                    ->pluck('value', 'key')
                     ->toArray();
 
-                foreach ($result as $key => $value) {
-                    unset($result[$key]);
-
-                    Arr::set($result, $key, $value);
+                if (App::isProduction() && Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
+                    cache()->tags('translations')->put($locale . '_' . $group, $result, 60);
                 }
 
-                if (app()->environment('production') && Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
-                    cache()->tags('translations')->put($locale.'_'.$group, $result, 60);
-                }
+                Cache::put('translations_' . $locale . '_' . $group, $result, 60);
             }
 
             return $result;
         } catch (Exception $e) {
             // just insure themselves in case of problems with the database
             Log::critical(
-                'message: '.$e->getMessage().', line: '.$e->getLine().', file: '.$e->getFile(),
+                'message: ' . $e->getMessage() . ', line: ' . $e->getLine() . ', file: ' . $e->getFile(),
                 [
                     'locale' => $locale,
-                    'group'  => $group,
+                    'group' => $group,
                 ]
             );
 
@@ -82,26 +65,26 @@ class DBLoader implements Loader
     /**
      * Add a new namespace to the loader.
      *
-     * @param  string $namespace
-     * @param  string $hint
+     * @param string $namespace
+     * @param string $hint
      *
      * @return void
      */
     public function addNamespace($namespace, $hint)
     {
-        // TODO: Implement addNamespace() method.
+        //
     }
 
     /**
      * Add a new JSON path to the loader.
      *
-     * @param  string $path
+     * @param string $path
      *
      * @return void
      */
     public function addJsonPath($path)
     {
-        // TODO: Implement addJsonPath() method.
+        //
     }
 
     /**
@@ -111,7 +94,7 @@ class DBLoader implements Loader
      */
     public function namespaces()
     {
-        // TODO: Implement namespaces() method.
+        //
     }
 
     /**

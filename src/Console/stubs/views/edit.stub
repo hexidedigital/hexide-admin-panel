@@ -1,5 +1,1 @@
-@extends("hexide_admin::editable")
-
-@section("form-body")
-    @include("admin.view.$module.partials._form")
-@endsection
+@extends("hexide-admin::editable")

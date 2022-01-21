@@ -5,13 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use HexideDigital\ModelPermissions\Models\Permission as HDPermission;
 
-class {{ class }} extends Migration
-{
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+return new class extends Migration {
     public function up()
     {
         Schema::create('{{ table }}', function (Blueprint $table) {
@@ -27,28 +21,20 @@ class {{ class }} extends Migration
         Schema::create('{{ table_singular }}_translations', function (Blueprint $table) {
             $table->id();
             $table->string('locale');
-            $table->unsignedBigInteger('{{ table_singular }}_id');
+            $table->foreignId('{{ table_singular }}_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
             $table->string('title')->nullable();
             $table->text('content')->nullable();
 
             $table->unique(['locale', '{{ table_singular }}_id']);
-
-            $table->foreign('{{ table_singular }}_id')->references('id')->on('{{ table }}')
-                ->cascadeOnDelete()->cascadeOnUpdate();
         });
 
-        PermissionRelation::touch('{{ table }}')->addCustom()->all();
+        PermissionRelation::touch('{{ table }}')->addCustomSet()->addResourceSet();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('{{ table_singular }}_translations');
         Schema::dropIfExists('{{ table }}');
     }
-}
+};

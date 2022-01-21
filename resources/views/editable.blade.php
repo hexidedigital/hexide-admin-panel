@@ -1,4 +1,4 @@
-@extends("hexide_admin::master")
+@extends("hexide-admin::master")
 
 @php
     $layout_type = $layout_type ?? (isset($model->id) ? 'edit' : 'create');
@@ -10,14 +10,16 @@
 @section("content")
 
     @yield('form-start', isset($model->id)
+        /** @warning Form model not working with `yield` */
         ? Form::model($model, ['route' => ["admin.$module.update", $model->id], 'method' => 'put', 'files' => View::getSection('with_files', false)])
         : Form::open(['route' => "admin.$module.store", 'files' => View::getSection('with_files', false)])
     )
 
-    @yield('form-body')
+{{--    {!! View::getSection('form-body', view("admin.view.$module.partials._form")) !!}--}}
+    @yield('form-body', )
 
     <div class="row mb-3">
-        @include("admin.partials.buttons.line__cancel_save")
+        @include("hexide-admin::partials.buttons.line__cancel_save")
     </div>
 
     @yield('form-close', Form::close())

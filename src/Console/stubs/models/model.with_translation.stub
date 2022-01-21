@@ -2,25 +2,24 @@
 
 namespace {{ namespace }};
 
-use HexideDigital\HexideAdmin\Models\Traits\VisibleTrait;
-use HexideDigital\HexideAdmin\Models\Traits\PositionSortTrait;
-use HexideDigital\HexideAdmin\Models\Traits\WithTranslationsTrait;
 use Astrotomic\Translatable\Translatable;
+use HexideDigital\HexideAdmin\Models\Traits\PositionSortTrait;
+use HexideDigital\HexideAdmin\Models\Traits\VisibleTrait;
+use HexideDigital\HexideAdmin\Models\Traits\WithTranslationsTrait;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @method {{ class }}Translation translate(?string $locale = null, bool $withFallback = false)
+ * @mixin \Eloquent
  * @mixin {{ class }}Translation
+ * @method {{ class }}Translation translate(?string $locale = null, bool $withFallback = false)
  */
 class {{ class }} extends Model
 {
     use Translatable, WithTranslationsTrait;
-    use VisibleTrait, PositionSortTrait;
+    use VisibleTrait;
+    use PositionSortTrait;
 
-    /**
-     * @var string[]
-     */
-    protected $translatedAttributes = [
+    protected array $translatedAttributes = [
         'title',
         'content',
     ];

@@ -5,13 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use HexideDigital\ModelPermissions\Models\Permission as HDPermission;
 
-class {{ class }} extends Migration
-{
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+return new class extends Migration {
     public function up()
     {
         Schema::create('{{ table }}', function (Blueprint $table) {
@@ -24,16 +18,11 @@ class {{ class }} extends Migration
             $table->timestamps();
         });
 
-        PermissionRelation::touch('{{ table }}')->addCustom()->all();
+        PermissionRelation::touch('{{ table }}')->addCustomSet()->addResourceSet();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('{{ table }}');
     }
-}
+};

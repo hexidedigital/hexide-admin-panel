@@ -1,2 +1,2 @@
-Route::resource('{{ module_name }}', '{{ ModelController }}');
+Route::resource('{{ model_name }}', {{ ModelName }}Controller::class);
         /*hexide_admin_stub-resource*/

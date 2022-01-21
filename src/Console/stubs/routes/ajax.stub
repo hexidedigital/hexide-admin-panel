@@ -1,2 +1,2 @@
-Route::post('{{ module_name }}/{id}/ajax_field','{{ ModelController }}@ajaxFieldChange')->name('{{ module_name }}.ajax_field');
+Route::post('{{ model_names }}/{id}', [{{ ModelName }}Controller::class, 'ajaxFieldChange'])->name('{{ model_names }}');
             /*hexide_admin_stub-ajax*/

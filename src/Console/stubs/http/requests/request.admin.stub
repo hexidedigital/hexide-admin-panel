@@ -3,26 +3,29 @@
 namespace {{ namespace }};
 
 use {{ model_namespace }};
+use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class {{ class }} extends FormRequest
 {
     public function authorize()
     {
-        return true;
+        if (isset($this->{{ model_name }})) {
+            return Gate::allows(Permission::Update, {{ ModelName }}::find($this->{{ model_name }}));
+        } else {
+            return Gate::allows(Permission::Create, {{ ModelName }}::class);
+        }
     }
 
     public function rules()
     {
-        $model = $this->{{ model }} ?? '';
-        if(isset($model->id) && ($model instanceof {{ ModuleName }})){$model = $model->id;}
+        $modelId = $this->{{ model_name }} ?? null;
 
-        $rules = [
-            'position'          => 'required|numeric|min:1',
-            'status'            => 'boolean',
-            'slug'              => 'required|string|max:191|unique:{{ module_name }},slug,'.$model.',id',
-        ];
-
-        return $rules;
+        return [
+           'position'          => 'required|numeric|min:1',
+           'status'            => 'boolean',
+           'slug'              => 'required|string|max:191|unique:{{ model_name }},slug,'.$modelId.',id',
+       ];
     }
 }

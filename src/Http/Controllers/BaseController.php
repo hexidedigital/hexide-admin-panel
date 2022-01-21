@@ -9,35 +9,47 @@ use View;
 
 abstract class BaseController extends Controller
 {
-    /**
-     * @var array
-     */
-    private $view_data = [];
+    private array $viewData = [];
+    private bool $withBreadcrumbs = true;
 
-    /**
-     * @var array
-     */
-    protected $locales = [];
+    protected array $locales = [];
 
-    /**
-     * @var bool
-     */
-    protected $with_breadcrumbs = true;
-
-    /**
-     * @var HexideAdmin|mixed
-     */
-    protected $hexideAdmin;
-
-    /**
-     * @var Breadcrumbs
-     */
-    protected $breadcrumbs;
+    protected HexideAdmin $hexideAdmin;
+    protected Breadcrumbs $breadcrumbs;
 
     public function __construct()
     {
-        $this->hexideAdmin = app()->get(HexideAdmin::class);
+        $this->hexideAdmin = app(HexideAdmin::class);
         $this->breadcrumbs = $this->hexideAdmin->getBreadcrumbs();
+    }
+
+    /* ------------ Breadcrumbs ------------ */
+
+    protected function withBreadcrumbs()
+    {
+        $this->withBreadcrumbs = true;
+    }
+
+    protected function withoutBreadcrumbs()
+    {
+        $this->withBreadcrumbs = false;
+    }
+
+    protected function canAddToBreadcrumbs(): bool
+    {
+        return $this->withBreadcrumbs;
+    }
+
+    /**
+     * @param string $name
+     * @param string|null $route
+     * @return void
+     */
+    protected function addToBreadcrumbs(string $name, ?string $route = null)
+    {
+        if ($this->canAddToBreadcrumbs()) {
+            $this->breadcrumbs->push($name, $route);
+        }
     }
 
     /**
@@ -51,8 +63,8 @@ abstract class BaseController extends Controller
         }
 
         foreach ($key as $_key => $_data) {
-            $this->view_data = array_merge(
-                $this->view_data,
+            $this->viewData = array_merge(
+                $this->viewData,
                 array($_key => $_data)
             );
         }
@@ -60,13 +72,13 @@ abstract class BaseController extends Controller
 
     protected function getViewData(): array
     {
-        return $this->view_data;
+        return $this->viewData;
     }
 
     /**
      * @param string|null $view
      * @param array $data
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
      */
     protected function render(?string $view = null, array $data = [])
     {
@@ -75,7 +87,7 @@ abstract class BaseController extends Controller
         $this->data($data);
 
         View::share($this->getViewData());
+
         return view($view, $this->getViewData());
     }
-
 }
