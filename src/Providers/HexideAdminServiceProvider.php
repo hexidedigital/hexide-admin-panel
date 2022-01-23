@@ -13,12 +13,12 @@ use HexideDigital\HexideAdmin\Console\Commands\CleanSeededStorageCommand;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
+use HexideDigital\HexideAdmin\Console\Commands\SetupProjectCommand;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\ConfigurationTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\PermissionTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\RoleTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
-use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Blade;
@@ -33,6 +33,7 @@ class HexideAdminServiceProvider extends ServiceProvider
         CreateAdminUser::class,
         PrepareDeployCommand::class,
         CleanSeededStorageCommand::class,
+        SetupProjectCommand::class,
     ];
 
     private array $components = [
@@ -100,11 +101,11 @@ class HexideAdminServiceProvider extends ServiceProvider
         ], 'hexide-admin:views');
 
         $this->publishes([
-            $this->packagePath('resources/build') => public_path('vendor/hexide-admin/build'),
+            $this->packagePath('build') => public_path('vendor/hexide-admin/build'),
             $this->packagePath('resources/js') => resource_path('js'),
             $this->packagePath('resources/img') => resource_path('img'),
             $this->packagePath('resources/sass') => resource_path('sass'),
-        ], 'hexide-admin:public');
+        ], 'hexide-admin:asset');
 
         $this->publishes([
             $this->packagePath("src/Console/stubs") => base_path('stubs/hexide-admin'),
