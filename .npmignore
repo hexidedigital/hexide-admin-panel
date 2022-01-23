@@ -5,3 +5,5 @@ src/
 composer.json
 composer.lock
 package-lock.json
+resources/views
+resources/lang
