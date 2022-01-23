@@ -1,0 +1,6 @@
+config/
+database/
+routes/
+src/
+composer.json
+composer.lock
