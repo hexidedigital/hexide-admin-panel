@@ -1,6 +1,6 @@
 {
     "name": "@oleksandr-moik/hexide-admin-panel",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "description": "Assets for hexide-admin-panel",
     "main": "build/index.js",
     "scripts": {

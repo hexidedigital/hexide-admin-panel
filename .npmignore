@@ -4,3 +4,4 @@ routes/
 src/
 composer.json
 composer.lock
+package-lock.json
