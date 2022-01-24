@@ -6,8 +6,6 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 abstract class DefaultTable extends DataTableComponent
 {
-    public ?string $module = null;
-
     public string $defaultSortColumn = 'id';
     public string $defaultSortDirection = 'desc';
     public ?int $searchFilterDebounce = 500;
@@ -21,10 +19,7 @@ abstract class DefaultTable extends DataTableComponent
         ],
     ];
 
-    public function getModuleName(): ?string
-    {
-        return $this->module;
-    }
+    abstract public function getModuleName(): string;
 
     public function setTableClass(): string
     {

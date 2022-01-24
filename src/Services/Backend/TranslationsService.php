@@ -5,15 +5,11 @@ namespace HexideDigital\HexideAdmin\Services\Backend;
 use HexideDigital\HexideAdmin\Models\Translation;
 use Exception;
 use HexideDigital\HexideAdmin\Services\BackendService;
-use Illuminate\Cache\TaggableStore;
-use Illuminate\Config\Repository;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 
 class TranslationsService extends BackendService
 {
@@ -55,13 +51,10 @@ class TranslationsService extends BackendService
      */
     public function updateTranslations(Request $request)
     {
-        $inputs = $request->validated();
+        $inputs = collect($request->validated());
 
         foreach ($this->locales as $locale) {
-            $translations = array_merge(
-                $this->getGroupTranslationsForLocale($locale),
-                Arr::get($inputs, $locale, [])
-            );
+            $translations = $this->getGroupTranslationsForLocale($locale)->merge($inputs->get($locale));
 
             foreach ($translations as $key => $value) {
                 Translation::updateOrCreate([
@@ -73,9 +66,9 @@ class TranslationsService extends BackendService
                 ]);
             }
 
-            if (Cache::getStore() instanceof TaggableStore) {
-                cache()->tags('translations')->forget($locale . '_' . $this->group);
-            }
+//            if (Cache::getStore() instanceof TaggableStore) {
+//                cache()->tags('translations')->forget($locale . '_' . $this->group);
+//            }
         }
     }
 
@@ -92,34 +85,32 @@ class TranslationsService extends BackendService
         );
     }
 
-    public function getListOfTranslations(): Collection
-    {
-        return $this->getGroupTranslations();
-    }
-
     /**
      * Get all translations for keys for current group <br>
      * Merge translations from database and from local file <br>
      * collection are sorted by key
      */
-    private function getGroupTranslations(): Collection
+    public function getGroupTranslations(): Collection
     {
         $list = [];
 
         foreach ($this->locales as $locale) {
-            $list = $this->getTranslationsForLocale($list, $locale);
+            $list = $this->getTranslationsForLocale($locale, $list);
         }
 
-        ksort($list);
+        foreach ($list as $key => $item) {
+            $item['key'] = $key;
+            $list[$key] = collect($item);
+        }
 
-        return Collection::make($list);
+        return collect($list)->sortKeys();
     }
 
     /**
      * Return list of translations with key-value mode <br>
      * every value is array, where key is locale and value form database or file
      */
-    private function getTranslationsForLocale(array $list, string $locale): array
+    public function getTranslationsForLocale(string $locale, array $list): array
     {
         $databaseTranslations = Translation::whereLocale($locale)
             ->whereGroup($this->getGroup())
@@ -129,16 +120,24 @@ class TranslationsService extends BackendService
          * Get array with keys from file
          * Values are at first gets from database, if is not existed, gets from local file
          */
-        $fileArray = Arr::dot($this->getArrayFromFile($locale));
+        $fileArray = collect(Arr::dot($this->getArrayFromFile($locale)));
         foreach ($fileArray as $key => $value) {
-            $list[$key][$locale] = Arr::get($databaseTranslations, $key, $value);
+            $list[$key][$locale] = collect([
+                'value' => $databaseTranslations->get($key, $value),
+                'value_from_db' => $databaseTranslations->has($key),
+                'exists_in_file' => true,
+            ]);
         }
 
         /*
          * Append to list missed in current locale file translations from database table
          */
-        foreach (Arr::except($databaseTranslations->toArray(), array_keys($fileArray)) as $key => $value) {
-            $list[$key][$locale] = $value;
+        foreach ($databaseTranslations->except($fileArray->keys()) as $key => $value) {
+            $list[$key][$locale] = collect([
+                'value' => $value,
+                'value_from_db' => true,
+                'exists_in_file' => false,
+            ]);
         }
 
         return $list;
@@ -149,14 +148,14 @@ class TranslationsService extends BackendService
      *
      * @param string $locale
      *
-     * @return array<string, string|null> array map -- key-value
+     * @return Collection<string, string|null> array map -- key-value
      */
-    private function getGroupTranslationsForLocale(string $locale): array
+    public function getGroupTranslationsForLocale(string $locale): Collection
     {
-        $list = [];
+        $list = collect();
 
         foreach ($this->getGroupTranslations() as $key => $translations) {
-            $list[$key] = Arr::get($translations, $locale);
+            $list->put($key, $translations->get($locale));
         }
 
         return $list;
@@ -167,14 +166,14 @@ class TranslationsService extends BackendService
      *
      * @return array<string, array|string>
      */
-    private function getArrayFromFile(string $locale): array
+    protected function getArrayFromFile(string $locale): array
     {
         $path = lang_path('/' . $locale . '/' . $this->getGroup() . '.php');
 
         return file_exists($path) ? include($path) : [];
     }
 
-    private function getArrayFromJsonFile(string $locale)
+    protected function getArrayFromJsonFile(string $locale)
     {
         $path = lang_path('/' . $locale . '.json');
 
