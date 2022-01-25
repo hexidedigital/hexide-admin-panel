@@ -18,9 +18,31 @@ $url_params = $url_params ?? [];
     </div>
 
     <div class="col-sm-6 justify-content-end text-right">
-        <div class="btn-group" :class="show && 'show'" x-data="{show: false}">
+        <div class="btn-group position-relative"
+             @isset($next_actions['menu'])
+             :class="open && 'show'"
+             x-data="{
+                open: false,
+                toggle() {
+                    if (this.open) {
+                        return this.close()
+                    }
+                    this.open = true
+                },
+                close(focusAfter) {
+                    this.open = false
+                    focusAfter && focusAfter.focus()
+                }
+             }"
+             @keydown.esc.prevent.stop="close($refs.button)"
+             @focusin.window="! $refs.panel.contains($event.target) && close()"
+             x-id="['dropdown-button']"
+            @endif
+        >
             @isset($next_actions['default'])
-                <button type="submit" name="next_action" value="{{ array_first(array_keys($next_actions['default'])) }}" class="btn btn-success">
+                <button type="submit" name="next_action" class="btn btn-success"
+                        value="{{ array_first(array_keys($next_actions['default'])) }}"
+                >
                     <span class="mr-2"><i class="far fa-save"></i></span>
                     {{ array_first($next_actions['default']) }}
                 </button>
@@ -32,11 +54,22 @@ $url_params = $url_params ?? [];
             @endif
 
             @isset($next_actions['menu'])
-                <a class="btn btn-success dropdown-toggle" @click.prevent="show = !show">
+                <a class="btn btn-success dropdown-toggle"
+                   x-ref="button"
+                   @click="toggle()"
+                   :aria-expanded="open"
+                   :aria-controls="$id('dropdown-button')"
+                >
                     <span class="sr-only">Toggle Dropdown</span>
                 </a>
-                <div class="dropdown-menu" :class="show && 'show'" x-show="show" @click.outside="show = false"
-                     style="position: absolute; transform: translate3d(-5px, 38px, 0px); top: 0; left: 0px; will-change: transform; right: auto; bottom: auto;">
+                <div class="dropdown-menu position-absolute"
+                     :class="open && 'show'"
+                     x-ref="panel"
+                     x-show="open"
+                     x-transition.origin.top.left
+                     @click.outside="close($refs.button)"
+                     :id="$id('dropdown-button')"
+                     style="transform: translate3d(-5px, 38px, 0px); top: 0; left: 0; will-change: transform; right: auto; bottom: auto;">
                     @foreach($next_actions['menu'] as $nextAction => $title)
                         <button type="submit" name="next_action" value="{{ $nextAction }}" class="dropdown-item">
                             {{ $title }}
