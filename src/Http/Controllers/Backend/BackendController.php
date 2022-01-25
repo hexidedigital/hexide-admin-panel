@@ -243,17 +243,18 @@ abstract class BackendController extends BaseController
             DB::commit();
 
             return $result;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $exception) {
             if ($this->catchExceptions) {
-                throw $e;
+                throw $exception;
             }
 
+            report($exception);
             $this
                 ->notify(self::DatabaseAction[$action], null, 'error')
                 ->notify(self::DatabaseAction[$action],
-                    class_basename($e) . " -- {$e->getFile()}: {$e->getLine()} ",
+                    class_basename($exception) . " -- {$exception->getFile()}: {$exception->getLine()} ",
                     'error',
-                    class_basename($e) . $e->getMessage());
+                    class_basename($exception) . $exception->getMessage());
 
             DB::rollBack();
         }
