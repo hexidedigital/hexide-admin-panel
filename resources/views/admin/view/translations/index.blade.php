@@ -13,7 +13,7 @@
             {!! Form::open(['url' => route('admin.translations.update', $group), 'method' => 'post', 'class' => 'without-js-validation' ]) !!}
             {!! Form::hidden('page', $page) !!}
 
-            <livewire:admin.tables.translation-table/>
+            <livewire:hexide-admin::admin.tables.translation-table/>
 
             @include('hexide-admin::admin.view.translations.partials.buttons')
 

@@ -5,16 +5,23 @@ namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 use App\Models\User;
 use HexideDigital\ModelPermissions\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class UserTable extends DefaultTable
 {
     public ?string $module = 'users';
+    public Collection $roles;
 
     public array $filterNames = [
         'deleted' => 'Delete state',
     ];
+
+    public function mount()
+    {
+        $this->roles = Role::pluck('title', 'id');
+    }
 
     public function setUserRole()
     {
@@ -35,8 +42,6 @@ class UserTable extends DefaultTable
 
     public function filters(): array
     {
-        $rolesArray = Role::pluck('title', 'id')->toArray();
-
         return [
             'deleted' => Filter::make(__('Deleted uses'))
                 ->select([
@@ -46,7 +51,7 @@ class UserTable extends DefaultTable
                 ]),
 
             'roles' => Filter::make(trans_choice('models.roles.name', 2))
-                ->multiSelect($rolesArray),
+                ->multiSelect($this->roles->toArray()),
         ];
     }
 

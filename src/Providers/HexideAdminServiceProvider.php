@@ -17,6 +17,7 @@ use HexideDigital\HexideAdmin\Console\Commands\SetupProjectCommand;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\ConfigurationTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\PermissionTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\RoleTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\TranslationTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
 use Illuminate\Container\Container;
@@ -49,6 +50,7 @@ class HexideAdminServiceProvider extends ServiceProvider
                 'permission-table' => PermissionTable::class,
                 'role-table' => RoleTable::class,
                 'user-table' => UserTable::class,
+                'translation-table' => TranslationTable::class,
             ],
         ],
     ];
