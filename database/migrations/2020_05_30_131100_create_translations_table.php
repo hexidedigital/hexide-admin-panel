@@ -22,7 +22,9 @@ return new class extends Migration {
             'api_viewAny',
             'site_viewAny',
         ];
-        PermissionRelation::touch('translations')->extra($data)->populate();
+        PermissionRelation::touch('translations')
+            ->extra($data)
+            ->addResourceSet();
     }
 
     public function down()

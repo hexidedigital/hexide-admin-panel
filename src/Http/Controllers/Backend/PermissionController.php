@@ -14,7 +14,7 @@ class PermissionController extends HexideAdminBaseController
         $this->setResourceAccessMap();
 
         $this->setModelClassName(Permission::class);
-        $this->setModuleName('users');
+        $this->setModuleName('permissions');
         $this->setServiceClassName();
         $this->setService($this->getService());
         $this->setFromRequestClassName(PermissionRequest::class);

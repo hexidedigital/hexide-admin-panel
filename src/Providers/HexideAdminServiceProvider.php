@@ -21,6 +21,7 @@ use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -80,6 +81,7 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->loadTranslations();
         $this->loadRoutes();
 
+        $this->registerBladeDirectives();
         $this->registerCommands();
         $this->registerComponents();
         $this->registerViewComposers($view);
@@ -147,6 +149,19 @@ class HexideAdminServiceProvider extends ServiceProvider
     private function loadViews()
     {
         $this->loadViewsFrom($this->packagePath('resources/views'), 'hexide-admin');
+    }
+
+    private function registerBladeDirectives()
+    {
+        /* @admin */
+        Blade::if('admin', function () {
+            return Auth::check() && Auth::user()->hasAdminAccess();
+        });
+
+        /* @isRole */
+        Blade::if('isRole', function (int $roleId) {
+            return Auth::check() && Auth::user()->isRole($roleId);
+        });
     }
 
     private function registerCommands()
