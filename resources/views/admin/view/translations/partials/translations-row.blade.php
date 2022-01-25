@@ -22,13 +22,17 @@
 
         @isRole(\HexideDigital\ModelPermissions\Models\Role::SuperAdmin)
             <div class="row mt-2">
-                <small class="col-6 text-center {{collect($row->get($locale))->get('value_from_db') ? 'text-success' : 'text-danger'}}">
+                <small class="col text-center {{collect($row->get($locale))->get('value_from_db') ? 'text-success' : 'text-danger'}}">
                     <i class="mr-2 {{collect($row->get($locale))->get('value_from_db') ? 'fas fa-check' : 'fas fa-times'}}"></i>
-                    Value stored in db
+                    Value stored in db?
                 </small>
-                <small class="col-6 text-center {{collect($row->get($locale))->get('exists_in_file') ? 'text-success' : 'text-danger'}}">
+                <small class="col text-center {{collect($row->get($locale))->get('exists_in_file') ? 'text-success' : 'text-danger'}}">
                     <i class="mr-2 {{collect($row->get($locale))->get('exists_in_file') ? 'fas fa-check' : 'fas fa-times'}}"></i>
-                    Key exists in file
+                    Key exists in file?
+                </small>
+                <small class="col text-center {{collect($row->get($locale))->get('is_same') ? 'text-success' : 'text-danger'}}">
+                    <i class="mr-2 {{collect($row->get($locale))->get('is_same') ? 'fas fa-check' : 'fas fa-times'}}"></i>
+                    DB and file values are same?
                 </small>
             </div>
         @endisRole

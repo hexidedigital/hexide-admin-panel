@@ -51,7 +51,7 @@ class UserTable extends DefaultTable
                 ]),
 
             'roles' => Filter::make(trans_choice('models.roles.name', 2))
-                ->multiSelect($this->roles->toArray()),
+                ->multiSelect($this->roles->all()),
         ];
     }
 

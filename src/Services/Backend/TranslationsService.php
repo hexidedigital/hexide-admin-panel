@@ -126,6 +126,7 @@ class TranslationsService extends BackendService
                 'value' => $databaseTranslations->get($key, $value),
                 'value_from_db' => $databaseTranslations->has($key),
                 'exists_in_file' => true,
+                'is_same' => $databaseTranslations->get($key) === $value,
             ]);
         }
 
@@ -137,6 +138,7 @@ class TranslationsService extends BackendService
                 'value' => $value,
                 'value_from_db' => true,
                 'exists_in_file' => false,
+                'is_same' => false,
             ]);
         }
 

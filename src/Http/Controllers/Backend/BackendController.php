@@ -244,7 +244,7 @@ abstract class BackendController extends BaseController
 
             return $result;
         } catch (\Throwable $exception) {
-            if ($this->catchExceptions) {
+            if (!$this->catchExceptions && App::hasDebugModeEnabled()) {
                 throw $exception;
             }
 
