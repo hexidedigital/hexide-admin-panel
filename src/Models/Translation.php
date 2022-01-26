@@ -43,11 +43,9 @@ class Translation extends Model
 
     public function scopeOrderByGroupKeys(Builder $query, bool $ordered = false): Builder
     {
-        if ($ordered) {
-            $query->orderBy('group')->orderBy('key');
-        }
-
-        return $query;
+        return $query->when($ordered, fn(Builder $builder) => $builder
+            ->orderBy('group')
+            ->orderBy('key'));
     }
 
     public function scopeSelectDistinctGroup(Builder $query): Builder

@@ -11,8 +11,6 @@ use Illuminate\Http\Request;
 
 class TranslationController extends HexideAdminBaseController
 {
-    private int $perPage = 30;
-
     public function __construct(Request $request)
     {
         parent::__construct();
@@ -20,7 +18,7 @@ class TranslationController extends HexideAdminBaseController
         $this->withoutBreadcrumbs();
 
         $this->setModelClassName(Translation::class);
-        $this->setModuleName('translations');
+        $this->setModuleName();
         $this->setServiceClassName(TranslationsService::class);
         $this->setService(new TranslationsService($request->route('group')));
         $this->setFromRequestClassName(TranslationUpdateRequest::class);
@@ -31,29 +29,13 @@ class TranslationController extends HexideAdminBaseController
         /** @var TranslationsService $service */
         $service = $this->getService();
 
-        $page = $request->get('page', 1);
-        $group = $service->getGroup();
-
-        $list = $service->getPaginatedList(
-            $this->perPage,
-            $page,
-            [
-                'path' => route('admin.' . $this->getModuleName() . '.index', $group),
-                'query' => [],
-            ]
-        );
-
         $this->data([
             'locales' => $service->getLocales(),
-            'list' => $list,
-            'group' => $group,
-            'page' => $page,
-            'page_title' => trans('labels.translation_group_' . $group),
+            'group' => $service->getGroup(),
+            'page' => $request->input('page', 1),
         ]);
 
         $this->notifyIfExistsErrors(ActionNames::Edit);
-
-        $request->flush();
 
         return $this->render();
     }

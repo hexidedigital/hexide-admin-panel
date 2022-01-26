@@ -292,7 +292,7 @@ abstract class BackendController extends BaseController
     protected function setModuleName(string $name = null)
     {
         if (empty($name)) {
-            $name = $this->getModelObject()->getTable();
+            $name = module_name_from_model($this->getModelObject());
         }
 
         $this->module = $name;

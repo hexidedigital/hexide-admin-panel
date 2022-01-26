@@ -7,7 +7,6 @@ use Exception;
 use HexideDigital\HexideAdmin\Services\BackendService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -72,19 +71,6 @@ class TranslationsService extends BackendService
         }
     }
 
-    public function getPaginatedList(int $perPage = 15, int $page = 1, array $options = []): LengthAwarePaginator
-    {
-        $list = $this->getGroupTranslations();
-
-        return new LengthAwarePaginator(
-            $list->slice(($page - 1) * $perPage, $perPage),
-            $list->count(),
-            $perPage,
-            $page,
-            $options
-        );
-    }
-
     /**
      * Get all translations for keys for current group <br>
      * Merge translations from database and from local file <br>
@@ -123,6 +109,7 @@ class TranslationsService extends BackendService
         $fileArray = collect(Arr::dot($this->getArrayFromFile($locale)));
         foreach ($fileArray as $key => $value) {
             $list[$key][$locale] = collect([
+                'locale' => $locale,
                 'value' => $databaseTranslations->get($key, $value),
                 'value_from_db' => $databaseTranslations->has($key),
                 'exists_in_file' => true,
@@ -135,6 +122,7 @@ class TranslationsService extends BackendService
          */
         foreach ($databaseTranslations->except($fileArray->keys()) as $key => $value) {
             $list[$key][$locale] = collect([
+                'locale' => $locale,
                 'value' => $value,
                 'value_from_db' => true,
                 'exists_in_file' => false,
