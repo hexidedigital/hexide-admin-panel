@@ -6,5 +6,5 @@
             'model' => \{{ model_namespace }}::class,
             'can' => 'viewAny',
             'route' => 'admin.{{ model_names }}.index',
-            'active' => ['regex:@^admin/{{ model_names }}/.+@'],
+            'active' => ['regex:@^(\w+)/{{ model_names }}/.+@'],
         ],/*hexide_admin_stub*/
