@@ -71,6 +71,10 @@ class AdminConfiguration extends Model
     use Translatable, WithTranslationsTrait;
     use VisibleTrait;
 
+    public string $moduleName = 'admin_configurations';
+
+    /* ------------------------ Types ------------------------ */
+
     public const DefaultType = Configuration::TEXT;
 
     /** @var array<string> */

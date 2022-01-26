@@ -9,7 +9,7 @@ class RolePolicy extends DefaultPolicy
 {
     protected function module(): string
     {
-        return (new Role())->getTable();
+        return module_name_from_model(new Role);
     }
 
     /**

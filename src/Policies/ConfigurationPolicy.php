@@ -8,7 +8,6 @@ class ConfigurationPolicy extends DefaultPolicy
 {
     protected function module(): string
     {
-        return (new AdminConfiguration())->getTable();
-        // return 'admin_configurations';
+        return module_name_from_model(new AdminConfiguration);
     }
 }

@@ -8,6 +8,6 @@ class TranslationPolicy extends DefaultPolicy
 {
     protected function module(): string
     {
-        return (new Translation())->getTable();
+        return module_name_from_model(new Translation);
     }
 }

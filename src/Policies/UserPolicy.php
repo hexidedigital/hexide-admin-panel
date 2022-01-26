@@ -51,6 +51,6 @@ class UserPolicy extends DefaultPolicy
 
     protected function module(): string
     {
-        return (new User())->getTable();
+        return module_name_from_model(new User);
     }
 }
