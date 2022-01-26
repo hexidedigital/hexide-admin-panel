@@ -53,7 +53,7 @@ class TranslationsService extends BackendService
         $inputs = collect($request->validated());
 
         foreach ($this->locales as $locale) {
-            $translations = $this->getGroupTranslationsForLocale($locale)->merge($inputs->get($locale));
+            $translations = collect($inputs->get($locale));
 
             foreach ($translations as $key => $value) {
                 Translation::updateOrCreate([
