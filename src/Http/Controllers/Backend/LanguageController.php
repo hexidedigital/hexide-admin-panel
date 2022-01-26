@@ -3,9 +3,8 @@
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
 use Carbon\Carbon;
-use HexideDigital\HexideAdmin\Http\Controllers\BaseController;
 
-class LanguageController extends BaseController
+class LanguageController extends BackendController
 {
     public function __invoke($locale)
     {
@@ -14,11 +13,11 @@ class LanguageController extends BaseController
         $message = __('hexide-admin::messages.language.changed', [], $locale);
 
         if (!in_array($locale, config('hexide-admin.locales'))) {
-            $locale = config('hexide-admin.locale');
+            $locale = config('hexide-admin.locale', 'en');
             $message = __('hexide-admin::messages.language.default', [], $locale);
         }
 
-        toastr($message, 'info');
+        $this->notify(null, $message, 'info', __("hexide-admin::messages.info.title", [], $locale));
 
         $cookie = cookie(config('hexide-admin.lang_cookie'), $locale, Carbon::now()->diffInMinutes(Carbon::now()->addYear()));
 

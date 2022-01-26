@@ -551,17 +551,17 @@ abstract class BackendController extends BaseController
         }
     }
 
-    protected function notify(string $action = '', string $message = null, string $type = 'success', string $title = '', array $options = []): self
+    protected function notify(?string $action = null, ?string $message = null, string $type = 'success', ?string $title = null, array $options = []): self
     {
         if (!ActionNames::isAllowed($action)) {
             $action = ActionNames::Action;
         }
 
-        if (empty($title)) {
+        if (!isset($title)) {
             $title = trans("hexide-admin::messages.$type.title");
         }
 
-        if (empty($message) && in_array($type, ['error', 'success'])) {
+        if (!isset($message) && in_array($type, ['error', 'success'])) {
             $message = $this->getNotifyModelMessage($type, $action);
         }
 

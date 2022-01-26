@@ -125,8 +125,8 @@ class HexideAdminServiceProvider extends ServiceProvider
     {
         $routesCfg = [
             'as' => 'admin.',
-            'prefix' => 'admin',
-            'middleware' => ['web', 'auth:admin'],
+            'prefix' => config('hexide-admin.routes.admin.prefix', 'admin'),
+            'middleware' => config('hexide-admin.routes.admin.middleware', ['web', 'auth:admin', 'language:admin']),
         ];
 
         Route::group($routesCfg, function () {
