@@ -127,7 +127,7 @@ abstract class BackendController extends BaseController
 
     public function updateAction(Request $request): RedirectResponse
     {
-        $model = $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject();
+        $model = $this->getModelFromRoute($request, ActionNames::Edit);
 
         $this->secureActions->checkWithAbort(ActionNames::Edit, $model);
 
@@ -204,29 +204,6 @@ abstract class BackendController extends BaseController
 
 
     /** @throws \Throwable */
-    protected function getActionResult(string $action, $parameters)
-    {
-        if (!in_array($action, self::Actions)) {
-            return parent::callAction($action, $parameters);
-        }
-
-        if ($this->isDatabaseAction($action)) {
-            return $this->dbTransactionAction($action, $parameters);
-        }
-
-        if (!method_exists($this, $action)) {
-            return App::call([$this, $action . 'Action']);
-        }
-
-        return parent::callAction($action, $parameters);
-    }
-
-    protected function isDatabaseAction(string $action): bool
-    {
-        return in_array($action, array_keys(self::DatabaseAction));
-    }
-
-    /** @throws \Throwable */
     protected function dbTransactionAction(string $action, $parameters)
     {
         DB::beginTransaction();
@@ -244,7 +221,9 @@ abstract class BackendController extends BaseController
 
             return $result;
         } catch (\Throwable $exception) {
-            if (!$this->catchExceptions && App::hasDebugModeEnabled()) {
+            if ((!$this->catchExceptions && App::hasDebugModeEnabled())
+                || \Auth::user()->isRoleSuperAdmin())
+            {
                 throw $exception;
             }
 
@@ -618,6 +597,7 @@ abstract class BackendController extends BaseController
     {
         $this->createBreadcrumb($this->getModuleName());
 
+        /* // todo move or remove this code
         $result = $this->protectAction($method);
 
         if ($result !== true) {
@@ -626,8 +606,26 @@ abstract class BackendController extends BaseController
 
             return $result;
         }
+        */
 
-        return $this->getActionResult($method, $parameters);
+        if (!in_array($method, self::Actions)) {
+            return parent::callAction($method, $parameters);
+        }
+
+        if ($this->isDatabaseAction($method)) {
+            return $this->dbTransactionAction($method, $parameters);
+        }
+
+        if (!method_exists($this, $method)) {
+            return App::call([$this, $method . 'Action']);
+        }
+
+        return parent::callAction($method, $parameters);
+    }
+
+    protected function isDatabaseAction(string $action): bool
+    {
+        return in_array($action, array_keys(self::DatabaseAction));
     }
 
     /**

@@ -54,14 +54,15 @@ $url_params = $url_params ?? [];
             @endif
 
             @isset($next_actions['menu'])
-                <a class="btn btn-success dropdown-toggle"
-                   x-ref="button"
-                   @click="toggle()"
-                   :aria-expanded="open"
-                   :aria-controls="$id('dropdown-button')"
+                <button class="btn btn-success dropdown-toggle"
+                        type="button" role="button"
+                        x-ref="button"
+                        @click="toggle()"
+                        :aria-expanded="open"
+                        :aria-controls="$id('dropdown-button')"
                 >
                     <span class="sr-only">Toggle Dropdown</span>
-                </a>
+                </button>
                 <div class="dropdown-menu position-absolute"
                      :class="open && 'show'"
                      x-ref="panel"
@@ -69,7 +70,7 @@ $url_params = $url_params ?? [];
                      x-transition.origin.top.left
                      @click.outside="close($refs.button)"
                      :id="$id('dropdown-button')"
-                     style="transform: translate3d(-5px, 38px, 0px); top: 0; left: 0; will-change: transform; right: auto; bottom: auto;">
+                     style="transform: translate3d(0, 0, 0); top: 38px; left: 0; will-change: transform; right: auto; bottom: auto;">
                     @foreach($next_actions['menu'] as $nextAction => $title)
                         <button type="submit" name="next_action" value="{{ $nextAction }}" class="dropdown-item">
                             {{ $title }}

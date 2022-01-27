@@ -20,6 +20,7 @@ use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\RoleTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\TranslationTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
+use HexideDigital\HexideAdmin\Services\Backend\UserService;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Auth;
@@ -71,6 +72,10 @@ class HexideAdminServiceProvider extends ServiceProvider
 
         $this->app->bind(Configuration::class, function () {
             return new Configuration();
+        });
+
+        $this->app->bind(UserService::class, function () {
+            return new UserService();
         });
     }
 

@@ -12,7 +12,7 @@ class UserRequest extends FormRequest
     public function authorize(): bool
     {
         if (isset($this->user)) {
-            return Gate::allows(Permission::Update, User::find($this->user));
+            return Gate::allows(Permission::Update, $this->user instanceof User ? $this->user : User::firstOrFail($this->user));
         } else {
             return Gate::allows(Permission::Create, User::class);
         }
@@ -21,6 +21,9 @@ class UserRequest extends FormRequest
     public function rules(): array
     {
         $model = $this->user ?? '';
+        if ($model instanceof User) {
+            $model = $model->id;
+        }
 
         return [
             'name' => 'required|string|max:255',
