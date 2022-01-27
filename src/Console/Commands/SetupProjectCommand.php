@@ -144,7 +144,7 @@ class SetupProjectCommand extends Command
     protected function getOptions(): array
     {
         return [
-            new InputOption('database', 'd', InputOption::VALUE_OPTIONAL, 'Create user and database for project'),
+            new InputOption('database', 'd', InputOption::VALUE_NONE, 'Create user and database for project'),
         ];
     }
 }
