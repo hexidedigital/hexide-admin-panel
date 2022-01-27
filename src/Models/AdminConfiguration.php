@@ -123,7 +123,7 @@ class AdminConfiguration extends Model
         });
 
         static::saved(function (AdminConfiguration $adminConfiguration) {
-            app(Configuration::class)->storeToCache();
+            \App::make(Configuration::class)->storeToCache();
         });
     }
 
@@ -138,7 +138,7 @@ class AdminConfiguration extends Model
     {
         $field = $this->storeKey();
 
-        $configuration = app(Configuration::class);
+        $configuration = \App::make(Configuration::class);
 
         if ($configuration->isSingleValueType($this->type)) {
 
@@ -185,7 +185,7 @@ class AdminConfiguration extends Model
 
         $value = $this->translatable ? ($this->translate()->attributes[$field] ?? null) : $this->attributes[$field];
 
-        $configuration = app(Configuration::class);
+        $configuration = \App::make(Configuration::class);
 
         if ($configuration->isTextValueType($this->type)) {
             return $value;
@@ -240,7 +240,7 @@ class AdminConfiguration extends Model
 
     public function storeKey(): string
     {
-        return app(Configuration::class)->getStoreKey($this->type, $this->translatable);
+        return \App::make(Configuration::class)->getStoreKey($this->type, $this->translatable);
     }
 
     public function isType(string $type): bool

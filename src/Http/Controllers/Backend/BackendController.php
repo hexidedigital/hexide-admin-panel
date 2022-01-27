@@ -88,7 +88,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Show);
 
-        $this->secureActions->checkWithAbort(ActionNames::Show, $model);
+        $this->protectAction(ActionNames::Show, $model);
 
         $this->dataModel($model);
 
@@ -104,7 +104,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Edit);
 
-        $this->secureActions->checkWithAbort(ActionNames::Edit, $model);
+        $this->protectAction(ActionNames::Edit, $model);
 
         $this->dataModel($model);
 
@@ -113,7 +113,7 @@ abstract class BackendController extends BaseController
 
     public function storeAction(Request $request): RedirectResponse
     {
-        $this->secureActions->checkWithAbort(ActionNames::Create, $this->getModelClassName());
+        $this->protectAction(ActionNames::Create, $this->getModelObject());
 
         $service = $this->getService();
 
@@ -129,7 +129,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Edit);
 
-        $this->secureActions->checkWithAbort(ActionNames::Edit, $model);
+        $this->protectAction(ActionNames::Edit, $model);
 
         $service = $this->getService();
 
@@ -145,7 +145,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Delete);
 
-        $this->secureActions->checkWithAbort(ActionNames::Delete, $model);
+        $this->protectAction(ActionNames::Delete, $model);
 
         $service = $this->getService();
         $service->deleteModel($request, $model);
@@ -157,7 +157,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Restore);
 
-        $this->secureActions->checkWithAbort(ActionNames::Restore, $model);
+        $this->protectAction(ActionNames::Restore, $model);
 
         $service = $this->getService();
         $service->restoreModel($request, $model);
@@ -169,7 +169,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::ForceDelete);
 
-        $this->secureActions->checkWithAbort(ActionNames::ForceDelete, $model);
+        $this->protectAction(ActionNames::ForceDelete, $model);
 
         $service = $this->getService();
         $service->forceDeleteModel($request, $model);
@@ -365,6 +365,10 @@ abstract class BackendController extends BaseController
             $request->get('id')
         );
 
+        if ($id instanceof Model) {
+            return $id;
+        }
+
         if (in_array(SoftDeletes::class, class_uses($this->modelClass))) {
             return $this->getModelObject()::withTrashed()->findOrFail($id);
         }
@@ -456,31 +460,27 @@ abstract class BackendController extends BaseController
 
     /**
      * @param string $action
+     * @param Model|class-string<Model>|null $model
      *
      * @return bool|JsonResponse|RedirectResponse|SymfonyResponse
      */
-    protected function protectAction(string $action)
+    protected function protectAction(string $action, $model = null)
     {
-        $type = $this->model;
-        if (empty($this->model) && !empty($this->modelClass)) {
-            $type = $this->getModelObject();
+        if ($this->secureActions->check($action, $model)) {
+            return true;
         }
 
-        if (!$this->secureActions->check($action, $type)) {
-            if (request()->ajax()) {
-                return response()
-                    ->json(['message' => trans('api_labels.forbidden'), 'type' => 'error'])
-                    ->setStatusCode(SymfonyResponse::HTTP_FORBIDDEN);
-            } else {
-                if ($action != 'index') {
-                    return $this->redirect();
-                } else {
-                    return redirect()->route('admin.home');
-                }
-            }
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()
+                ->json(['message' => trans('api_labels.forbidden'), 'type' => 'error'])
+                ->setStatusCode(403);
         }
 
-        return true;
+        if ($action !== 'index') {
+            return $this->redirect();
+        }
+
+        return redirect()->route('admin.home');
     }
 
     protected function setResourceAccessMap(array $merge = []): void
