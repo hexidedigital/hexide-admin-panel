@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 abstract class BackendController extends BaseController
@@ -221,9 +222,12 @@ abstract class BackendController extends BaseController
 
             return $result;
         } catch (\Throwable $exception) {
+            if ($exception instanceof ValidationException) {
+                throw $exception;
+            }
+
             if ((!$this->catchExceptions && App::hasDebugModeEnabled())
-                || \Auth::user()->isRoleSuperAdmin())
-            {
+                || \Auth::user()->isRoleSuperAdmin()) {
                 throw $exception;
             }
 
