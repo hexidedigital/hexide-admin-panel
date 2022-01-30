@@ -73,27 +73,6 @@ class AdminConfiguration extends Model
 
     public string $moduleName = 'admin_configurations';
 
-    /* ------------------------ Types ------------------------ */
-
-    public const DefaultType = Configuration::TEXT;
-
-    /** @var array<string> */
-    protected static array $types = [
-        Configuration::TEXT,
-        Configuration::TEXTAREA,
-        Configuration::EDITOR,
-        Configuration::WEEKDAY,
-        Configuration::TIME,
-        Configuration::DATE,
-        Configuration::BOOLEAN,
-        Configuration::SELECT,
-        Configuration::MULTI_SELECT,
-        Configuration::IMAGE,
-        Configuration::FILE,
-        Configuration::RANGE,
-        Configuration::IMG_BUTTON,
-    ];
-
     /* ------------------------ Model ------------------------ */
 
     public $translationModel = AdminConfigurationTranslation::class;
@@ -245,6 +224,6 @@ class AdminConfiguration extends Model
 
     public function isType(string $type): bool
     {
-        return in_array($type, self::$types) && $this->type === $type;
+        return in_array($type, \App::make(Configuration::class)->getTypes()) && $this->type === $type;
     }
 }
