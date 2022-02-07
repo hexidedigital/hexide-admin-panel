@@ -102,7 +102,9 @@ class AdminConfiguration extends Model
         });
 
         static::saved(function (AdminConfiguration $adminConfiguration) {
-            \App::make(Configuration::class)->storeToCache();
+            foreach (config('translatable.locales') as $locale) {
+                \App::make(Configuration::class)->storeToCache($locale);
+            }
         });
     }
 

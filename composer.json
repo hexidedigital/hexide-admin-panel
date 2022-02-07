@@ -3,7 +3,7 @@
     "description": "hexide-digital admin panel",
     "license": "MIT",
     "type": "library",
-    "version": "2.5.1",
+    "version": "2.5.2",
     "support": {
         "issues": "https://github.com/hexidedigital/hexide-admin-panel/issues",
         "source": "https://github.com/hexidedigital/hexide-admin-panel",

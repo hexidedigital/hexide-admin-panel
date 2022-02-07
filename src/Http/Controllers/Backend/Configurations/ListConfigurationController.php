@@ -32,6 +32,7 @@ class ListConfigurationController extends HexideAdminBaseController
                 ->select([
                     'admin_configurations.*',
                     'admin_configuration_translations.text as text',
+                    'admin_configuration_translations.json as json',
                 ])
                 ->with('translations')
                 ->sorted()

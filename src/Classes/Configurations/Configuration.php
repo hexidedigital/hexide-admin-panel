@@ -2,9 +2,9 @@
 
 namespace HexideDigital\HexideAdmin\Classes\Configurations;
 
-
 use HexideDigital\HexideAdmin\Models\AdminConfiguration;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class Configuration
@@ -266,15 +266,17 @@ class Configuration
         return $configuration->value;
     }
 
-
-    public function storeToCache(): array
+    public function storeToCache(?string $locale = null): array
     {
+        $locale = $this->resolveLocale($locale);
+
         $collection = AdminConfiguration::visible()->sorted()
             ->joinTranslations()
             ->with('translations')
             ->select([
                 'admin_configurations.*',
                 'admin_configuration_translations.text as text',
+                'admin_configuration_translations.json as json',
             ])
             ->get()
             ->groupBy('group');
@@ -286,20 +288,23 @@ class Configuration
             $values = [];
 
             foreach ($admin_configurations as $admin_configuration) {
+                $admin_configuration->setDefaultLocale($locale);
                 $values[$admin_configuration->key] = $admin_configuration->value;
             }
 
             $data[$groupName] = $values;
         }
 
-        Cache::forever('configurations_' . app()->getLocale(), $data);
+        Cache::forever('configurations_' . $locale, $data);
 
         return $data;
     }
 
-    public function readFromCache(): ?array
+    public function readFromCache(?string $locale = null): ?array
     {
-        return Cache::get('configurations_' . app()->getLocale(), $this->storeToCache());
+        $locale = $this->resolveLocale($locale);
+
+        return Cache::get('configurations_' . $locale, $this->storeToCache($locale));
     }
 
     public function lists(): array
@@ -307,15 +312,21 @@ class Configuration
         return $this->readFromCache();
     }
 
+    public function resolveLocale(?string $locale = null): string
+    {
+        return $locale ?: app()->getLocale();
+    }
+
     /**
      * @param string|array $group
+     * @param string|null $locale
      *
      * @return array
      */
-    public function configurations($group = []): array
+    public function configurations($group = [], string $locale = null): array
     {
-        return collect($this->readFromCache())
-            ->only(array_wrap($group))
-            ->toArray();
+        return collect($this->readFromCache($locale))
+            ->when($group, fn (Collection $collection) => $collection->only(array_wrap($group)))
+            ->all();
     }
 }
