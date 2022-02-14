@@ -3,27 +3,18 @@
 namespace HexideDigital\HexideAdmin\Http\Requests\Backend;
 
 use App\Models\User;
-use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 
 class UserRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        if (isset($this->user)) {
-            return Gate::allows(Permission::Update, $this->user instanceof User ? $this->user : User::firstOrFail($this->user));
-        } else {
-            return Gate::allows(Permission::Create, User::class);
-        }
-    }
+    use AdminFormRequest;
+
+    protected string $modelClass = User::class;
+    protected string $routeKeyName = 'user';
 
     public function rules(): array
     {
-        $model = $this->user ?? '';
-        if ($model instanceof User) {
-            $model = $model->id;
-        }
+        $model = $this->modelId();
 
         return [
             'name' => 'required|string|max:255',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
 use HexideDigital\HexideAdmin\Models\AdminConfiguration;
@@ -56,7 +58,7 @@ class ConfigurationTable extends DefaultTable
 
     public function getModuleName(): string
     {
-        return 'admin_configurations';
+        return module_name_from_model(new AdminConfiguration);
     }
 
     public function query(): Builder

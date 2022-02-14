@@ -2,11 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use {{ model_namespace }};
 use HexideDigital\HexideAdmin\Policies\DefaultPolicy;
 
-class PermissionPolicy extends DefaultPolicy
+class {{ class }} extends DefaultPolicy
 {
     protected function module(): string
     {

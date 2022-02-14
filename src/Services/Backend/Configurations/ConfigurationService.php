@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Services\Backend\Configurations;
 
 use HexideDigital\HexideAdmin\Models\AdminConfiguration;

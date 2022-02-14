@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
 use HexideDigital\HexideAdmin\Models\Translation;

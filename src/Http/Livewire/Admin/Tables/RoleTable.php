@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
 use HexideDigital\ModelPermissions\Models\Role;
@@ -40,7 +42,7 @@ class RoleTable extends DefaultTable
 
     public function getModuleName(): string
     {
-        return 'roles';
+        return module_name_from_model(new Role);
     }
 
     public function query(): Builder

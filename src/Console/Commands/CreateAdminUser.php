@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Console\Commands;
 
 use App\Models\User;

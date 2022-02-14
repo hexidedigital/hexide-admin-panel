@@ -1,24 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Providers;
 
-use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
 use HexideDigital\HexideAdmin\Classes\Breadcrumbs;
+use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
+use HexideDigital\HexideAdmin\Classes\FileUploader;
 use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotification;
+use HexideDigital\HexideAdmin\Classes\Thumb;
 use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
 use HexideDigital\HexideAdmin\Components\Tabs\TabsComponent;
 use HexideDigital\HexideAdmin\Console\Commands\CleanSeededStorageCommand;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
-use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
+use HexideDigital\HexideAdmin\Console\Commands\Creators;
+use HexideDigital\HexideAdmin\Console\Commands\ModuleMakeCommand;
 use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
 use HexideDigital\HexideAdmin\Console\Commands\SetupProjectCommand;
-use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\ConfigurationTable;
-use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\PermissionTable;
-use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\RoleTable;
-use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\TranslationTable;
-use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
 use HexideDigital\HexideAdmin\Services\Backend\UserService;
 use Illuminate\Container\Container;
@@ -32,11 +33,20 @@ use Route;
 class HexideAdminServiceProvider extends ServiceProvider
 {
     private array $commands = [
-        HexideAdminCommand::class,
         CreateAdminUser::class,
         PrepareDeployCommand::class,
         CleanSeededStorageCommand::class,
         SetupProjectCommand::class,
+
+        ModuleMakeCommand::class,
+        Creators\ControllerMakeCommand::class,
+        Creators\MigrationMakeCommand::class,
+        Creators\LivewireTableMakeCommand::class,
+        Creators\ModelMakeCommand::class,
+        Creators\ModelTranslationMakeCommand::class,
+        Creators\PolicyMakeCommand::class,
+        Creators\RequestMakeCommand::class,
+        Creators\ServiceMakeCommand::class,
     ];
 
     private array $components = [
@@ -47,11 +57,11 @@ class HexideAdminServiceProvider extends ServiceProvider
     private array $livewire = [
         'admin' => [
             'tables' => [
-                'configuration-table' => ConfigurationTable::class,
-                'permission-table' => PermissionTable::class,
-                'role-table' => RoleTable::class,
-                'user-table' => UserTable::class,
-                'translation-table' => TranslationTable::class,
+                'configuration-table' => Tables\ConfigurationTable::class,
+                'permission-table' => Tables\PermissionTable::class,
+                'role-table' => Tables\RoleTable::class,
+                'user-table' => Tables\TranslationTable::class,
+                'translation-table' => Tables\UserTable::class,
             ],
         ],
     ];
@@ -77,6 +87,9 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->app->bind(UserService::class, function () {
             return new UserService();
         });
+
+        $this->app->bind('thumb', Thumb::class);
+        $this->app->bind('file_uploader', FileUploader::class);
     }
 
     public function boot(Factory $view)
@@ -141,6 +154,11 @@ class HexideAdminServiceProvider extends ServiceProvider
         Route::group(['middleware' => ['web']], function () {
             $this->loadRoutesFrom($this->packagePath('routes/web.php'));
         });
+
+        Route::middleware(config('hexide-admin.routes.admin.middleware'))
+            ->as('admin.')
+            ->prefix(config('hexide-admin.routes.admin.prefix'))
+            ->group(base_path('routes/admin.php'));
     }
 
     private function loadConfig()

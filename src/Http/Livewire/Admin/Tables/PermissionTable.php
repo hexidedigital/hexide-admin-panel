@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
 use HexideDigital\ModelPermissions\Models\Permission;
@@ -43,7 +45,7 @@ class PermissionTable extends DefaultTable
 
     public function getModuleName(): string
     {
-        return 'permissions';
+        return module_name_from_model(new Permission);
     }
 
     public function query(): Builder

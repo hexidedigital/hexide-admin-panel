@@ -1,31 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {{ namespace }};
 
 use {{ model_namespace }};
-use HexideDigital\ModelPermissions\Models\Permission;
+use HexideDigital\HexideAdmin\Http\Requests\Backend\AdminFormRequest;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 
 class {{ class }} extends FormRequest
 {
-    public function authorize()
-    {
-        if (isset($this->{{ model_name }})) {
-            return Gate::allows(Permission::Update, {{ ModelName }}::find($this->{{ model_name }}));
-        } else {
-            return Gate::allows(Permission::Create, {{ ModelName }}::class);
-        }
-    }
+    use AdminFormRequest;
 
-    public function rules()
+    protected string $modelClass = {{ ModelName }}::class;
+    protected string $routeKeyName = '{{ model_name }}';
+
+    public function rules(): array
     {
-        $modelId = $this->{{ model_name }} ?? null;
+        $modelId = $this->modelId();
 
         $rules = [
+            'slug'              => 'required|string|max:191|unique:{{ model_names }},slug,'.$modelId.',id',
             'position'          => 'required|numeric|min:1',
             'status'            => 'boolean',
-            'slug'              => 'required|string|max:191|unique:{{ model_names }},slug,'.$modelId.',id',
 
             '{{title}}'         => 'required|string|max:191',
             '{{content}}'       => 'nullable|string|max:10000',

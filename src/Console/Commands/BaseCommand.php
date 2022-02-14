@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -9,60 +11,60 @@ abstract class BaseCommand extends Command
     /**
      * Log console message
      *
-     * @param string $message
+     * @param string $string
      * @param string $status
      * @param null|int|string $verbosity
      */
-    public function log(string $message, string $status = 'info', $verbosity = null)
+    public function log($string, string $status = 'info', $verbosity = null)
     {
-        $message = '[' . now() . '] ' . $message;
-        $this->line($message, $status, $verbosity);
+        $string = '[' . now() . '] ' . $string;
+        $this->line($string, $status, $verbosity);
     }
 
     /**
-     * @param string $message
+     * @param string $string
      * @param null|int|string $verbosity
      */
-    public function info($message, $verbosity = null)
+    public function info($string, $verbosity = null)
     {
-        $this->log($message, 'info', $verbosity);
+        $this->log($string, 'info', $verbosity);
     }
 
     /**
-     * @param string $message
+     * @param string $string
      * @param null|int|string $verbosity
      */
-    public function error($message, $verbosity = null)
+    public function error($string, $verbosity = null)
     {
-        $this->log($message, 'error', $verbosity);
+        $this->log($string, 'error', $verbosity);
     }
 
     /**
-     * @param string $message
+     * @param string $string
      * @param null|int|string $verbosity
      */
-    public function comment($message, $verbosity = null)
+    public function comment($string, $verbosity = null)
     {
-        $this->log($message, 'comment', $verbosity);
+        $this->log($string, 'comment', $verbosity);
     }
 
     /**
-     * @param string $message
+     * @param string $string
      * @param null|int|string $verbosity
      */
-    public function warn($message, $verbosity = null)
+    public function warn($string, $verbosity = null)
     {
-        $message = '[' . now() . '] ' . $message;
-        parent::warn($message, $verbosity);
+        $string = '[' . now() . '] ' . $string;
+        parent::warn($string, $verbosity);
     }
 
     /**
-     * @param string $message
+     * @param string $string
      * @param null|int|string $verbosity
      */
-    public function question($message, $verbosity = null)
+    public function question($string, $verbosity = null)
     {
-        $this->log($message, 'question', $verbosity);
+        $this->log($string, 'question', $verbosity);
     }
 
     /** Start command log */

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Classes;
 
 use Illuminate\Container\Container;
@@ -12,7 +14,7 @@ class HexideAdmin
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->breadcrumbs = app(Breadcrumbs::class);
+        $this->breadcrumbs = \App::make(Breadcrumbs::class);
     }
 
     public function getBreadcrumbs(): Breadcrumbs

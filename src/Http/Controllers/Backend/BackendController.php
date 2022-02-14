@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
 use Eloquent;
@@ -261,6 +263,14 @@ abstract class BackendController extends BaseController
         $this->setFromRequestClassName();
     }
 
+    protected function resolveNamespace(string $type, string $className, string $suffix = null): string
+    {
+        return (string)Str::of(config("hexide-admin.namespaces.$type"))
+            ->start('App\\')
+            ->finish('\\')
+            ->append(Str::of($className)->studly()->singular() . $suffix);
+    }
+
     protected function setModelClassName(string $modelClassName): void
     {
         $this->modelClass = $modelClassName;
@@ -269,7 +279,7 @@ abstract class BackendController extends BaseController
     /** @return class-string<Model|Eloquent>|string */
     protected function getModelClassName(): string
     {
-        return $this->modelClass ?: config('hexide-admin.namespaces.model') . '\\' . str_singular(Str::studly($this->getModuleName()));
+        return $this->modelClass ?: $this->resolveNamespace('model', $this->getModuleName());
     }
 
     protected function setModuleName(string $name = null)
@@ -322,7 +332,7 @@ abstract class BackendController extends BaseController
     /** @return class-string<ServiceInterface|BackendService>|string */
     protected function getServiceClassName(): string
     {
-        return $this->serviceClass ?: config('hexide-admin.namespaces.service') . '\\' . str_singular(Str::studly($this->getModuleName())) . 'Service';
+        return $this->serviceClass ?: $this->resolveNamespace('service', $this->getModuleName(), 'Service');
     }
 
     protected function setService(ServiceInterface $service)
@@ -400,7 +410,7 @@ abstract class BackendController extends BaseController
      */
     protected function getFormRequestClassName(string $action = null): string
     {
-        return $this->formRequestClassName ?: config('hexide-admin.namespaces.request') . '\\' . str_singular(Str::studly($this->getModuleName())) . 'Request';
+        return $this->formRequestClassName ?: $this->resolveNamespace('request', $this->getModuleName(), 'Request');
     }
 
     /**

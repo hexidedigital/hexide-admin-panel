@@ -1,9 +1,0 @@
-@extends("hexide-admin::index")
-
-@section("content")
-    <div class="row">
-        <div class="col-12">
-            <livewire:admin.tables.{{ model-name }}-table/>
-        </div>
-    </div>
-@endsection

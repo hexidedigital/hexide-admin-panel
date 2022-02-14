@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
 use App\Models\User;
@@ -75,7 +77,7 @@ class UserTable extends DefaultTable
 
     public function getModuleName(): string
     {
-        return 'users';
+        return module_name_from_model(new User);
     }
 
     public function query(): Builder

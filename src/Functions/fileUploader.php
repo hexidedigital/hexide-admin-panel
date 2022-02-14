@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 if (!function_exists('file_uploader')) {
     /** Get the FileUploader instance */
     function file_uploader(): \HexideDigital\HexideAdmin\Classes\FileUploader

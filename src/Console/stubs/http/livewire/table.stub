@@ -26,7 +26,7 @@ class {{ class }} extends DefaultTable
 
     public function getModuleName(): string
     {
-        return '{{ module_names }}';
+        return module_name_from_model(new {{ ModelName }});
     }
 
     public function query(): Builder
