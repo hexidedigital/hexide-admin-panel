@@ -8,9 +8,11 @@
 @endphp
 
 @php
-    $with_not_set = $with_not_set ?? true;
+$with_not_set = $with_not_set ?? true;
 
-    $route = route("admin.ajax_field.$module", ['id' => $model->getKey()]);
+$route = Route::has("admin.ajax_field.$module")
+    ? route("admin.ajax_field.$module", ['id' => $model->getKey()])
+    : route("admin.ajax-field.module-name", ['id' => $model->getKey(), 'module_name' => $module])
 @endphp
 
 <label>

@@ -23,7 +23,9 @@
         $attributes = $toggle_attributes[$field];
     }
 
-    $route = route("admin.ajax_field.$module", ['id' => $model->getKey()]);
+    $route = Route::has("admin.ajax_field.$module")
+        ? route("admin.ajax_field.$module", ['id' => $model->getKey()])
+        : route("admin.ajax-field.module-name", ['id' => $model->getKey(), 'module_name' => $module])
 @endphp
 
 <label>
