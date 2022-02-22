@@ -11,6 +11,17 @@ return [
         'show_debug_footer_admin' => true,
     ],
 
+    'routes' => [
+        'admin' => [
+            'prefix' => 'admin',
+            'middleware' => ['web', 'auth:admin', 'language:admin'],
+        ],
+        'ajax' => [
+            'middleware' => ['ajax'],
+            'prefix' => 'ajax_field',
+        ],
+    ],
+
     // -------------------------------
     // Localisation
 

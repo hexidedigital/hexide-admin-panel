@@ -20,7 +20,7 @@ class Authenticate extends Middleware
 
         Auth::logout();
 
-        session(['redirect_uri' => $request->getRequestUri()]);
+        session()->put('redirect_uri', $request->getRequestUri());
 
         return redirect(route('admin.login'));
     }

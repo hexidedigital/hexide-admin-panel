@@ -4,9 +4,19 @@ require_once 'fileUploader.php';
 
 use Astrotomic\Translatable\Validation\RuleFactory;
 use HexideDigital\HexideAdmin\Http\Middleware\LanguageMiddleware;
-use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Database\Eloquent\Model;
 
+
+if (!function_exists('module_name_from_model')) {
+    function module_name_from_model(Model $model): string
+    {
+        if (method_exists($model, 'getModuleName')) {
+            return $model->getModuleName();
+        }
+
+        return $model->moduleName ?? $model->getTable();
+    }
+}
 
 if (!function_exists('lang_rules')) {
     /**

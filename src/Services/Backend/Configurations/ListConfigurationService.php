@@ -41,7 +41,7 @@ class ListConfigurationService extends BackendService
         // after array merge, id-key is transformed to 0-key
         unset($inputs[0]);
 
-        $configuration = app(Configuration::class);
+        $configuration = \App::make(Configuration::class);
 
         if ($configuration->canStoreFiles($model->type)) {
             $key = $model->storeKey();
@@ -124,7 +124,7 @@ class ListConfigurationService extends BackendService
         $key = $model->storeKey();
 
         $oldValue = $model->translatable
-            ? $model->translate($locale)->getAttribute($key) ?? null
+            ? optional($model->translate($locale))->getAttribute($key) ?? null
             : $model->{$key} ?? null;
 
         if ($model->isType(Configuration::IMG_BUTTON)) {

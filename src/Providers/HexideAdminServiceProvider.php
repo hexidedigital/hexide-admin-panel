@@ -13,14 +13,17 @@ use HexideDigital\HexideAdmin\Console\Commands\CleanSeededStorageCommand;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\HexideAdminCommand;
 use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
+use HexideDigital\HexideAdmin\Console\Commands\SetupProjectCommand;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\ConfigurationTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\PermissionTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\RoleTable;
+use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\TranslationTable;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables\UserTable;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
-use HexideDigital\HexideAdmin\Models\AdminConfiguration;
+use HexideDigital\HexideAdmin\Services\Backend\UserService;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -33,6 +36,7 @@ class HexideAdminServiceProvider extends ServiceProvider
         CreateAdminUser::class,
         PrepareDeployCommand::class,
         CleanSeededStorageCommand::class,
+        SetupProjectCommand::class,
     ];
 
     private array $components = [
@@ -47,6 +51,7 @@ class HexideAdminServiceProvider extends ServiceProvider
                 'permission-table' => PermissionTable::class,
                 'role-table' => RoleTable::class,
                 'user-table' => UserTable::class,
+                'translation-table' => TranslationTable::class,
             ],
         ],
     ];
@@ -68,6 +73,10 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->app->bind(Configuration::class, function () {
             return new Configuration();
         });
+
+        $this->app->bind(UserService::class, function () {
+            return new UserService();
+        });
     }
 
     public function boot(Factory $view)
@@ -79,6 +88,7 @@ class HexideAdminServiceProvider extends ServiceProvider
         $this->loadTranslations();
         $this->loadRoutes();
 
+        $this->registerBladeDirectives();
         $this->registerCommands();
         $this->registerComponents();
         $this->registerViewComposers($view);
@@ -100,11 +110,11 @@ class HexideAdminServiceProvider extends ServiceProvider
         ], 'hexide-admin:views');
 
         $this->publishes([
-            $this->packagePath('resources/build') => public_path('vendor/hexide-admin/build'),
+            $this->packagePath('build') => public_path('vendor/hexide-admin/build'),
             $this->packagePath('resources/js') => resource_path('js'),
             $this->packagePath('resources/img') => resource_path('img'),
             $this->packagePath('resources/sass') => resource_path('sass'),
-        ], 'hexide-admin:public');
+        ], 'hexide-admin:asset');
 
         $this->publishes([
             $this->packagePath("src/Console/stubs") => base_path('stubs/hexide-admin'),
@@ -120,8 +130,8 @@ class HexideAdminServiceProvider extends ServiceProvider
     {
         $routesCfg = [
             'as' => 'admin.',
-            'prefix' => 'admin',
-            'middleware' => ['web', 'auth:admin'],
+            'prefix' => config('hexide-admin.routes.admin.prefix', 'admin'),
+            'middleware' => config('hexide-admin.routes.admin.middleware', ['web', 'auth:admin', 'language:admin']),
         ];
 
         Route::group($routesCfg, function () {
@@ -146,6 +156,19 @@ class HexideAdminServiceProvider extends ServiceProvider
     private function loadViews()
     {
         $this->loadViewsFrom($this->packagePath('resources/views'), 'hexide-admin');
+    }
+
+    private function registerBladeDirectives()
+    {
+        /* @admin */
+        Blade::if('admin', function () {
+            return Auth::check() && Auth::user()->hasAdminAccess();
+        });
+
+        /* @isRole */
+        Blade::if('isRole', function (int $roleId) {
+            return Auth::check() && Auth::user()->isRole($roleId);
+        });
     }
 
     private function registerCommands()

@@ -11,11 +11,11 @@
      * @var array|null $url_params
      */
 
-    $with_show = ($with_show ?? true) && Route::has("admin.$module.show") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::View, $model);
-    $with_edit = ($with_edit ?? true) && Route::has("admin.$module.edit") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::Update, $model);
-    $with_delete = ($with_delete ?? true) && Route::has("admin.$module.destroy") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::Delete, $model);
-    $with_restore = ($with_restore ?? true) && Route::has("admin.$module.restore") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::Restore, $model);
-    $with_force_delete = ($with_force_delete ?? true) && Route::has("admin.$module.forceDelete") && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::ForceDelete, $model);
+    $with_show = ($with_show ?? true) && Route::has("admin.$module.show") && Gate::allows('view', $model);
+    $with_edit = ($with_edit ?? true) && Route::has("admin.$module.edit") && Gate::allows('update', $model);
+    $with_delete = ($with_delete ?? true) && Route::has("admin.$module.destroy") && Gate::allows('delete', $model);
+    $with_restore = ($with_restore ?? true) && Route::has("admin.$module.restore") && Gate::allows('restore', $model);
+    $with_force_delete = ($with_force_delete ?? true) && Route::has("admin.$module.forceDelete") && Gate::allows('forceDelete', $model);
     $url_params = $url_params ?? [];
     if(isset($model->id)) {
         $url_params = array_merge(

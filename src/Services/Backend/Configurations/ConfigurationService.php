@@ -19,7 +19,7 @@ class ConfigurationService extends BackendService
      */
     public function deleteModel(Request $request, Model $model): void
     {
-        $configuration = app(Configuration::class);
+        $configuration = \App::make(Configuration::class);
 
         if ($configuration->canStoreFiles($model->type)) {
             if ($model->translatable) {

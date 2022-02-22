@@ -19,8 +19,7 @@ $url_params_edit = array_merge([str_singular($module) => $model], $url_params ??
         </a>
     </div>
 
-    @if(isset($model->id) && Route::has("admin.$module.edit")
-        && Gate::allows(\HexideDigital\ModelPermissions\Models\Permission::Update, $model))
+    @if(isset($model->id) && Route::has("admin.$module.edit") && Gate::allows('update', $model))
         <div class="col-sm-6 justify-content-end text-right">
             <a class="btn btn-warning" title="{{__('hexide-admin::buttons.edit')}}"
                href="{{route("admin.$module.edit", $url_params_edit)}}">

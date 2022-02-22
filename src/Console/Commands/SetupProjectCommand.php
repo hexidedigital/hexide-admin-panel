@@ -27,22 +27,24 @@ class SetupProjectCommand extends Command
             }
 
             $this->createEnv();
+
+            $this->info('Env file generated.');
+
+            return self::SUCCESS;
         } catch (\Exception $exception) {
             $this->error($exception->getMessage());
 
             return self::FAILURE;
-        } finally {
-            return self::SUCCESS;
         }
     }
 
     /** @throws \Exception */
     private function setProjectName()
     {
-        $project = $this->argument('project') ?? $this->ask('Project projectName');
+        $project = $this->argument('project') ?: $this->ask('Project projectName');
 
         if (empty($project)) {
-            throw new \Exception('Incorrect arguments');
+            throw new \Exception('Incorrect projectName');
         }
 
         $names = explode('.', $project);
@@ -73,13 +75,11 @@ class SetupProjectCommand extends Command
         ], $envFilePath);
 
         $this->info('generating app_key');
+        $this->laravel['config']['app.key'] = null;
         Artisan::call('key:generate', [], $this->output);
 
         $this->info('generating storage_link');
-        Artisan::call('storage:link', [], $this->output);
-
-        $this->info('generating jwt_secret');
-        Artisan::call('jwt:secret -f', [], $this->output);
+        Artisan::call('storage:link', ['--relative' => true, '--force' => true], $this->output);
 
         copy($envFilePath, $envFilePath . '.' . $this->projectName);
     }
@@ -87,14 +87,22 @@ class SetupProjectCommand extends Command
     /** @throws \Exception */
     private function createUserAndDatabase()
     {
-        $rootPassword = $this->argument('password') ?? $this->secret('Database root password', '');
+        $rootPassword = $this->argument('password') ?:
+            $this->secret('Database root password (if empty, will try get from current .env file)', '');
+
+        if (empty($rootPassword)) {
+            $connection = $this->laravel['config']['database.default'];
+            $rootPassword = $this->laravel['config']['database.connections.' . $connection . 'password'] ?? '';
+        }
 
         $result = exec("mysql --user=root --password=$rootPassword --execute=\"exit\"");
 
         if (Str::contains($result, 'Access denied')) {
-            $this->warn($result);
+            $this->error($result);
 
-            throw new \Exception('Invalid database root password');
+            // continue creating env file, but without configuring database
+            return;
+            // throw new \Exception('Invalid database root password');
         }
 
         $dbName = 'laravel_' . $this->projectName;
@@ -102,7 +110,11 @@ class SetupProjectCommand extends Command
 
         $this->info('Preparing database...');
 
-        $this->warn(exec("mysql --user=root --password=$rootPassword --execute=\"CREATE DATABASE \`$dbName\`; CREATE USER \`$dbName\`@'localhost' IDENTIFIED BY '$dbPass'; GRANT ALL PRIVILEGES ON \`$dbName\`.* TO \`$dbName\`@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;\" "));
+        $this->warn(exec("mysql --user=root --password=$rootPassword --execute=\"
+        CREATE DATABASE \`$dbName\`;
+        CREATE USER \`$dbName\`@'localhost' IDENTIFIED BY '$dbPass';
+        GRANT ALL PRIVILEGES ON \`$dbName\`.* TO \`$dbName\`@'localhost' WITH GRANT OPTION;
+        FLUSH PRIVILEGES;\" "));
 
         $this->database = [
             'name' => $dbName,
@@ -124,15 +136,15 @@ class SetupProjectCommand extends Command
     protected function getArguments(): array
     {
         return [
-            new InputArgument('project', InputArgument::OPTIONAL, 'project name'),
-            new InputArgument('password', InputArgument::OPTIONAL, 'root password'),
+            new InputArgument('project', InputArgument::REQUIRED, 'project name'),
+            new InputArgument('password', InputArgument::OPTIONAL, 'root password for database (not secure, but allowed)'),
         ];
     }
 
     protected function getOptions(): array
     {
         return [
-            new InputOption('database', 'd', InputOption::VALUE_OPTIONAL, 'Create user and database for project'),
+            new InputOption('database', 'd', InputOption::VALUE_NONE, 'Create user and database for project'),
         ];
     }
 }

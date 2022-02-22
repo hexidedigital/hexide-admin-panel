@@ -23,10 +23,12 @@ class ListUpdateRequest extends FormRequest
         $type = "{$this->get('type')}";
         $translatable = boolval($this->get('translatable'));
 
-        $attribute = app(Configuration::class)->getStoreKey($type, $translatable);
+        $configuration = \App::make(Configuration::class);
+
+        $attribute = $configuration->getStoreKey($type, $translatable);
         $attribute = $translatable ? '{{' . $attribute . '}}' : $attribute;
 
-        $valueRule = app(Configuration::class)->getRuleForType($type, $attribute);
+        $valueRule = $configuration->getRuleForType($type, $attribute);
 
         if ($translatable) {
             $valueRule = lang_rules($valueRule);
@@ -34,7 +36,7 @@ class ListUpdateRequest extends FormRequest
 
         $rules = [
             'id'           => 'numeric|exists:admin_configurations,id',
-            'type'         => 'string|in:' . app(Configuration::class)->implodeTypes(),
+            'type'         => 'string|in:' . $configuration->implodeTypes(),
             'translatable' => 'nullable|boolean',
 
             $this->get('id') => $valueRule,

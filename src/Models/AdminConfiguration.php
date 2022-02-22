@@ -71,24 +71,7 @@ class AdminConfiguration extends Model
     use Translatable, WithTranslationsTrait;
     use VisibleTrait;
 
-    public const DefaultType = Configuration::TEXT;
-
-    /** @var array<string> */
-    protected static array $types = [
-        Configuration::TEXT,
-        Configuration::TEXTAREA,
-        Configuration::EDITOR,
-        Configuration::WEEKDAY,
-        Configuration::TIME,
-        Configuration::DATE,
-        Configuration::BOOLEAN,
-        Configuration::SELECT,
-        Configuration::MULTI_SELECT,
-        Configuration::IMAGE,
-        Configuration::FILE,
-        Configuration::RANGE,
-        Configuration::IMG_BUTTON,
-    ];
+    public string $moduleName = 'admin_configurations';
 
     /* ------------------------ Model ------------------------ */
 
@@ -119,7 +102,9 @@ class AdminConfiguration extends Model
         });
 
         static::saved(function (AdminConfiguration $adminConfiguration) {
-            app(Configuration::class)->storeToCache();
+            foreach (config('translatable.locales') as $locale) {
+                \App::make(Configuration::class)->storeToCache($locale);
+            }
         });
     }
 
@@ -134,7 +119,7 @@ class AdminConfiguration extends Model
     {
         $field = $this->storeKey();
 
-        $configuration = app(Configuration::class);
+        $configuration = \App::make(Configuration::class);
 
         if ($configuration->isSingleValueType($this->type)) {
 
@@ -181,7 +166,7 @@ class AdminConfiguration extends Model
 
         $value = $this->translatable ? ($this->translate()->attributes[$field] ?? null) : $this->attributes[$field];
 
-        $configuration = app(Configuration::class);
+        $configuration = \App::make(Configuration::class);
 
         if ($configuration->isTextValueType($this->type)) {
             return $value;
@@ -236,11 +221,11 @@ class AdminConfiguration extends Model
 
     public function storeKey(): string
     {
-        return app(Configuration::class)->getStoreKey($this->type, $this->translatable);
+        return \App::make(Configuration::class)->getStoreKey($this->type, $this->translatable);
     }
 
     public function isType(string $type): bool
     {
-        return in_array($type, self::$types) && $this->type === $type;
+        return in_array($type, \App::make(Configuration::class)->getTypes()) && $this->type === $type;
     }
 }

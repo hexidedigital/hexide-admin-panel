@@ -3,7 +3,12 @@
     "description": "hexide-digital admin panel",
     "license": "MIT",
     "type": "library",
-    "version": "2.1.1",
+    "version": "2.5.2",
+    "support": {
+        "issues": "https://github.com/hexidedigital/hexide-admin-panel/issues",
+        "source": "https://github.com/hexidedigital/hexide-admin-panel",
+        "docs": "https://github.com/hexidedigital/hexide-admin-panel/wiki"
+    },
     "authors": [
         {
             "name": "Oleksandr-Moik",
@@ -27,7 +32,6 @@
         "laravel/framework": "^8.0",
         "laravel/helpers": "^1.4",
         "laravelcollective/html": "^6.2",
-        "livewire/livewire": "^2.7",
         "rappasoft/laravel-livewire-tables": "^1.20",
         "intervention/image": "^2.7",
         "yoeunes/toastr": "^1.2"

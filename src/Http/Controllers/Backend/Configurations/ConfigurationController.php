@@ -27,10 +27,10 @@ class ConfigurationController extends HexideAdminBaseController
     protected function render(?string $view = null, array $data = [], string $forceActionType = null)
     {
         if (in_array($view, [ViewNames::Create, ViewNames::Edit])) {
-            $types = [];
-            foreach (app(Configuration::class)::getTypes() as $type) {
-                $types[$type] = __('models.admin_configurations.type.' . $type);
-            }
+            $types = collect(\App::make(Configuration::class)::getTypes())
+                ->mapWithKeys(fn($type) => [
+                    $type => __('models.admin_configurations.type.' . $type),
+                ]);
 
             $groups = AdminConfiguration::select()->groupBy('group')->pluck('group', 'group')->toArray();
 

@@ -15,7 +15,7 @@ class BaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type'              => 'required|string|in:' . app(Configuration::class)->implodeTypes(),
+            'type'              => 'required|string|in:' . \App::make(Configuration::class)->implodeTypes(),
             'key'               => 'required|string|max:10000',
             'name'              => 'required|string|max:10000',
             'translatable'      => 'required|boolean',

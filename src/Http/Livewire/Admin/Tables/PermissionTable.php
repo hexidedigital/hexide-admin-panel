@@ -10,7 +10,6 @@ use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class PermissionTable extends DefaultTable
 {
-    public ?string $module = 'permissions';
     public Collection $modules;
 
     public function mount()
@@ -32,23 +31,19 @@ class PermissionTable extends DefaultTable
     public function columns(): array
     {
         return [
-            Column::make(__("admin_labels.attributes.id"), 'id')
-                ->addAttributes(['style' => 'width: 50px;'])
-                ->sortable()
-            ,
+            $this->getIdColumn(),
+
             Column::make('title')
                 ->sortable()
-                ->searchable()
-            ,
-            Column::make(__("hexide-admin::buttons.actions"))
-                ->addAttributes(['style' => 'width: 95px'])
-                ->format(fn($value, $column, $row) => view('hexide-admin::partials.control_buttons', [
-                    'model' => $row,
-                    'module' => $this->module,
-                ]))
-                ->asHtml()
-            ,
+                ->searchable(),
+
+            $this->getActionsColumn(),
         ];
+    }
+
+    public function getModuleName(): string
+    {
+        return 'permissions';
     }
 
     public function query(): Builder

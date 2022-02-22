@@ -1,0 +1,52 @@
+{
+    "name": "@oleksandr-moik/hexide-admin-panel",
+    "version": "2.1.2",
+    "description": "Assets for hexide-admin-panel",
+    "main": "build/index.js",
+    "scripts": {
+        "dev": "npm run development",
+        "development": "mix",
+        "watch": "mix watch",
+        "watch-poll": "mix watch -- --watch-options-poll=1000",
+        "hot": "mix watch --hot",
+        "prod": "npm run production",
+        "production": "mix --production"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hexidedigital/hexide-admin-panel.git"
+    },
+    "keywords": [
+        "hexide-digital",
+        "laravel8"
+    ],
+    "author": "Oleksandr Moik",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/hexidedigital/hexide-admin-panel/issues"
+    },
+    "homepage": "https://github.com/hexidedigital/hexide-admin-panel#readme",
+    "devDependencies": {
+        "@fortawesome/fontawesome-free": "^5.15.4",
+        "admin-lte": "^3.1.0",
+        "alpinejs": "^3.4.2",
+        "axios": "^0.21",
+        "bootstrap": "^4.6.1",
+        "bootstrap-datetimepicker": "^0.0.7",
+        "bootstrap-toggle": "^2.2.2",
+        "browser-sync": "^2.27.5",
+        "browser-sync-webpack-plugin": "^2.3.0",
+        "icheck-bootstrap": "^3.0.1",
+        "jquery": "^3.6.0",
+        "jquery-ui": "^1.12.1",
+        "jquery-validation": "^1.19.3",
+        "laravel-mix": "^6.0.6",
+        "overlayscrollbars": "^1.13.1",
+        "popper.js": "^1.16.1",
+        "resolve-url-loader": "^5.0.0",
+        "sass": "^1.32.13",
+        "sass-loader": "^12.4.0",
+        "select2": "^4.0.13",
+        "toastr": "^2.1.4"
+    }
+}

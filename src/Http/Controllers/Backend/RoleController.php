@@ -26,7 +26,12 @@ class RoleController extends HexideAdminBaseController
     protected function render(?string $view = null, array $data = [], string $forceActionType = null)
     {
         if (in_array($view, [ViewNames::Create, ViewNames::Edit])) {
-            $this->data(['permissions' => Permission::pluck('title', 'id'),]);
+            $permissions = Permission::orderBy('id')->get(['id', 'title']);
+
+            $this->data([
+                'modules' => $permissions->groupBy('module'),
+                'permissions' => $permissions->pluck('title', 'id'),
+            ]);
         }
 
         return parent::render($view, $data, $forceActionType);

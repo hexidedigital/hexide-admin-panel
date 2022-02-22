@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 abstract class BackendController extends BaseController
@@ -88,7 +89,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Show);
 
-        $this->secureActions->checkWithAbort(ActionNames::Show, $model);
+        $this->protectAction(ActionNames::Show, $model);
 
         $this->dataModel($model);
 
@@ -104,7 +105,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Edit);
 
-        $this->secureActions->checkWithAbort(ActionNames::Edit, $model);
+        $this->protectAction(ActionNames::Edit, $model);
 
         $this->dataModel($model);
 
@@ -113,7 +114,7 @@ abstract class BackendController extends BaseController
 
     public function storeAction(Request $request): RedirectResponse
     {
-        $this->secureActions->checkWithAbort(ActionNames::Create, $this->getModelClassName());
+        $this->protectAction(ActionNames::Create, $this->getModelObject());
 
         $service = $this->getService();
 
@@ -127,9 +128,9 @@ abstract class BackendController extends BaseController
 
     public function updateAction(Request $request): RedirectResponse
     {
-        $model = $this->getModelFromRoute($request, ActionNames::Edit) ?: $this->getModelObject();
+        $model = $this->getModelFromRoute($request, ActionNames::Edit);
 
-        $this->secureActions->checkWithAbort(ActionNames::Edit, $model);
+        $this->protectAction(ActionNames::Edit, $model);
 
         $service = $this->getService();
 
@@ -145,7 +146,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Delete);
 
-        $this->secureActions->checkWithAbort(ActionNames::Delete, $model);
+        $this->protectAction(ActionNames::Delete, $model);
 
         $service = $this->getService();
         $service->deleteModel($request, $model);
@@ -157,7 +158,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::Restore);
 
-        $this->secureActions->checkWithAbort(ActionNames::Restore, $model);
+        $this->protectAction(ActionNames::Restore, $model);
 
         $service = $this->getService();
         $service->restoreModel($request, $model);
@@ -169,7 +170,7 @@ abstract class BackendController extends BaseController
     {
         $model = $this->getModelFromRoute($request, ActionNames::ForceDelete);
 
-        $this->secureActions->checkWithAbort(ActionNames::ForceDelete, $model);
+        $this->protectAction(ActionNames::ForceDelete, $model);
 
         $service = $this->getService();
         $service->forceDeleteModel($request, $model);
@@ -204,29 +205,6 @@ abstract class BackendController extends BaseController
 
 
     /** @throws \Throwable */
-    protected function getActionResult(string $action, $parameters)
-    {
-        if (!in_array($action, self::Actions)) {
-            return parent::callAction($action, $parameters);
-        }
-
-        if ($this->isDatabaseAction($action)) {
-            return $this->dbTransactionAction($action, $parameters);
-        }
-
-        if (!method_exists($this, $action)) {
-            return App::call([$this, $action . 'Action']);
-        }
-
-        return parent::callAction($action, $parameters);
-    }
-
-    protected function isDatabaseAction(string $action): bool
-    {
-        return in_array($action, array_keys(self::DatabaseAction));
-    }
-
-    /** @throws \Throwable */
     protected function dbTransactionAction(string $action, $parameters)
     {
         DB::beginTransaction();
@@ -243,17 +221,23 @@ abstract class BackendController extends BaseController
             DB::commit();
 
             return $result;
-        } catch (\Throwable $e) {
-            if ($this->catchExceptions) {
-                throw $e;
+        } catch (\Throwable $exception) {
+            if ($exception instanceof ValidationException) {
+                throw $exception;
             }
 
+            if ((!$this->catchExceptions && App::hasDebugModeEnabled())
+                || \Auth::user()->isRoleSuperAdmin()) {
+                throw $exception;
+            }
+
+            report($exception);
             $this
                 ->notify(self::DatabaseAction[$action], null, 'error')
                 ->notify(self::DatabaseAction[$action],
-                    class_basename($e) . " -- {$e->getFile()}: {$e->getLine()} ",
+                    class_basename($exception) . " -- {$exception->getFile()}: {$exception->getLine()} ",
                     'error',
-                    class_basename($e) . $e->getMessage());
+                    class_basename($exception) . $exception->getMessage());
 
             DB::rollBack();
         }
@@ -291,7 +275,7 @@ abstract class BackendController extends BaseController
     protected function setModuleName(string $name = null)
     {
         if (empty($name)) {
-            $name = $this->getModelObject()->getTable();
+            $name = module_name_from_model($this->getModelObject());
         }
 
         $this->module = $name;
@@ -385,6 +369,10 @@ abstract class BackendController extends BaseController
             $request->get('id')
         );
 
+        if ($id instanceof Model) {
+            return $id;
+        }
+
         if (in_array(SoftDeletes::class, class_uses($this->modelClass))) {
             return $this->getModelObject()::withTrashed()->findOrFail($id);
         }
@@ -476,31 +464,27 @@ abstract class BackendController extends BaseController
 
     /**
      * @param string $action
+     * @param Model|class-string<Model>|null $model
      *
      * @return bool|JsonResponse|RedirectResponse|SymfonyResponse
      */
-    protected function protectAction(string $action)
+    protected function protectAction(string $action, $model = null)
     {
-        $type = $this->model;
-        if (empty($this->model) && !empty($this->modelClass)) {
-            $type = $this->getModelObject();
+        if ($this->secureActions->check($action, $model)) {
+            return true;
         }
 
-        if (!$this->secureActions->check($action, $type)) {
-            if (request()->ajax()) {
-                return response()
-                    ->json(['message' => trans('api_labels.forbidden'), 'type' => 'error'])
-                    ->setStatusCode(SymfonyResponse::HTTP_FORBIDDEN);
-            } else {
-                if ($action != 'index') {
-                    return $this->redirect();
-                } else {
-                    return redirect()->route('admin.home');
-                }
-            }
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()
+                ->json(['message' => trans('api_labels.forbidden'), 'type' => 'error'])
+                ->setStatusCode(403);
         }
 
-        return true;
+        if ($action !== 'index') {
+            return $this->redirect();
+        }
+
+        return redirect()->route('admin.home');
     }
 
     protected function setResourceAccessMap(array $merge = []): void
@@ -550,17 +534,17 @@ abstract class BackendController extends BaseController
         }
     }
 
-    protected function notify(string $action = '', string $message = null, string $type = 'success', string $title = '', array $options = []): self
+    protected function notify(?string $action = null, ?string $message = null, string $type = 'success', ?string $title = null, array $options = []): self
     {
         if (!ActionNames::isAllowed($action)) {
             $action = ActionNames::Action;
         }
 
-        if (empty($title)) {
+        if (!isset($title)) {
             $title = trans("hexide-admin::messages.$type.title");
         }
 
-        if (empty($message) && in_array($type, ['error', 'success'])) {
+        if (!isset($message) && in_array($type, ['error', 'success'])) {
             $message = $this->getNotifyModelMessage($type, $action);
         }
 
@@ -617,6 +601,7 @@ abstract class BackendController extends BaseController
     {
         $this->createBreadcrumb($this->getModuleName());
 
+        /* // todo move or remove this code
         $result = $this->protectAction($method);
 
         if ($result !== true) {
@@ -625,8 +610,26 @@ abstract class BackendController extends BaseController
 
             return $result;
         }
+        */
 
-        return $this->getActionResult($method, $parameters);
+        if (!in_array($method, self::Actions)) {
+            return parent::callAction($method, $parameters);
+        }
+
+        if ($this->isDatabaseAction($method)) {
+            return $this->dbTransactionAction($method, $parameters);
+        }
+
+        if (!method_exists($this, $method)) {
+            return App::call([$this, $method . 'Action']);
+        }
+
+        return parent::callAction($method, $parameters);
+    }
+
+    protected function isDatabaseAction(string $action): bool
+    {
+        return in_array($action, array_keys(self::DatabaseAction));
     }
 
     /**

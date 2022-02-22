@@ -43,6 +43,7 @@ abstract class BaseController extends Controller
     /**
      * @param string $name
      * @param string|null $route
+     *
      * @return void
      */
     protected function addToBreadcrumbs(string $name, ?string $route = null)
@@ -78,6 +79,7 @@ abstract class BaseController extends Controller
     /**
      * @param string|null $view
      * @param array $data
+     *
      * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
      */
     protected function render(?string $view = null, array $data = [])

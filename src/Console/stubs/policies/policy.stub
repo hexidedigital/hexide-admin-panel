@@ -10,7 +10,6 @@ class PermissionPolicy extends DefaultPolicy
 {
     protected function module(): string
     {
-        return (new {{ ModelName }}())->getTable();
-        // return '{{ module_names }}';
+        return module_name_from_model(new {{ ModelName }});
     }
 }
