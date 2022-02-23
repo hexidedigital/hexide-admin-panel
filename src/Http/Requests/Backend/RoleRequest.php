@@ -3,9 +3,12 @@
 namespace HexideDigital\HexideAdmin\Http\Requests\Backend;
 
 use HexideDigital\ModelPermissions\Models\Role;
+use Illuminate\Foundation\Http\FormRequest;
 
-class RoleRequest extends AdminFormRequest
+class RoleRequest extends FormRequest
 {
+    use AdminFormRequest;
+
     protected string $modelClass = Role::class;
     protected string $routeKeyName = 'role';
 
