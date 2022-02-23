@@ -166,7 +166,7 @@ class BackendService implements ServiceInterface
         ) {
             return $this->saveImage(
                 $image,
-                $this->model->getKey() ?? null,
+                (string)($this->model->getKey() ?? null),
                 $oldPath,
                 $folder,
                 $module ?? null,
@@ -196,7 +196,7 @@ class BackendService implements ServiceInterface
 
         if (isset($file) || $isRemove) {
             $uniqId = $this->model->getKey() ?? null;
-            return $this->saveImage($file, $uniqId, $oldPath, $folder, $module);
+            return $this->saveImage($file, (string)$uniqId, $oldPath, $folder, $module);
         }
 
         return false;
