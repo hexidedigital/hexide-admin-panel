@@ -1,0 +1,26 @@
+{
+    "$schema": "http://laravel-ide.com/schema/laravel-ide-v1.json",
+    "view": {
+        "paths": [
+            {
+                "path": "resources/views",
+                "namespace": "hexide-admin"
+            }
+        ]
+    },
+    "blade": {
+        "components": {
+            "viewPaths": [
+                {
+                    "path": "resources/views/components",
+                    "namespace": "hexide-admin"
+                },
+                {
+                    "path": "resources/views/components",
+                    "namespace": "",
+                    "viewNamespace": "hexide-admin"
+                }
+            ]
+        }
+    }
+}
