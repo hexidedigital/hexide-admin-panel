@@ -49,6 +49,12 @@ abstract class ApiController extends Controller
         return $this->respondMessage($message, $status);
     }
 
+    /** Respond without content with status 204 */
+    protected function respondNoContent()
+    {
+        return response()->noContent();
+    }
+
     /** Respond with a given array of items */
     protected function respondDataArray(array $array, int $status = 200, array $headers = []): JsonResponse
     {
@@ -131,8 +137,6 @@ abstract class ApiController extends Controller
     {
         return $this->respondDataArray([
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'expires_in' => config('sanctum.expiration', 0) * 60
         ]);
     }
 
@@ -141,8 +145,6 @@ abstract class ApiController extends Controller
     {
         return $this->setMessage($message)->respondDataArray([
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'expires_in' => config('sanctum.expiration', 0) * 60,
             'message' => $this->message,
         ]);
     }

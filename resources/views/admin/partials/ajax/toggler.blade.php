@@ -33,10 +33,8 @@
        data-url="{!! $route !!}"
        data-value="{!! $model->{$field} == true ? false : true !!}"
 
-       @foreach($data as $item => $val)
-       data-{{$item}}="{{$val}}"
-       @endforeach
-
+       @foreach($data as $item => $val)data-{{$item}}="{{$val}}"@endforeach
+       @foreach($attributes as $item => $val) {{$item}}="{{$val}}" @endforeach
        data-width="75"
        data-size="small"
 

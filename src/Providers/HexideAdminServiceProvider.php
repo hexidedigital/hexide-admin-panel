@@ -60,8 +60,8 @@ class HexideAdminServiceProvider extends ServiceProvider
                 'configuration-table' => Tables\ConfigurationTable::class,
                 'permission-table' => Tables\PermissionTable::class,
                 'role-table' => Tables\RoleTable::class,
-                'user-table' => Tables\TranslationTable::class,
-                'translation-table' => Tables\UserTable::class,
+                'user-table' => Tables\UserTable::class,
+                'translation-table' => Tables\TranslationTable::class,
             ],
         ],
     ];
