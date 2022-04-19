@@ -6,15 +6,15 @@ namespace HexideDigital\HexideAdmin\Console\Commands;
 
 use ErrorException;
 use Exception;
+use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
-class PrepareDeployCommand extends BaseCommand
+class PrepareDeployCommand extends Command
 {
     protected $name = 'hd-admin:utils:deploy';
     protected $description = 'Command to prepare your deploy';
@@ -24,8 +24,8 @@ class PrepareDeployCommand extends BaseCommand
 
     /** @var resource */
     protected $resourceDeployFile;
-    protected string $projectDir = '.';
-    protected string $accessYamlPath = 'deploy/access.yml';
+    protected string $projectDir;
+    protected string $accessYamlPath;
     protected string $stageName = 'dev';
     protected string $sshDir = '.ssh';
 
@@ -34,6 +34,9 @@ class PrepareDeployCommand extends BaseCommand
 
     public function handle(): int
     {
+        $this->projectDir = base_path();
+        $this->accessYamlPath = base_path('deploy/access.yml');
+
         $this->resourceDeployFile = fopen(base_path('deploy/dep.txt'), 'w');
 
         $this->bar = $this->output->createProgressBar();
@@ -58,7 +61,7 @@ class PrepareDeployCommand extends BaseCommand
 
     private function parseAccess(): array
     {
-        $accessFile = Yaml::parseFile($this->projectDir . '/deploy/access.yml');
+        $accessFile = Yaml::parseFile($this->accessYamlPath);
 
         $this->stageName = $accessFile['stage'];
 
@@ -77,7 +80,7 @@ class PrepareDeployCommand extends BaseCommand
         $options = Arr::get($stageConfigs, 'options', []);
 
         $this->replaceMap = [
-            '{{PROJ_DIR}}' => '.',
+            '{{PROJ_DIR}}' => $this->projectDir,
 
             '{{DEPLOY_BASE_DIR}}' => $this->replace(
                 $options['base-dir-pattern'], [
@@ -117,6 +120,7 @@ class PrepareDeployCommand extends BaseCommand
         ];
     }
 
+    /** @throws Exception */
     private function executeAndPrintDeployCommands()
     {
         $this->generateLocalDeploySshKeys();
@@ -142,18 +146,25 @@ class PrepareDeployCommand extends BaseCommand
         $folderExists = is_dir($this->sshDir);
 
         if (!$folderExists) {
+            $folderExists = true;
             mkdir($this->sshDir);
         }
 
-        if ($folderExists && (file_exists($this->sshDir . '/id_rsa') || file_exists($this->sshDir . '/id_rsa.pub'))
-            && !$this->confirmAction('Should generate keys command?', false)) {
+        if ($folderExists && $this->sshFilesExits() && !$this->confirmAction('Should generate keys command?', false)) {
             return;
         }
 
-        $this->runProcessCommand("ssh-keygen -t rsa -f $this->sshDir/id_rsa -N \"\" -y");
+        $option = $this->sshFilesExits() ? '-y' : '';
+
+        $this->forceExecuteCommand("ssh-keygen -t rsa -f $this->sshDir/id_rsa -N \"\" $option");
 
         $this->appendEchoLine("cat $this->sshDir/id_rsa", 'info');
         $this->gitlabVars['SSH_PRIVATE_KEY'] = $this->getContent($this->sshDir . '/id_rsa');
+    }
+
+    private function sshFilesExits(): bool
+    {
+        return file_exists($this->sshDir . '/id_rsa') || file_exists($this->sshDir . '/id_rsa.pub');
     }
 
     private function copySshKeysOnRemoteHost(): void
@@ -161,7 +172,7 @@ class PrepareDeployCommand extends BaseCommand
         $this->newSection('copy ssh to server - public key to remote host');
         $this->appendEchoLine($this->replace('can ask a password - enter <comment>{{DEPLOY_PASS}}</comment>'));
 
-        $this->runProcessCommand("ssh-copy-id -i $this->sshDir/id_rsa.pub {{DEPLOY_USER}}@{{DEPLOY_SERVER}}");
+        $this->optionallyExecuteCommand("ssh-copy-id -i $this->sshDir/id_rsa.pub {{DEPLOY_USER}}@{{DEPLOY_SERVER}}");
     }
 
     private function generateRemoteHostSshKeys(): void
@@ -171,10 +182,10 @@ class PrepareDeployCommand extends BaseCommand
         $sshRemote = $this->replace("ssh -i $this->sshDir/id_rsa {{DEPLOY_USER}}@{{DEPLOY_SERVER}} ");
 
         if ($this->confirmAction('Generate ssh keys on remote host', false)) {
-            $this->runProcessCommand($sshRemote . '"ssh-keygen -t rsa -f .ssh/id_rsa -N \"\""');
+            $this->forceExecuteCommand($sshRemote . '"ssh-keygen -t rsa -f .ssh/id_rsa -N \"\""');
         }
 
-        $this->runProcessCommand($sshRemote . '"cat ~/.ssh/id_rsa.pub"', function ($type, $buffer) {
+        $this->forceExecuteCommand($sshRemote . '"cat ~/.ssh/id_rsa.pub"', function ($type, $buffer) {
             $this->gitlabVars['SSH_PUB_KEY'] = $buffer;
         });
     }
@@ -211,14 +222,14 @@ class PrepareDeployCommand extends BaseCommand
         }
 
         $knownHost = '';
-        $this->runProcessCommand('ssh-keyscan -t ecdsa-sha2-nistp256 gitlab.hexide-digital.com,188.34.141.230',
+        $this->optionallyExecuteCommand('ssh-keyscan -t ecdsa-sha2-nistp256 gitlab.hexide-digital.com,188.34.141.230',
             function ($type, $buffer) use (&$knownHost) {
                 $knownHost = trim($buffer);
             }
         );
 
         // todo before append, check if remote host already know about gitlab
-        $this->runProcessCommand("ssh -i $this->sshDir/id_rsa {{DEPLOY_USER}}@{{DEPLOY_SERVER}} echo \"$knownHost\" >> ~/.ssh/known_hosts");
+        $this->optionallyExecuteCommand("ssh -i $this->sshDir/id_rsa {{DEPLOY_USER}}@{{DEPLOY_SERVER}} echo \"$knownHost\" >> ~/.ssh/known_hosts");
     }
 
     private function runDeployPrepareCommand(): void
@@ -238,7 +249,7 @@ class PrepareDeployCommand extends BaseCommand
 
         $this->putNewVariablesToDeployFile($deployFile);
 
-        $this->runProcessCommand('php {{PROJ_DIR}}/vendor/bin/dep deploy:prepare {{CI_COMMIT_REF_NAME}} -v -o branch={{CI_COMMIT_REF_NAME}}',
+        $this->optionallyExecuteCommand('php {{PROJ_DIR}}/vendor/bin/dep deploy:prepare {{CI_COMMIT_REF_NAME}} -v -o branch={{CI_COMMIT_REF_NAME}}',
             function ($type, $buffer) {
                 $this->line($type . ' > ' . trim($buffer));
             }
@@ -277,8 +288,8 @@ PHP;
     {
         $this->newSection('setup .env.host and move to server');
 
-        $this->runProcessCommand("mv .env .env.local");
-        $this->runProcessCommand("cp .env.example .env");
+        $this->forceExecuteCommand("mv .env .env.local");
+        $this->forceExecuteCommand("cp .env.example .env");
 
         $ENV = [
             'APP_URL=http://localhost:8000' => $this->replace('APP_URL=https://{{DEPLOY_SERVER}}'),
@@ -296,19 +307,18 @@ PHP;
 
         $this->putContentToFile($this->projectDir . '/.env', $ENV);
 
-        Artisan::call('key:generate', [], $this->output);
-        Artisan::call('jwt:secret -f', [], $this->output);
+        $this->call('key:generate');
 
-        $this->runProcessCommand("scp -i $this->sshDir/id_rsa $this->sshDir/.env {{DEPLOY_USER}}@{{DEPLOY_SERVER}}:{{DEPLOY_BASE_DIR}}/shared/.env");
+        $this->optionallyExecuteCommand("scp -i $this->sshDir/id_rsa $this->sshDir/.env {{DEPLOY_USER}}@{{DEPLOY_SERVER}}:{{DEPLOY_BASE_DIR}}/shared/.env");
 
-        $this->runProcessCommand("mv .env.local .env");
+        $this->optionallyExecuteCommand("mv .env.local .env");
     }
 
     private function runFirstDeployCommand(): void
     {
         $this->newSection('run deploy from local');
 
-        $this->runProcessCommand('php {{PROJ_DIR}}/vendor/bin/dep deploy {{CI_COMMIT_REF_NAME}} -v -o branch={{CI_COMMIT_REF_NAME}}',
+        $this->optionallyExecuteCommand('php {{PROJ_DIR}}/vendor/bin/dep deploy {{CI_COMMIT_REF_NAME}} -v -o branch={{CI_COMMIT_REF_NAME}}',
             function ($type, $buffer) {
                 $this->line($type . ' > ' . trim($buffer));
             }
@@ -345,7 +355,7 @@ alias artisan=\"php74 artisan\"
 alias pcomposer=\"php74 /usr/bin/composer\"
 BASH;
 
-            $this->runProcessCommand("ssh -i $this->sshDir/id_rsa {{DEPLOY_USER}}@{{DEPLOY_SERVER}} 'echo \"$CONTENT\" >> ~/.bashrc'");
+            $this->optionallyExecuteCommand("ssh -i $this->sshDir/id_rsa {{DEPLOY_USER}}@{{DEPLOY_SERVER}} 'echo \"$CONTENT\" >> ~/.bashrc'");
         }
     }
 
@@ -374,14 +384,24 @@ BASH;
 
     private function newSection(string $name): void
     {
-        $this->appendEchoLine(PHP_EOL . '-----------------------------', 'comment');
-        $this->appendEchoLine($this->step++ . '. ' . Str::ucfirst($name) . PHP_EOL, 'comment');
+        $string = strip_tags($this->step++ . '. ' . Str::ucfirst($name));
+
+        $length = Str::length($string) + 12;
+
+        $this->appendEchoLine('');
+
+        $this->appendEchoLine(str_repeat('*', $length));
+        $this->appendEchoLine('*     ' . $string . '     *');
+        $this->appendEchoLine(str_repeat('*', $length));
+
+        $this->appendEchoLine('');
+
         $this->bar->advance();
     }
 
     private function appendEchoLine(?string $content, string $style = null): void
     {
-        $this->writeToFile($content);
+        $this->writeToFile(strip_tags($content));
         $this->writeToConsole($content, $style);
     }
 
@@ -412,16 +432,26 @@ BASH;
 
     private function confirmAction(string $question, bool $default = false): bool
     {
-        return $this->option('force') || !$this->confirm($question, $default);
+        return $this->option('force') || $this->confirm($question, $default);
     }
 
-    private function runProcessCommand(string $command, callable $callable = null): void
+    private function forceExecuteCommand(string $command, callable $callable = null)
+    {
+        $this->runProcessCommand(true, $command, $callable);
+    }
+
+    private function optionallyExecuteCommand(string $command, callable $callable = null)
+    {
+        $this->runProcessCommand(false, $command, $callable);
+    }
+
+    private function runProcessCommand(bool $force, string $command, callable $callable = null): void
     {
         $command = $this->replace($command);
 
         $this->appendEchoLine($command, 'info');
 
-        if ($this->option('only-print')) {
+        if (!$force || $this->option('only-print')) {
             return;
         }
 
