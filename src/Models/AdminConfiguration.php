@@ -13,18 +13,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Eloquent;
 
 /**
  * @mixin AdminConfigurationTranslation
- * @mixin Eloquent
+ * @mixin \Eloquent
  *
  * @property int $id
  * @property string $key
  * @property string $type
  * @property string|null $name
  * @property string|null $description
- * @property int $translatable
+ * @property int|bool $translatable
  * @property string|null $group
  * @property int $in_group_position
  * @property string|null $content
@@ -108,6 +107,18 @@ class AdminConfiguration extends Model
                 \App::make(Configuration::class)->storeToCache($locale);
             }
         });
+    }
+
+    /* ------------------------ methods ------------------------ */
+
+    public function storeKey(): string
+    {
+        return \App::make(Configuration::class)->getStoreKey($this->type, $this->translatable);
+    }
+
+    public function isType(string $type): bool
+    {
+        return in_array($type, \App::make(Configuration::class)->getTypes()) && $this->type === $type;
     }
 
     /* ------------------------ attributes ------------------------ */
@@ -219,15 +230,5 @@ class AdminConfiguration extends Model
     public function scopeSortedDesc(Builder $builder): Builder
     {
         return $builder->orderBy('in_group_position', 'DESC');
-    }
-
-    public function storeKey(): string
-    {
-        return \App::make(Configuration::class)->getStoreKey($this->type, $this->translatable);
-    }
-
-    public function isType(string $type): bool
-    {
-        return in_array($type, \App::make(Configuration::class)->getTypes()) && $this->type === $type;
     }
 }
