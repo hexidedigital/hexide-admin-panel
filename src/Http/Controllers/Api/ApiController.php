@@ -1,12 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Controllers\Api;
 
-use App\Models\User;
-use HexideDigital\HexideAdmin\Traits\Includeble;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as Controller;
 
@@ -122,7 +119,7 @@ abstract class ApiController extends Controller
     {
         return $this->setMessage($message)->respondDataArray([
             'message' => $this->message,
-            'errors' => $errors
+            'errors' => $errors,
         ], $statusCode, $headers);
     }
 

@@ -21,8 +21,8 @@ class ConfigurationTable extends DefaultTable
 
             Column::make(__('admin_labels.attributes.type'), 'type')
                 ->sortable()
-                ->format(fn($value, $col, $row) => __('models.admin_configurations.type.' . $row->type ?? ''))
-            ,
+                ->format(fn($value, $col, $row) => __('models.admin_configurations.type.' . $row->type ?? '')),
+
             Column::make(__('admin_labels.attributes.key'), 'key')
                 ->sortable()
                 ->searchable(),

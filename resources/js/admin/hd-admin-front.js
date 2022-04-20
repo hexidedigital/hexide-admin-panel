@@ -3,6 +3,7 @@ require('./scripts/duplication_row')
 require('./scripts/slug_generate')
 require('./scripts/image_select')
 require('./scripts/set_require_inputs')
+require('./scripts/bootstrapToggle')
 
 // require('./scripts/legacy-source')
 
@@ -15,15 +16,6 @@ $(document).ready(function () {
     CKEDITOR.config.removePlugins   = 'elementspath'
     CKEDITOR.config.enterMode       = CKEDITOR.ENTER_P
     CKEDITOR.config.shiftEnterMode  = CKEDITOR.ENTER_BR
-
-    // --------------------
-
-
-    // make toggle/switch from checkbox
-    $(document).ready(function () {
-        $('.toggle_attributes').bootstrapToggle()
-        $('.toogle').bootstrapToggle()
-    })
 
     // --------------------
 

@@ -127,7 +127,7 @@ class ListConfigurationService extends BackendService
 
         $oldValue = $model->translatable
             ? optional($model->translate($locale))->getAttribute($key) ?? null
-            : $model->{$key} ?? null;
+            : $model->getAttribute($key) ?? null;
 
         if ($model->isType(Configuration::IMG_BUTTON)) {
             $oldValue = Arr::get(Arr::wrap($oldValue), 'image');

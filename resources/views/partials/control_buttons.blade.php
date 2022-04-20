@@ -1,8 +1,7 @@
 @php
-    use \Illuminate\Support\Str;
     /**
      * @var string $module
-     * @var \Illuminate\Database\Eloquent\Model $model
+     * @var \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\SoftDeletes $model
      * @var bool|null $with_show
      * @var bool|null $with_edit
      * @var bool|null $with_delete
@@ -17,9 +16,9 @@
     $with_restore = ($with_restore ?? true) && Route::has("admin.$module.restore") && Gate::allows('restore', $model);
     $with_force_delete = ($with_force_delete ?? true) && Route::has("admin.$module.forceDelete") && Gate::allows('forceDelete', $model);
     $url_params = $url_params ?? [];
-    if(isset($model->id)) {
+    if($model->exists) {
         $url_params = array_merge(
-            [ Str::singular($module) => $model->{$model->getKeyName()}]
+            [ str_singular($module) => $model->getKey()]
             , $url_params
         );
     }
@@ -28,10 +27,9 @@
 @if(isset($module) && isset($model))
     <div class="d-flex flex-nowrap">
 
-        @if(empty($model->deleted_at))
+        @if(empty($model->getAttribute($model->getDeletedAtColumn())))
 
             @if($with_show)
-
                 @include('hexide-admin::partials.buttons.control_button', [
                     "href" => route("admin.$module.show", $url_params), "title" => __("hexide-admin::buttons.show"),
                     "color" => "indigo", "icon" => "fas fa-eye"

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
 use HexideDigital\ModelPermissions\Models\Permission;

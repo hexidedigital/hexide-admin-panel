@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Http;
 
-abstract class ViewNames
+final class ViewNames
 {
     public const Index = 'index';
     public const Show = 'show';
@@ -12,4 +12,8 @@ abstract class ViewNames
 
     public const General = 'general';
     public const Locale = 'lang';
+
+    private function __construct()
+    {
+    }
 }

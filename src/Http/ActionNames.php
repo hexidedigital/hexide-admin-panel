@@ -2,7 +2,7 @@
 
 namespace HexideDigital\HexideAdmin\Http;
 
-abstract class ActionNames
+final class ActionNames
 {
     /* follow locale file in lang/__/messages.php' */
 
@@ -29,5 +29,9 @@ abstract class ActionNames
     public static function isAllowed(?string $action): bool
     {
         return !empty($action) && in_array($action, self::ALLOWED);
+    }
+
+    private function __construct()
+    {
     }
 }

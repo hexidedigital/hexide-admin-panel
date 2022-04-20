@@ -84,7 +84,7 @@ abstract class BackendController extends BaseController
 
     public function indexAction()
     {
-        return $this->render();
+        return $this->render(ActionNames::Index);
     }
 
     public function showAction(Request $request)
@@ -100,7 +100,23 @@ abstract class BackendController extends BaseController
 
     public function createAction()
     {
+        $this->protectAction(ActionNames::Create, $this->modelClass);
+
         return $this->render(ViewNames::Create);
+    }
+
+    public function storeAction(Request $request): RedirectResponse
+    {
+        $this->protectAction(ActionNames::Create, $this->modelClass);
+
+        $service = $this->getService();
+
+        $model = $service->handleRequest(
+            $this->getFormRequest(ActionNames::Create) ?: $request,
+            $this->getModelObject()
+        );
+
+        return $this->nextActionRedirect($model);
     }
 
     public function editAction(Request $request)
@@ -112,20 +128,6 @@ abstract class BackendController extends BaseController
         $this->dataModel($model);
 
         return $this->render(ViewNames::Edit);
-    }
-
-    public function storeAction(Request $request): RedirectResponse
-    {
-        $this->protectAction(ActionNames::Create, $this->getModelObject());
-
-        $service = $this->getService();
-
-        $model = $service->handleRequest(
-            $this->getFormRequest(ActionNames::Create) ?: $request,
-            $this->getModelObject()
-        );
-
-        return $this->nextActionRedirect($model);
     }
 
     public function updateAction(Request $request): RedirectResponse
@@ -205,7 +207,6 @@ abstract class BackendController extends BaseController
         return response()->json(['message' => $this->getNotifyModelMessage('error', ActionNames::Edit)], 422);
     }
 
-
     /** @throws \Throwable */
     protected function dbTransactionAction(string $action, $parameters)
     {
@@ -235,11 +236,8 @@ abstract class BackendController extends BaseController
 
             report($exception);
             $this
-                ->notify(self::DatabaseAction[$action], null, 'error')
-                ->notify(self::DatabaseAction[$action],
-                    class_basename($exception) . " -- {$exception->getFile()}: {$exception->getLine()} ",
-                    'error',
-                    class_basename($exception) . $exception->getMessage());
+                ->notify(self::DatabaseAction[$action], 'See logs to get more details about error', 'error')
+                ->notify(self::DatabaseAction[$action], class_basename($exception) . $exception->getMessage(), 'error');
 
             DB::rollBack();
         }
@@ -403,21 +401,13 @@ abstract class BackendController extends BaseController
         $this->formRequestClassName = $requestClassName;
     }
 
-    /**
-     * @param string|null $action
-     *
-     * @return class-string<FormRequest|Request>|string
-     */
+    /** @return class-string<FormRequest|Request>|string */
     protected function getFormRequestClassName(string $action = null): string
     {
         return $this->formRequestClassName ?: $this->resolveNamespace('request', $this->getModuleName(), 'Request');
     }
 
-    /**
-     * @param string|null $action
-     *
-     * @return FormRequest|Request
-     */
+    /** @return FormRequest|Request */
     protected function getFormRequest(string $action = null): Request
     {
         return App::make($this->getFormRequestClassName($action));

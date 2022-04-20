@@ -32,11 +32,11 @@ class TranslationTable extends DefaultTable
 
     public function columns(): array
     {
+        /*todo remove debug*/
         $columns = [
             Column::make(__("admin_labels.attributes.key"))
                 ->addAttributes(['style' => "width: {$this->keyColumnWidth};"])
-                ->searchable(fn($value) => dd(func_num_args()))
-            ,
+                // ->searchable(fn($value) => dd(func_num_args())),
         ];
 
         $locales = sizeof($this->locales);
