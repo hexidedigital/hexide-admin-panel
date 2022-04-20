@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
@@ -47,6 +49,19 @@ abstract class DefaultTable extends DataTableComponent
             ->asHtml();
     }
 
+    protected function getPriorityColumn(): Column
+    {
+        return Column::make(__('admin_labels.attributes.priority'), 'priority')
+            ->sortable()
+            ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.input', [
+                'model' => $row,
+                'module' => $this->getModuleName(),
+                'field' => 'priority',
+                'type' => 'number',
+            ]))
+            ->asHtml();
+    }
+
     protected function getStatusColumn(): Column
     {
         return Column::make(__('admin_labels.attributes.status'), 'status')
@@ -68,5 +83,19 @@ abstract class DefaultTable extends DataTableComponent
                 'module' => $this->getModuleName(),
             ]))
             ->asHtml();
+    }
+
+    protected function getImageColumn(): Column
+    {
+        return Column::make(__("admin_labels.attributes.image"), 'image')
+            ->format(fn($value, $column, $row) => view('hexide-admin::partials.image', ['src' => $row->image]))
+            ->asHtml();
+    }
+
+    protected function getTitleColumn(string $field = 'title'): Column
+    {
+        return Column::make(__("admin_labels.attributes.title"), $field)
+            ->sortable()
+            ->searchable();
     }
 }
