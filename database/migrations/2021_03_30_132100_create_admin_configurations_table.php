@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->json('value')->nullable();
             $table->boolean('status')->default(1);
             $table->string('group')->nullable();
-            $table->integer('in_group_position')->default(1);
+            $table->unsignedInteger('in_group_position')->nullable();
             $table->timestamps();
         });
 

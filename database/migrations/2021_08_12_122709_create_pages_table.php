@@ -11,7 +11,7 @@ return new class extends Migration {
         Schema::create('pages', function (Blueprint $table) {
             $table->id();
             $table->string('slug')->unique();
-            $table->integer('position')->default(1);
+            $table->unsignedInteger('position')->nullable();
             $table->boolean('status')->default(true);
             $table->string('image')->nullable();
 
