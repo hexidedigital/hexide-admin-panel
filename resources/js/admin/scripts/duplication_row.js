@@ -13,7 +13,7 @@ window.duplicate_row = function ($this) {
         return
     }
     window.ic++
-    $nrow[0].innerHTML = $nrow[0].innerHTML.replace(/replaseme/g, 'new][' + window.ic)
+    $nrow[0].innerHTML = $nrow[0].innerHTML.replace(/replaseme/g, window.ic)
     $nrow.removeClass('duplicate').insertBefore($parent.find('.duplication-button'))
     $nrow.find('.form-control').each(function () {
         $(this).attr('name', $(this).data('name'))
