@@ -7,7 +7,7 @@ namespace HexideDigital\HexideAdmin\Database\Factories;
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 /**
  * @mixin Factory
@@ -16,65 +16,86 @@ trait FactoryWithTranslations
 {
     public function configure(): self
     {
-        return $this
-            ->afterCreating(fn(Model $model) => $this->translate($model)->save())
-            ->afterMaking(fn(Model $model) => $this->translate($model));
+        return $this->translate();
     }
 
-    public function translate(Model $model): Model
+    public function translate(): self
     {
-        $translatableModel = 'App\\Models\\' . \Str::studly(str_singular($model->getTable())) . 'Translation';
+        return $this->afterMaking(function(Model $model) {
+            if (!$this->isTranslatable($model)) {
+                return $model;
+            }
 
-        if (!$this->isTranslatable($model, $translatableModel)) {
+            $title = $this->getTitleTranslation();
+
+            if (in_array('slug', $model->getFillable())) {
+                $model->fill(['slug' => \Str::slug($title)]);
+            }
+
+            /** @var Translatable|Model $model */
+            $translatableModel = $model->getTranslationModelName();
+            $translatableModel = new $translatableModel();
+
+            $model->fill($this->getTranslatedAttributes([
+                'name' => $this->getNameTranslation(),
+                'title' => $title,
+                'content' => $this->getDescriptionTranslation(),
+                'description' => $this->getDescriptionTranslation(),
+            ], $translatableModel->getFillable()));
+
             return $model;
-        }
+        });
+    }
 
-        $title = $this->getTitleTranslation();
+    public function translateMetaTitle(string $title = null)
+    {
+        return $this->translateKey('meta_title', $title);
+    }
 
-        if (in_array('slug', $model->getFillable())) {
-            $translations = ['slug' => \Str::slug($title),];
-        } else {
-            $translations = [];
-        }
+    public function translateKey(string $key, ?string $value = null)
+    {
+        return $this->afterMaking(function (Model $model) use ($key, $value) {
+            /** @var Translatable|Model $model */
+            $model->fill($this->getTranslatedAttributes([
+                $key => $value ?: ($model->title ?? $this->getTitleTranslation()),
+            ]));
 
-        $translatableModel = new $translatableModel();
+            return $model;
+        });
+    }
+
+    public function getTranslatedAttributes(array $keyValues, array $filterKeys = null): array
+    {
+        $translations = collect();
 
         foreach (config('translatable.locales') as $locale) {
-            $item = [
-                'name'        => $this->getNameTranslation() . ' ' . $locale,
-                'title'       => "$title $locale",
-                'content'     => $this->getDescriptionTranslation(),
-                'description' => $this->getDescriptionTranslation(),
-            ];
-
-            $item = Arr::only($item, $translatableModel->getFillable());
-
-            $translations[$locale] = $item;
+            $translations[$locale] = collect($keyValues)
+                ->mapWithKeys(fn($value, $key) => [
+                    $key => $value . ' ' . $locale,
+                ])
+                ->when(!empty($filterKeys), fn(Collection $collection) => $collection->only($filterKeys));
         }
 
-        $model->fill($translations);
-
-        return $model;
+        return $translations->toArray();
     }
 
-    public function getTitleTranslation($words = 6)
+    public function getTitleTranslation(int $words = 6): string
     {
         return $this->faker->words($words, true);
     }
 
-    public function getNameTranslation($words = 3)
+    public function getNameTranslation(int $words = 3): string
     {
         return $this->faker->words($words, true);
     }
 
-    public function getDescriptionTranslation($nb = 3)
+    public function getDescriptionTranslation(int $nb = 3): string
     {
         return $this->faker->paragraphs($nb, true);
     }
 
-    private function isTranslatable(Model $model, string $translatableModel): bool
+    private function isTranslatable(Model $model): bool
     {
-        return in_array(Translatable::class, array_keys(class_uses($model)))
-            && class_exists($translatableModel);
+        return in_array(Translatable::class, array_keys(class_uses($model)));
     }
 }
