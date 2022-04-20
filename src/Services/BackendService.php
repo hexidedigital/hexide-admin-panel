@@ -23,6 +23,11 @@ class BackendService implements ServiceInterface
 
     public function __construct()
     {
+        $this->initService();
+    }
+
+    public function initService()
+    {
         $this->locales = config('translatable.locales');
     }
 
@@ -88,7 +93,7 @@ class BackendService implements ServiceInterface
         }
 
         if ($this->withImage && !$this->modelUsesSoftDeletesTrait($model)) {
-            $this->deleteImage($model->image ?? null);
+            $this->deleteFile($model->image ?? null);
         }
     }
 
@@ -128,7 +133,7 @@ class BackendService implements ServiceInterface
         }
 
         if ($this->withImage) {
-            $this->deleteImage($model->image ?? null);
+            $this->deleteFile($model->image ?? null);
         }
     }
 
@@ -141,9 +146,8 @@ class BackendService implements ServiceInterface
      * @param array $imageInput
      * @param array $options <table>
      *  <tr>    <th>key of option</th>        <th>Default</th>        </tr>
+     *  <tr>    <td>model</td>     <td>model to process</td>     </tr>
      *  <tr>    <td>image_field_key</td>      <td>image</td>      </tr>
-     *  <tr>    <td>folder</td>     <td>images</td>     </tr>
-     *  <tr>    <td>module</td>     <td>table of model</td>       </tr>
      *  <tr>    <td>old_path</td>     <td>old path for image</td>       </tr>
      *  <tr>    <td>is_remove_key</td>     <td>field name if remove existed image</td>       </tr>
      * </table>
@@ -152,51 +156,49 @@ class BackendService implements ServiceInterface
      */
     public function handleOneImage(array $imageInput, array $options = [])
     {
-        $fieldKey = Arr::get($options, 'image_field_key', 'image');
-        $folder = Arr::get($options, 'folder', 'images');
-        $module = Arr::get($options, 'module', $this->model->getTable());
-        $oldPath = Arr::get($options, 'old_path', $this->model->{$fieldKey} ?? null);
-        $isRemove = Arr::get($options, 'is_remove_key', 'isRemoveImage');
+        /** @var Model $model */
+        $model = Arr::get($options, 'model', $this->model);
+        $imageFieldKey = Arr::get($options, 'image_field_key', 'image');
+        $isRemoveKey = Arr::get($options, 'is_remove_key', 'isRemoveImage');
 
-        $image = Arr::get($imageInput, $fieldKey);
+        $options = [
+            'folder' => Arr::get($options, 'folder', 'images'),
+            'model' => $model,
+            'old_path' => Arr::get($options, 'old_path', $model->getAttribute($imageFieldKey) ?? null),
+        ];
 
-        if (
-            (isset($image) && $image instanceof UploadedFile)
-            || Arr::get($imageInput, $isRemove, false)
-        ) {
-            return $this->saveImage(
-                $image,
-                (string)($this->model->getKey() ?? null),
-                $oldPath,
-                $folder,
-                $module ?? null,
-            );
-        }
-
-        return false;
+        return $this->handleUploadedFile(
+            Arr::get($imageInput, $imageFieldKey),
+            boolval(Arr::get($imageInput, $isRemoveKey, false)),
+            $options
+        );
     }
 
     /**
      * @param UploadedFile|null $file
-     * @param bool|null $isRemove
+     * @param bool|null $shouldRemove
      * @param array $options <table>
      *  <tr>    <th>key of option</th>        <th>Default</th>        </tr>
-     *  <tr>    <td>folder</td>     <td>images</td>     </tr>
+     *  <tr>    <td>folder</td>     <td>files</td>     </tr>
+     *  <tr>    <td>model</td>     <td>model to process</td>     </tr>
      *  <tr>    <td>module</td>     <td>table of model</td>       </tr>
      *  <tr>    <td>old_path</td>     <td>old path for image</td>       </tr>
      * </table>
      *
      * @return bool|string|null
      */
-    public function handleUploadedFile(?UploadedFile $file = null, ?bool $isRemove = false, array $options = [])
+    public function handleUploadedFile(?UploadedFile $file = null, ?bool $shouldRemove = false, array $options = [])
     {
-        $folder = Arr::get($options, 'folder', 'images');
-        $module = Arr::get($options, 'module', $this->model ? $this->model->getTable() : null);
+        $folder = Arr::get($options, 'folder', 'files');
+        /** @var Model $model */
+        $model = Arr::get($options, 'model', $this->model);
+        $module = Arr::get($options, 'module', $this->model ? module_name_from_model($this->model) : null);
         $oldPath = Arr::get($options, 'old_path');
 
-        if (isset($file) || $isRemove) {
-            $uniqId = $this->model->getKey() ?? null;
-            return $this->saveImage($file, (string)$uniqId, $oldPath, $folder, $module);
+        if (isset($file) || $shouldRemove) {
+            $uniqId = $model->getKey() ?? null;
+
+            return $this->storeUploadedFile($file, (string)$uniqId, $oldPath, $folder, $module);
         }
 
         return false;
@@ -210,26 +212,47 @@ class BackendService implements ServiceInterface
      * @param string|null $module
      *
      * @return string|null
+     * @deprecated `saveImage` will be removed is future releases, use `storeUploadedFile` instead
      */
     public function saveImage($image, string $uniqId = null, string $oldPath = null, string $type = null, string $module = null): ?string
     {
-        if (!empty($oldPath)) {
-            $this->deleteImage($oldPath);
-        }
-
-        if (empty($module)) {
-            $module = $this->model->getTable() ?? null;
-        }
-
-        if (empty($type)) {
-            $type = 'images';
-        }
-
-        return FileUploader::put($image, $type, $module, $uniqId) ?? null;
+        return $this->storeUploadedFile($image, $uniqId, $oldPath, $type, $module);
     }
 
+    /** @deprecated `deleteImage` will be removed is future releases, use `deleteFile` instead */
     public function deleteImage(?string $path): bool
     {
-        return Storage::disk('public')->delete($path);
+        return $this->deleteFile($path);
+    }
+
+    /**
+     * @param UploadedFile|mixed|null $file
+     * @param string|null $uniqId
+     * @param string|null $oldPath
+     * @param string|null $type
+     * @param string|null $module
+     *
+     * @return string|null
+     */
+    protected function storeUploadedFile($file, string $uniqId = null, string $oldPath = null, string $type = null, string $module = null): ?string
+    {
+        $this->deleteFile($oldPath);
+
+        if (empty($module)) {
+            $module = $this->model ? module_name_from_model($this->model) : 'uploads';
+        }
+
+        $type = $type ?: 'file';
+
+        return FileUploader::put($file, $type, $module, $uniqId) ?? null;
+    }
+
+    protected function deleteFile(?string $path, string $disk = 'public'): bool
+    {
+        if (empty($path)) {
+            return false;
+        }
+
+        return Storage::disk($disk)->delete($path);
     }
 }

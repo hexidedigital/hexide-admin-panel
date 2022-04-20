@@ -46,6 +46,8 @@ abstract class BackendController extends BaseController
         'forceDelete' => ActionNames::ForceDelete,
     ];
 
+    protected bool $selfDescribedController = false;
+
     private ?Model $model = null;
     private ?string $module = null;
     /** @var class-string<Model|Eloquent|SoftDeletes>|string|null */
@@ -68,17 +70,9 @@ abstract class BackendController extends BaseController
     {
         parent::__construct();
 
-        $this->secureActions = App::get(SecureActions::class);
-
-        $this->setNotifier(app(NotificationInterface::class));
-
-        $this->dataUrlParams([]);
-
-        if (!config('hexide-admin.configurations.show_debug_footer_admin', true)) {
-            \Debugbar::disable();
-        }
+        $this->prepareController();
+        $this->bootController();
     }
-
 
     /* ------------ Backend actions ------------ */
 
@@ -214,7 +208,7 @@ abstract class BackendController extends BaseController
 
         try {
             if (!method_exists($this, $action)) {
-                $result = App::call([$this, $action . 'Action']);
+                $result = App::call([$this, $action . 'Action'], $parameters);
             } else {
                 $result = parent::callAction($action, $parameters);
             }
@@ -249,7 +243,7 @@ abstract class BackendController extends BaseController
 
     protected function initModule(string $modelClassName): void
     {
-        if (!class_exists($modelClassName)) {
+        if (!class_exists($modelClassName) && $this->selfDescribedController) {
             /* Will throw exception like `Class not found` */
             new $modelClassName;
         }
@@ -309,28 +303,31 @@ abstract class BackendController extends BaseController
     /** @return Model|Eloquent|SoftDeletes */
     protected function getModelObject(): Model
     {
-        $class = $this->getModelClassName();
-
-        return new $class;
+        return App::get($this->getModelClassName());
     }
 
     protected function setServiceClassName(string $serviceClassName = null)
     {
+        $this->serviceClass = $this->resolveServiceClassName($serviceClassName);
+    }
+
+    protected function resolveServiceClassName(?string $serviceClassName)
+    {
         if (is_null($serviceClassName)) {
-            $serviceClassName = $this->getServiceClassName();
+            $serviceClassName = $this->resolveNamespace('service', $this->getModuleName(), 'Service');
         }
 
         if (!class_exists($serviceClassName)) {
-            $serviceClassName = BackendService::class;
+            return BackendService::class;
         }
 
-        $this->serviceClass = $serviceClassName;
+        return $serviceClassName;
     }
 
     /** @return class-string<ServiceInterface|BackendService>|string */
     protected function getServiceClassName(): string
     {
-        return $this->serviceClass ?: $this->resolveNamespace('service', $this->getModuleName(), 'Service');
+        return $this->serviceClass;
     }
 
     protected function setService(ServiceInterface $service)
@@ -338,9 +335,7 @@ abstract class BackendController extends BaseController
         $this->service = $service;
     }
 
-    /**
-     * @return ServiceInterface|BackendService|null
-     */
+    /** @return ServiceInterface|BackendService|null */
     protected function getService(): ?ServiceInterface
     {
         if (isset($this->service)) {
@@ -349,25 +344,26 @@ abstract class BackendController extends BaseController
 
         $class = $this->getServiceClassName();
 
-        return new $class;
+        return App::get($class);
     }
 
-    /**
-     * @return ServiceInterface|BackendService|null
-     */
+    /** @return ServiceInterface|BackendService|null */
     protected function getBackendService(): ?ServiceInterface
     {
-        return new BackendService;
+        return App::get(BackendService::class);
     }
 
     /**
-     * @param Request $request
+     * @param Request|null $request
      * @param string|null $action
      *
      * @return Model|Eloquent|SoftDeletes|null
      */
-    protected function getModelFromRoute(Request $request, string $action = null): ?Model
+    protected function getModelFromRoute(Request $request = null, string $action = null): ?Model
     {
+        /** @var Request $request */
+        $request = $request ?: request();
+
         if (in_array($action, $this->resourceMethodsWithoutModels())) {
             return $this->getModelObject();
         }
@@ -390,21 +386,31 @@ abstract class BackendController extends BaseController
 
     protected function setFromRequestClassName(string $requestClassName = null)
     {
+        $this->formRequestClassName = $this->resolveFormRequestClassName($requestClassName);
+    }
+
+    /**
+     * @param string|null $requestClassName
+     * @param string|null $action
+     * @return string<Request|FormRequest>|null
+     */
+    protected function resolveFormRequestClassName(?string $requestClassName, ?string $action = null): ?string
+    {
         if (is_null($requestClassName)) {
-            $requestClassName = $this->getFormRequestClassName();
+            $requestClassName = $this->resolveNamespace('request', $this->getModuleName(), 'Request');
         }
 
         if (!class_exists($requestClassName)) {
-            $requestClassName = Request::class; // laravel base request
+            return Request::class; // laravel base request
         }
 
-        $this->formRequestClassName = $requestClassName;
+        return $requestClassName;
     }
 
     /** @return class-string<FormRequest|Request>|string */
     protected function getFormRequestClassName(string $action = null): string
     {
-        return $this->formRequestClassName ?: $this->resolveNamespace('request', $this->getModuleName(), 'Request');
+        return $this->formRequestClassName;
     }
 
     /** @return FormRequest|Request */
@@ -437,7 +443,7 @@ abstract class BackendController extends BaseController
         $module = $this->getModuleName();
 
         if (in_array($nextAction, ['edit', 'show'])) {
-            $params = array_merge([str_singular($module) => $model], $params);
+            $params[str_singular($module)] = $model;
         }
 
         return redirect()->route("admin.$module.$nextAction", $params);
@@ -594,11 +600,46 @@ abstract class BackendController extends BaseController
         return route("admin.$module.$method", $this->model ?? '');
     }
 
+    /* ------------ Hooks ------------ */
+
+    protected function prepareController(): void
+    {
+        $this->secureActions = App::get(SecureActions::class);
+
+        $this->setNotifier(app(NotificationInterface::class));
+
+        $this->dataUrlParams([]);
+
+        if (!config('hexide-admin.configurations.show_debug_footer_admin', true)) {
+//            todo if (class_exists('\\Barryvdh\\Debugbar\\Facades\\Debugbar'))
+//            \Debugbar::disable();
+        }
+    }
+
+    protected function bootController(): void
+    {
+        // write your code here and not in the constructor
+        if ($this->selfDescribedController) {
+            $this->setFullAccessMap();
+
+            $this->initModule(
+                $this->resolveNamespace('model', str_replace('Controller', '', class_basename($this)))
+            );
+        }
+    }
+
+    protected function beforeCallAnyAction($method, &$parameters): void
+    {
+        //
+    }
+
 
     /* ------------ Controller methods ------------ */
 
     public function callAction($method, $parameters)
     {
+        $this->beforeCallAnyAction($method, $parameters);
+
         $this->createBreadcrumb($this->getModuleName());
 
         /* // todo move or remove this code
@@ -621,7 +662,7 @@ abstract class BackendController extends BaseController
         }
 
         if (!method_exists($this, $method)) {
-            return App::call([$this, $method . 'Action']);
+            return App::call([$this, $method . 'Action'], $parameters);
         }
 
         return parent::callAction($method, $parameters);
@@ -639,30 +680,43 @@ abstract class BackendController extends BaseController
      *
      * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory|Application
      */
-    protected function render(?string $view = null, array $data = [], string $forceActionType = null)
+    protected function render(?string $view = ViewNames::Index, array $data = [], string $forceActionType = null)
     {
         $view = $view ?: ViewNames::Index;
+        $forceActionType = $forceActionType ?: $view;
 
+        $this->processNotify($view, $forceActionType);
+
+        $this->prepareDataToRender($view, $data);
+
+        $viewName = $this->guessViewName($view);
+
+        $this->createBreadcrumb($forceActionType ?: array_last(explode('.', $viewName)));
+
+        return parent::render($viewName, $data);
+    }
+
+    protected function prepareDataToRender(string $view, array &$data): void
+    {
+        $this->data([
+            'next_actions' => $this->getActionsForView(),
+            'module' => $this->getModuleName(),
+        ]);
+
+        if (empty($this->model) && !empty($this->modelClass)) {
+            $this->dataModel($this->getModelObject());
+        }
+    }
+
+    protected function processNotify(?string $view, ?string $forceActionType): void
+    {
         if (in_array($forceActionType, [ViewNames::Edit, ViewNames::Create]) ||
             in_array($view, [ViewNames::Edit, ViewNames::Create])) {
-            $forceActionType = $forceActionType ?? $view;
             $this->notifyIfExistsErrors($forceActionType);
             $this->data('layout_type', $forceActionType);
         } else {
             $this->notifyIfExistsErrors();
         }
-
-        $view = $this->guessViewName($view);
-
-        $this->createBreadcrumb($forceActionType ?: array_last(explode('.', $view)));
-
-        $this->data('next_actions', $this->getActionsForView());
-        $this->data('module', $this->getModuleName());
-        if (empty($this->model) && !empty($this->modelClass)) {
-            $this->dataModel($this->getModelObject());
-        }
-
-        return parent::render($view, $data);
     }
 
     protected function guessViewName(string $view): string
@@ -699,5 +753,4 @@ abstract class BackendController extends BaseController
 
         return redirect()->route($route, $params);
     }
-
 }
