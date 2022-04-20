@@ -9,21 +9,8 @@ use Illuminate\Routing\Controller as Controller;
 
 abstract class ApiController extends Controller
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-    use Includeble;
-
-    protected ?User $user;
-
     /** Message for responding. Can be the key of translations */
     protected string $message = '';
-
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = $request->user();
-            return $next($request);
-        });
-    }
 
     /** Set message for response */
     public function setMessage(string $message, bool $translate = true): self
@@ -67,6 +54,9 @@ abstract class ApiController extends Controller
     /** Response with the current error */
     protected function respondWithError(string $message, int $statusCode): JsonResponse
     {
+        // todo
+//        throw new \Exception($message, $statusCode);
+
         return $this->setMessage($message)->respondArray([
             'message' => $this->message,
         ], $statusCode);
@@ -141,6 +131,7 @@ abstract class ApiController extends Controller
     protected function respondTokenAndMessage($token, string $message = 'success'): JsonResponse
     {
         return $this->setMessage($message)->respondDataArray([
+            // todo move and make key for token editable (from configs)
             'access_token' => $token,
             'message' => $this->message,
         ]);
