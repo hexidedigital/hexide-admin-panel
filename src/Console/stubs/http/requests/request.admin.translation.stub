@@ -20,12 +20,12 @@ class {{ class }} extends FormRequest
         $modelId = $this->modelId();
 
         $rules = [
-            'slug'              => 'required|string|max:191|unique:{{ model_names }},slug,'.$modelId.',id',
-            'position'          => 'required|numeric|min:1',
-            'status'            => 'boolean',
+            'slug'              => ['required', 'string', 'max:191', 'unique:{{ model_names }},slug,'.$modelId.',id'],
+            'position'          => ['nullable', 'numeric', 'min:1'],
+            'status'            => ['boolean'],
 
-            '{{title}}'         => 'required|string|max:191',
-            '{{content}}'       => 'nullable|string|max:10000',
+            '{{title}}'         => ['required', 'string', 'max:191'],
+            '{{content}}'       => ['nullable', 'string', 'max:10000'],
         ];
 
         return lang_rules($rules);

@@ -16,9 +16,9 @@ class TranslationUpdateRequest extends FormRequest
     public function rules(): array
     {
         return lang_rules([
-            'page' => 'nullable|string',
+            'page' => ['nullable', 'string'],
 
-            '{{*}}' => 'nullable',
+            '{{*}}' => ['nullable'],
         ]);
     }
 }

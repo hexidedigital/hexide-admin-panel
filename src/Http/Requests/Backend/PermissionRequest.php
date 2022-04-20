@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace HexideDigital\HexideAdmin\Http\Requests\Backend;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 use HexideDigital\ModelPermissions\Models\Permission;
 
 class PermissionRequest extends FormRequest
@@ -18,7 +17,7 @@ class PermissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|min:3|max:100|unique:permissions,title,'.$this->modelId().',id',
+            'title' => ['required', 'min:3', 'max:100', 'unique:permissions,title,'.$this->modelId().',id'],
         ];
     }
 }

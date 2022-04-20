@@ -9,9 +9,9 @@ class AjaxFieldRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id'    => 'required|numeric',
-            'field' => 'required|string',
-            'value' => 'nullable',
+            'id' => ['required', 'numeric'],
+            'field' => ['required', 'string'],
+            'value' => ['nullable'],
         ];
     }
 }

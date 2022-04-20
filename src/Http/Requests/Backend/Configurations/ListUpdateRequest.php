@@ -35,9 +35,9 @@ class ListUpdateRequest extends FormRequest
         }
 
         $rules = [
-            'id'           => 'numeric|exists:admin_configurations,id',
-            'type'         => 'string|in:' . $configuration->implodeTypes(),
-            'translatable' => 'nullable|boolean',
+            'id'           => ['numeric', 'exists:admin_configurations,id'],
+            'type'         => ['string', 'in:' . $configuration->implodeTypes()],
+            'translatable' => ['nullable', 'boolean'],
 
             $this->get('id') => $valueRule,
         ];

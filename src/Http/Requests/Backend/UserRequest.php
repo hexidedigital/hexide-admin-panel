@@ -14,14 +14,15 @@ class UserRequest extends FormRequest
 
     public function rules(): array
     {
-        $model = $this->modelId();
+        $modelId = $this->modelId();
 
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $model . ',id',
-            'password' => (!empty($model) ? 'nullable' : 'required') . '|confirmed|min:' . User::password_min_length,
-            'roles' => 'nullable|array',
-            'roles.*' => 'integer',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$modelId.',id'],
+            /* todo refactor and research to check request method, but not empty */
+            'password' => [(!empty($modelId) ? 'nullable' : 'required'), 'confirmed', 'min:' . User::password_min_length],
+            'roles' => ['nullable', 'array'],
+            'roles.*' => ['integer'],
         ];
     }
 }

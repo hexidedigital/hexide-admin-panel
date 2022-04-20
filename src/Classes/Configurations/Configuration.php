@@ -160,81 +160,81 @@ class Configuration
 
         if (Configuration::isArrayValueType($type)) {
             return [
-                $attribute => 'nullable|array',
-                $attribute . '*' => 'required|string',
+                $attribute => ['nullable', 'array'],
+                $attribute . '*' => ['required', 'string'],
             ];
         }
 
         if (Configuration::TEXT === $type) {
             return [
-                $attribute => 'nullable|string|max:500',
+                $attribute => ['nullable', 'string', 'max:500'],
             ];
         }
 
         if (in_array($type, [Configuration::TEXTAREA, Configuration::EDITOR])) {
             return [
-                $attribute => 'nullable|string|max:5000',
+                $attribute => ['nullable', 'string', 'max:5000'],
             ];
         }
 
         if (Configuration::WEEKDAY === $type) {
             return [
-                $attribute => 'required|string|max:20',
+                $attribute => ['required', 'string', 'max:20'],
             ];
         }
 
         if (Configuration::TIME === $type) {
             return [
-                $attribute => 'nullable|string|max:10',
+                $attribute => ['nullable', 'string', 'max:10'],
             ];
         }
 
         if (Configuration::DATE === $type) {
             return [
-                $attribute => 'nullable|date',
+                $attribute => ['nullable', 'date'],
             ];
         }
 
         if (Configuration::BOOLEAN === $type) {
             return [
-                $attribute => 'boolean',
+                $attribute => ['boolean'],
             ];
         }
 
         if (Configuration::SELECT === $type) {
             return [
-                $attribute => 'nullable|string',
+                $attribute => ['nullable', 'string'],
             ];
         }
 
         if (Configuration::IMAGE === $type) {
             return [
-                $attribute . '.image' => 'nullable|image',
-                $attribute . '.isRemoveImage' => 'nullable|boolean',
+                $attribute . '.image' => ['nullable', 'image'],
+                $attribute . '.isRemoveImage' => ['nullable', 'boolean'],
             ];
         }
 
         if (Configuration::FILE === $type) {
             return [
-                $attribute . '.file' => 'nullable|file',
-                $attribute . '.isRemoveFile' => 'nullable|boolean',
+                $attribute . '.file' => ['nullable', 'file'],
+                $attribute . '.isRemoveFile' => ['nullable', 'boolean'],
             ];
         }
 
         if (Configuration::IMG_BUTTON === $type) {
             return [
-                $attribute . '.image' => 'nullable|image',
-                $attribute . '.isRemoveImage' => 'nullable|boolean',
-                $attribute . '.url' => 'nullable|string|max:250',
-                $attribute . '.title' => 'nullable|string|max:100',
-                $attribute . '.content' => 'nullable|string|max:5000',
+                $attribute . '.image' => ['nullable', 'image'],
+                $attribute . '.isRemoveImage' => ['nullable', 'boolean'],
+                $attribute . '.url' => ['nullable', 'string', 'max:250'],
+                $attribute . '.title' => ['nullable', 'string', 'max:100'],
+                $attribute . '.content' => ['nullable', 'string', 'max:5000'],
             ];
         }
 
         if (Configuration::RANGE === $type) {
             return [
-                $attribute . '.from' => 'nullable|string',
-                $attribute . '.to' => 'nullable|string',
+                $attribute . '.from' => ['nullable', 'string'],
+                $attribute . '.to' => ['nullable', 'string'],
             ];
         }
 
