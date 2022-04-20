@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up()
     {
-        Schema::create('{{ table }}', function (Blueprint $table) {
+        $model = new \{{ model_namespace }}();
+
+        Schema::create($model->getTable(), function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('position')->nullable();
             $table->boolean('status')->default(true);
@@ -22,6 +24,8 @@ return new class extends Migration {
 
     public function down()
     {
-        Schema::dropIfExists('{{ table }}');
+        $model = new \{{ model_namespace }}();
+
+        Schema::dropIfExists($model->getTable());
     }
 };

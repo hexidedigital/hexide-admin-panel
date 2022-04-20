@@ -5,26 +5,27 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+// todo correct
 return new class extends Migration {
     public function up()
     {
-        Schema::create('pages', function (Blueprint $table) {
+        Schema::create(app(\App\Models\Page::class)->getTable(), function (Blueprint $table) {
             $table->id();
             $table->string('slug')->unique();
             $table->unsignedInteger('position')->nullable();
             $table->boolean('status')->default(true);
             $table->string('image')->nullable();
 
-            $table->foreignId('parent_id')->nullable()->references('id')->on('pages')
+            $table->foreignId('parent_id')->nullable()->references('id')->on($table->getTable())
                 ->nullOnDelete()->cascadeOnUpdate();
 
             $table->timestamps();
         });
 
-        Schema::create('page_translations', function (Blueprint $table) {
+        Schema::create(app(\App\Models\PageTranslation::class)->getTable(), function (Blueprint $table) {
             $table->id();
             $table->string('locale');
-            $table->foreignId('page_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignIdFor(\App\Models\Page::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
             $table->string('title')->nullable();
             $table->text('short_description')->nullable();
@@ -39,7 +40,7 @@ return new class extends Migration {
 
     public function down()
     {
-        Schema::dropIfExists('page_translations');
-        Schema::dropIfExists('pages');
+        Schema::dropIfExists(app(\App\Models\PageTranslation::class)->getTable());
+        Schema::dropIfExists(app(\App\Models\Page::class)->getTable());
     }
 };
