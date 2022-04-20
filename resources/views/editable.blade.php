@@ -11,8 +11,8 @@
 
     @yield('form-start', isset($model->id)
         /** @warning Form model not working with `yield` */
-        ? Form::model($model, ['route' => ["admin.$module.update", $model->id], 'method' => 'put', 'files' => View::getSection('with_files', false)])
-        : Form::open(['route' => "admin.$module.store", 'files' => View::getSection('with_files', false)])
+        ? Form::model($model, ['route' => ["admin.$module.update", $model->id], 'method' => 'put', 'files' => View::getSection('with_files', true)])
+        : Form::open(['route' => "admin.$module.store", 'files' => View::getSection('with_files', true)])
     )
 
 {{--    {!! View::getSection('form-body', view("admin.view.$module.partials._form")) !!}--}}

@@ -1,11 +1,9 @@
-{{-- @section('with_files', true) --}}
-
 @php
     Form::model($model ?? null)
 @endphp
 
 <x-adminlte-card theme="navy" class="shadow" collapsible maximizable>
-    <x-hexide-admin-tabs-component
+    <x-hexide-admin::tabs-component
         :show-locale-tabs="{{ show_locale_tabs }}"
         :show-general-tab="true"
         :general-tab-errors="['name', 'etc']"
