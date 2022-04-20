@@ -44,7 +44,7 @@
             @endif
 
             @if($with_delete)
-                <form action="{{ route("admin.$module.destroy", $model->{$model->getKeyName()}) }}"
+                <form action="{{ route("admin.$module.destroy", $url_params) }}"
                       method="POST" style="display: inline-block;"
                       onsubmit="return confirm('{{__("hexide-admin::messages.confirm.delete")}}');">
                     @csrf
@@ -60,7 +60,7 @@
         @else
 
             @if($with_restore)
-                <form action="{{ route("admin.$module.restore", $model->{$model->getKeyName()}) }}"
+                <form action="{{ route("admin.$module.restore", $url_params) }}"
                       method="POST" style="display: inline-block;"
                       onsubmit="return confirm('{{__("hexide-admin::messages.confirm.restore")}}');">
                     @csrf
@@ -74,7 +74,7 @@
             @endif
 
             @if($with_force_delete)
-                <form action="{{ route("admin.$module.forceDelete", $model->{$model->getKeyName()}) }}"
+                <form action="{{ route("admin.$module.forceDelete", $url_params) }}"
                       method="POST" style="display: inline-block;"
                       onsubmit="return confirm('{{__("hexide-admin::messages.confirm.force_delete")}}');">
                     @csrf
