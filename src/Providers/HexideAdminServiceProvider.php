@@ -11,8 +11,8 @@ use HexideDigital\HexideAdmin\Classes\HexideAdmin;
 use HexideDigital\HexideAdmin\Classes\Notifications\NotificationInterface;
 use HexideDigital\HexideAdmin\Classes\Notifications\ToastrNotification;
 use HexideDigital\HexideAdmin\Classes\Thumb;
-use HexideDigital\HexideAdmin\Components\NavItems\LanguageItem;
-use HexideDigital\HexideAdmin\Components\Tabs\TabsComponent;
+use HexideDigital\HexideAdmin\Components\NavItems;
+use HexideDigital\HexideAdmin\Components\Tabs;
 use HexideDigital\HexideAdmin\Console\Commands\CleanSeededStorageCommand;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\Creators;
@@ -50,8 +50,8 @@ class HexideAdminServiceProvider extends ServiceProvider
     ];
 
     private array $components = [
-        'language-item' => LanguageItem::class,
-        'tabs-component' => TabsComponent::class,
+        'language-item' => NavItems\LanguageItem::class,
+        'tabs-component' => Tabs\TabsComponent::class,
     ];
 
     private array $livewire = [

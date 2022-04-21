@@ -20,7 +20,7 @@
 @endpush
 
 @section("content_top_nav_right")
-    <x-hexide-admin::language-item/>
+    <x-hexide-admin-language-item/>
 @endsection
 
 @section("content_header")

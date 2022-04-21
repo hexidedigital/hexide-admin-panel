@@ -1,5 +1,21 @@
 {
     "$schema": "http://laravel-ide.com/schema/laravel-ide-v1.json",
+    "completion": {
+        "view": [
+            {
+                "methods": ["render"],
+                "classes": ["Controller"],
+                "parameters": [1]
+            }
+        ],
+        "translation": [
+            {
+                "methods": ["setMessage"],
+                "classes": ["Controller"],
+                "parameters": [1]
+            }
+        ]
+    },
     "view": {
         "paths": [
             {
@@ -18,6 +34,19 @@
                 {
                     "path": "resources/views/components",
                     "namespace": "",
+                    "prefix": "hexide-admin-",
+                    "viewNamespace": "hexide-admin"
+                },
+                {
+                    "path": "resources/views/components/nav-items",
+                    "namespace": "",
+                    "prefix": "hexide-admin-",
+                    "viewNamespace": "hexide-admin"
+                },
+                {
+                    "path": "resources/views/components/tabs",
+                    "namespace": "",
+                    "prefix": "hexide-admin-",
                     "viewNamespace": "hexide-admin"
                 }
             ]

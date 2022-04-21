@@ -22,12 +22,16 @@
             , $url_params
         );
     }
+
+    $isDeleted =
+        in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($model))
+        && !empty($model->getAttribute($model->getDeletedAtColumn()));
 @endphp
 
 @if(isset($module) && isset($model))
     <div class="d-flex flex-nowrap">
 
-        @if(empty($model->getAttribute($model->getDeletedAtColumn())))
+        @if(!$isDeleted)
 
             @if($with_show)
                 @include('hexide-admin::partials.buttons.control_button', [
