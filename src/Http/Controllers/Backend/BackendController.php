@@ -268,13 +268,13 @@ abstract class BackendController extends BaseController
         $this->modelClass = $modelClassName;
     }
 
-    /** @return class-string<Model|Eloquent>|string */
-    protected function getModelClassName(): string
+    /** @return class-string<Model|Eloquent>|string|null */
+    protected function getModelClassName(): ?string
     {
         return $this->modelClass ?: $this->resolveNamespace('model', $this->getModuleName());
     }
 
-    protected function setModuleName(string $name = null)
+    protected function setModuleName(string $name = null): void
     {
         if (empty($name)) {
             $name = module_name_from_model($this->getModelObject());
@@ -306,18 +306,18 @@ abstract class BackendController extends BaseController
         return App::get($this->getModelClassName());
     }
 
-    protected function setServiceClassName(string $serviceClassName = null)
+    protected function setServiceClassName(string $serviceClassName = null): void
     {
         $this->serviceClass = $this->resolveServiceClassName($serviceClassName);
     }
 
-    protected function resolveServiceClassName(?string $serviceClassName)
+    protected function resolveServiceClassName(?string $serviceClassName): ?string
     {
         if (is_null($serviceClassName)) {
             $serviceClassName = $this->resolveNamespace('service', $this->getModuleName(), 'Service');
         }
 
-        if (!class_exists($serviceClassName)) {
+        if (is_null($serviceClassName) || !class_exists($serviceClassName)) {
             return BackendService::class;
         }
 
@@ -325,12 +325,12 @@ abstract class BackendController extends BaseController
     }
 
     /** @return class-string<ServiceInterface|BackendService>|string */
-    protected function getServiceClassName(): string
+    protected function getServiceClassName(): ?string
     {
         return $this->serviceClass;
     }
 
-    protected function setService(ServiceInterface $service)
+    protected function setService(ServiceInterface $service): void
     {
         $this->service = $service;
     }
