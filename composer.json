@@ -3,7 +3,6 @@
     "description": "hexide-digital admin panel",
     "license": "MIT",
     "type": "library",
-    "version": "2.7.4",
     "support": {
         "issues": "https://github.com/hexidedigital/hexide-admin-panel/issues",
         "source": "https://github.com/hexidedigital/hexide-admin-panel",
@@ -35,6 +34,9 @@
         "rappasoft/laravel-livewire-tables": "^1.20",
         "intervention/image": "^2.7",
         "yoeunes/toastr": "^1.2"
+    },
+    "require-dev": {
+        "hexide-digital/gitlab-deploy": "^0.3.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

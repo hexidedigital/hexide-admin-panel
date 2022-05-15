@@ -34,7 +34,6 @@ class HexideAdminServiceProvider extends ServiceProvider
 {
     private array $commands = [
         CreateAdminUser::class,
-        PrepareDeployCommand::class,
         CleanSeededStorageCommand::class,
         SetupProjectCommand::class,
 
