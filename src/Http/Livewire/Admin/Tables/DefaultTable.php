@@ -12,7 +12,7 @@ abstract class DefaultTable extends DataTableComponent
     public string $defaultSortColumn = 'id';
     public string $defaultSortDirection = 'desc';
     public ?int $searchFilterDebounce = 500;
-    public $refresh = 10000; // every 10 seconds
+    public $refresh = 20000; // every 20 seconds
     public array $perPageAccepted = [10, 25, 50, 100];
 
     public array $sortDirectionNames = [
