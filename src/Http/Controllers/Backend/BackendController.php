@@ -94,14 +94,14 @@ abstract class BackendController extends BaseController
 
     public function createAction()
     {
-        $this->protectAction(ActionNames::Create, $this->modelClass);
+        $this->protectAction(ActionNames::Create, $this->getModelObject());
 
         return $this->render(ViewNames::Create);
     }
 
     public function storeAction(Request $request): RedirectResponse
     {
-        $this->protectAction(ActionNames::Create, $this->modelClass);
+        $this->protectAction(ActionNames::Create, $this->getModelObject());
 
         $service = $this->getService();
 

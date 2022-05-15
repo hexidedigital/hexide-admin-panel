@@ -1,8 +1,8 @@
 
 // {{ model_name }}
-Route::post('{{ model_name }}/{id}', [{{ ModelName }}Controller::class, 'ajaxFieldChange'])
+Route::post('{{ model_names }}/{id}', [{{ ModelName }}Controller::class, 'ajaxFieldChange'])
     ->prefix(config('hexide-admin.routes.ajax.prefix'))
     ->middleware(config('hexide-admin.routes.ajax.middleware'))
-    ->name('ajax_field.{{ model_name }}');
-Route::resource('{{ model_name }}', {{ ModelName }}Controller::class);
+    ->name('ajax_field.{{ model_names }}');
+Route::resource('{{ model_names }}', {{ ModelName }}Controller::class);
 /*hexide_admin_stub*/
