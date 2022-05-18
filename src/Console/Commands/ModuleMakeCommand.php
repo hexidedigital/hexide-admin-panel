@@ -157,7 +157,7 @@ class ModuleMakeCommand extends BaseCommand
     private function createMigrations(): void
     {
         $this->call('hd-admin:make:migration', [
-            'name' => $this->getModuleName()->append('Table'),
+            'name' => $this->getModuleName(2)->append('Table')->prepend('Create'),
             '--translatable' => $this->isTranslatable(),
             '--model' => $this->getModuleName(),
             '--force' => $this->isForced(),

@@ -17,7 +17,7 @@ class MigrationMakeCommand extends GeneratorCommand
 
     protected function qualifyClass(string $name): string
     {
-        return 'Create' . str_plural($name) . 'Table';
+        return Str::camel($name);
     }
 
     protected function getPath(string $name): string
