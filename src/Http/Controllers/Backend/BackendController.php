@@ -32,13 +32,13 @@ abstract class BackendController extends BaseController
 {
     use AuthorizesRequests;
 
-    private const Actions = [
+    protected const Actions = [
         'index', 'show', 'create', 'store', 'edit', 'update', 'destroy',
         'restore', 'forceDelete',
         'ajaxFieldChange',
     ];
 
-    private const DatabaseAction = [
+    protected const DatabaseAction = [
         'store' => ActionNames::Create,
         'update' => ActionNames::Edit,
         'destroy' => ActionNames::Delete,
@@ -48,20 +48,20 @@ abstract class BackendController extends BaseController
 
     protected bool $selfDescribedController = false;
 
-    private ?Model $model = null;
-    private ?string $module = null;
+    protected ?Model $model = null;
+    protected ?string $module = null;
     /** @var class-string<Model|Eloquent|SoftDeletes>|string|null */
-    private ?string $modelClass = null;
+    protected ?string $modelClass = null;
 
-    private NotificationInterface $notificator;
-    private bool $showErrorNotification = true;
+    protected NotificationInterface $notificator;
+    protected bool $showErrorNotification = true;
 
-    private ServiceInterface $service;
+    protected ServiceInterface $service;
     /** @var class-string<ServiceInterface|BackendService>|string|null */
-    private ?string $serviceClass = null;
+    protected ?string $serviceClass = null;
 
     /** @var class-string<FormRequest|Request>|string|null */
-    private ?string $formRequestClassName = null;
+    protected ?string $formRequestClassName = null;
 
     protected SecureActions $secureActions;
     protected bool $catchExceptions = true;
