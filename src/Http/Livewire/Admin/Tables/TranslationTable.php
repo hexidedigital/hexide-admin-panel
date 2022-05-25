@@ -10,6 +10,7 @@ use HexideDigital\ModelPermissions\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use PhpParser\Error;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Str;
@@ -32,17 +33,16 @@ class TranslationTable extends DefaultTable
 
     public function columns(): array
     {
-        /*todo remove debug*/
         $columns = [
             Column::make(__("admin_labels.attributes.key"))
                 ->addAttributes(['style' => "width: {$this->keyColumnWidth};"])
-                // ->searchable(fn($value) => dd(func_num_args())),
+                ->searchable(),
         ];
 
-        $locales = sizeof($this->locales);
+        $localesCount = sizeof($this->locales);
         foreach ($this->locales as $locale) {
-            $columns[] = Column::make(__('admin_labels.locales.' . $locale))
-                ->addAttributes(['style' => "width: calc((100% - {$this->keyColumnWidth}) / {$locales})"]);
+            $columns[] = Column::make(__('admin_labels.locales.' . $locale), 'value')
+                ->addAttributes(['style' => "width: calc((100% - {$this->keyColumnWidth}) / {$localesCount})"]);
         }
 
         return $columns;
@@ -56,7 +56,7 @@ class TranslationTable extends DefaultTable
 
         $locale = array_merge([
             '' => 'All',
-        ],array_combine($this->locales, $this->locales));
+        ], array_combine($this->locales, $this->locales));
 
         return [
             'locale' => Filter::make('Locale')
@@ -103,7 +103,7 @@ class TranslationTable extends DefaultTable
 
         $collection = (new TranslationsService($this->group))->getGroupTranslations();
 
-        if(\Auth::user()->isRole(Role::SuperAdmin)) {
+        if (\Auth::user()->isRole(Role::SuperAdmin)) {
             $collection = $collection
                 ->when($this->hasFilter('locale'), fn(Collection $list) => $collection
                     ->filter(fn(Collection $translation) => $this
@@ -165,7 +165,11 @@ class TranslationTable extends DefaultTable
                     Str::contains($translation->get('key'), $search)
                     || $translation->filter(function ($locale) use ($search) {
                         if ($locale instanceof Collection) {
-                            return Str::contains($locale->get('value'), $search);
+                            try {
+                                return Str::of($locale->get('value'))->lower()->contains($search);
+                            } catch (Error|\Throwable $e) {
+                                dd($locale, $search);
+                            }
                         }
 
                         return false;
