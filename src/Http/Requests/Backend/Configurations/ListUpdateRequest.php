@@ -38,10 +38,12 @@ class ListUpdateRequest extends FormRequest
             'id'           => ['numeric', 'exists:admin_configurations,id'],
             'type'         => ['string', 'in:' . $configuration->implodeTypes()],
             'translatable' => ['nullable', 'boolean'],
-
-            $this->get('id') => $valueRule,
         ];
 
-        return array_dot($rules);
+        foreach ($valueRule as $key => $value) {
+            $rules[$this->get('id') . '.' . $key] = $value;
+        }
+
+        return $rules;
     }
 }
