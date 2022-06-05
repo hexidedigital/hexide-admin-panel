@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
+use HexideDigital\HexideAdmin\Classes\DBTranslations\TranslationItem;
+use HexideDigital\HexideAdmin\Classes\DBTranslations\TranslationRow;
 use HexideDigital\HexideAdmin\Models\Translation;
 use HexideDigital\HexideAdmin\Services\Backend\TranslationsService;
 use HexideDigital\ModelPermissions\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use PhpParser\Error;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Str;
 
 class TranslationTable extends DefaultTable
 {
@@ -101,36 +101,25 @@ class TranslationTable extends DefaultTable
     {
         $this->cleanFilters();
 
-        $collection = (new TranslationsService($this->group))->getGroupTranslations();
+        $translationRows = (new TranslationsService($this->group))->getGroupTranslations();
 
         if (\Auth::user()->isRole(Role::SuperAdmin)) {
-            $collection = $collection
-                ->when($this->hasFilter('locale'), fn(Collection $list) => $collection
-                    ->filter(fn(Collection $translation) => $this
-                            ->filterForTranslation($translation, 'locale')->count() > 0))
-                ->when($this->hasFilter('is_same'), fn(Collection $list) => $collection
-                    ->filter(fn(Collection $translation) => $this
-                            ->filterForTranslation($translation, 'is_same')->count() > 0))
-                ->when($this->hasFilter('exists_in_file'), fn(Collection $list) => $collection
-                    ->filter(fn(Collection $translation) => $this
-                            ->filterForTranslation($translation, 'exists_in_file')->count() > 0))
-                ->when($this->hasFilter('value_from_db'), fn(Collection $list) => $collection
-                    ->filter(fn(Collection $translation) => $this
-                            ->filterForTranslation($translation, 'value_from_db')->count() > 0));
+            $translationRows = $translationRows
+                ->when($this->hasFilter('is_same'), fn(Collection $rows) => $rows
+                    ->filter(fn(TranslationRow $row) => $row
+                        ->applyIsSame(boolval($this->getFilter('is_same')))))
+                ->when($this->hasFilter('exists_in_file'), fn(Collection $rows) => $rows
+                    ->filter(fn(TranslationRow $row) => $row
+                        ->applyIsValueExistsInFile(boolval($this->getFilter('exists_in_file')))))
+                ->when($this->hasFilter('value_from_db'), fn(Collection $rows) => $rows
+                    ->filter(fn(TranslationRow $row) => $row
+                        ->applyIsValueFromDatabase(boolval($this->getFilter('value_from_db')))))
+                ->when($this->hasFilter('locale'), fn(Collection $rows) => $rows
+                    ->filter(fn(TranslationRow $row) => $row
+                        ->applyHasLocale((string)$this->getFilter('locale'))));
         }
 
-        return $this->applySearchFilterForCollection($collection);
-    }
-
-    public function filterForTranslation(Collection $translation, string $field): Collection
-    {
-        return $translation->filter(function ($locale) use ($field) {
-            if ($locale instanceof Collection) {
-                return $locale->get($field) == $this->getFilter($field);
-            }
-
-            return false;
-        });
+        return $this->applySearchFilterForCollection($translationRows);
     }
 
     public function getRowsProperty()
@@ -157,28 +146,15 @@ class TranslationTable extends DefaultTable
     {
         $searchableColumns = $this->getSearchableColumns();
 
+        $translationRows = $collection;
+
         if ($this->hasFilter('search') && count($searchableColumns)) {
             $search = $this->getFilter('search');
 
-            $collection = $collection->filter(function (Collection $translation) use ($search) {
-                return
-                    Str::contains($translation->get('key'), $search)
-                    || $translation->filter(function ($locale) use ($search) {
-                        if ($locale instanceof Collection) {
-                            try {
-                                return Str::of($locale->get('value'))->lower()->contains($search);
-                            } catch (Error|\Throwable $e) {
-                                dd($locale, $search);
-                            }
-                        }
-
-                        return false;
-                    })
-                        ->count() > 0;
-            });
+            $translationRows = $collection->filter(fn(TranslationRow $row) => $row->applyMatch($search));
         }
 
-        return $collection;
+        return $translationRows;
     }
 
     public function render()

@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace HexideDigital\HexideAdmin\Services\Backend;
 
-use HexideDigital\HexideAdmin\Models\Translation;
 use Exception;
+use GuzzleHttp\Utils;
+use HexideDigital\HexideAdmin\Classes\DBTranslations\TranslationItem;
+use HexideDigital\HexideAdmin\Classes\DBTranslations\TranslationRow;
+use HexideDigital\HexideAdmin\Models\Translation;
 use HexideDigital\HexideAdmin\Services\BackendService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 
 class TranslationsService extends BackendService
 {
@@ -21,7 +25,14 @@ class TranslationsService extends BackendService
         parent::__construct();
 
         $this->group = $group;
-        $this->locales = $this->group == 'admin_labels' ? config('hexide-admin.locales') : config('translatable.locales');
+        $this->locales = $this->useAdminLocales($group)
+            ? config('hexide-admin.locales')
+            : config('translatable.locales');
+    }
+
+    public function useAdminLocales(?string $group): bool
+    {
+        return $group == 'admin_labels';
     }
 
     public function getGroup(): string
@@ -52,7 +63,7 @@ class TranslationsService extends BackendService
      */
     public function updateTranslations(Request $request)
     {
-        $inputs = collect($request->validated());
+        $inputs = $request->safe()->collect();
 
         foreach ($this->locales as $locale) {
             $translations = collect($inputs->get($locale));
@@ -80,25 +91,29 @@ class TranslationsService extends BackendService
      */
     public function getGroupTranslations(): Collection
     {
-        $list = [];
-
+        $accumulatedTranslations = collect();
         foreach ($this->locales as $locale) {
-            $list = $this->getTranslationsForLocale($locale, $list);
+            foreach ($this->getTranslationsForLocale($locale) as $item) {
+                $key = $item->getKey();
+
+                /** @var TranslationRow $row */
+                $row = $accumulatedTranslations->pull($key, TranslationRow::touch($key));
+                $row->addTranslation($item);
+                $accumulatedTranslations->put($key, $row);
+            }
         }
 
-        foreach ($list as $key => $item) {
-            $item['key'] = $key;
-            $list[$key] = collect($item);
-        }
-
-        return collect($list)->sortKeys();
+        return $accumulatedTranslations->sortKeys();
     }
 
     /**
      * Return list of translations with key-value mode <br>
      * every value is array, where key is locale and value form database or file
+     *
+     * @param string $locale
+     * @return \Generator<TranslationItem>|TranslationItem[]
      */
-    public function getTranslationsForLocale(string $locale, array $list): array
+    public function getTranslationsForLocale(string $locale): \Generator
     {
         $databaseTranslations = Translation::whereLocale($locale)
             ->whereGroup($this->getGroup())
@@ -108,31 +123,29 @@ class TranslationsService extends BackendService
          * Get array with keys from file
          * Values are at first gets from database, if is not existed, gets from local file
          */
-        $fileArray = collect(Arr::dot($this->getArrayFromFile($locale)));
-        foreach ($fileArray as $key => $value) {
-            $list[$key][$locale] = collect([
-                'locale' => $locale,
-                'value' => $databaseTranslations->get($key, $value),
-                'value_from_db' => $databaseTranslations->has($key),
-                'exists_in_file' => true,
-                'is_same' => $databaseTranslations->get($key) === $value,
-            ]);
+        $fileArray = collect(Arr::dot($this->getArrayFromFile($locale)))
+            ->filter(fn($item) => is_null($item) || is_string($item));
+
+        foreach ($fileArray as $key => $fileValue) {
+            yield TranslationItem::touch($locale)
+                ->setValue($databaseTranslations->get($key, $fileValue))
+                ->setKey($key)
+                ->setIsSame($databaseTranslations->get($key) === $fileValue)
+                ->setIsValueExistsInFile(true)
+                ->setIsValueFromDatabase($databaseTranslations->has($key));
         }
 
         /*
          * Append to list missed in current locale file translations from database table
          */
         foreach ($databaseTranslations->except($fileArray->keys()) as $key => $value) {
-            $list[$key][$locale] = collect([
-                'locale' => $locale,
-                'value' => $value,
-                'value_from_db' => true,
-                'exists_in_file' => false,
-                'is_same' => false,
-            ]);
+            yield TranslationItem::touch($locale)
+                ->setValue($value)
+                ->setKey($key)
+                ->setIsSame(false)
+                ->setIsValueExistsInFile(false)
+                ->setIsValueFromDatabase(true);
         }
-
-        return $list;
     }
 
     /**
@@ -162,13 +175,13 @@ class TranslationsService extends BackendService
     {
         $path = lang_path('/' . $locale . '/' . $this->getGroup() . '.php');
 
-        return file_exists($path) ? include($path) : [];
+        return File::exists($path) ? include($path) : [];
     }
 
     protected function getArrayFromJsonFile(string $locale)
     {
         $path = lang_path('/' . $locale . '.json');
 
-        return file_exists($path) ? json_decode(file_get_contents($path), true) : [];
+        return File::exists($path) ? Utils::jsonDecode(File::get($path), true) : [];
     }
 }
