@@ -67,6 +67,11 @@ class Configuration
         return implode(',', static::$types);
     }
 
+    public function isAvailableType(?string $type): bool
+    {
+        return in_array($type, $this->getTypes());
+    }
+
     public function getDeniedGroupNames(): array
     {
         return [
@@ -99,6 +104,8 @@ class Configuration
 
     public function getStoreKey(string $type, ?bool $translatable): string
     {
+        $this->assertTypeIsAvailable($type);
+
         if ($this->isTextValueType($type)) {
             return $translatable ? 'text' : 'content';
         }
@@ -152,11 +159,9 @@ class Configuration
         ]);
     }
 
-    public function getRuleForType($type, $attribute): array
+    public function getRuleForType($type, $attribute): ?array
     {
-        if (!in_array($type, Configuration::$types)) {
-            return [];
-        }
+        $this->assertTypeIsAvailable($type);
 
         if (Configuration::isArrayValueType($type)) {
             return [
@@ -238,7 +243,7 @@ class Configuration
             ];
         }
 
-        return [];
+        return null;
     }
 
     public static function getValueByKey(string $key)
@@ -330,5 +335,15 @@ class Configuration
         return collect($this->readFromCache($locale))
             ->when($group, fn (Collection $collection) => $collection->only(array_wrap($group)))
             ->all();
+    }
+
+    protected function assertTypeIsAvailable(?string $type): self
+    {
+        throw_if(
+            !$this->isAvailableType($type),
+            new \InvalidArgumentException("Type [$type] is not configured or not available to use.")
+        );
+
+        return $this;
     }
 }

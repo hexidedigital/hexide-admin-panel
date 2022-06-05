@@ -78,10 +78,15 @@ class AdminConfiguration extends Model
 
     public $translationModel = AdminConfigurationTranslation::class;
 
-    protected array $translatedAttributes = ['text', 'json',];
+    protected array $translatedAttributes = [
+        'text', 'json',
+    ];
 
     protected $fillable = [
-        'key', 'type', 'name', 'description', 'translatable', 'content', 'value', 'status', 'group', 'in_group_position',
+        'key', 'type', 'name', 'description', 'translatable',
+        'status', 'group', 'in_group_position',
+
+        'content', 'value',
     ];
 
     protected $casts = [
@@ -113,12 +118,14 @@ class AdminConfiguration extends Model
 
     public function storeKey(): string
     {
-        return \App::make(Configuration::class)->getStoreKey($this->type, $this->translatable);
+        return \App::make(Configuration::class)
+            ->getStoreKey((string)$this->type, boolval($this->translatable));
     }
 
     public function isType(string $type): bool
     {
-        return in_array($type, \App::make(Configuration::class)->getTypes()) && $this->type === $type;
+        return \App::make(Configuration::class)->isAvailableType($type)
+            && $this->type === $type;
     }
 
     /* ------------------------ attributes ------------------------ */
