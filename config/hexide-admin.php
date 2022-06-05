@@ -73,6 +73,15 @@ return [
     ],
 
     // -------------------------------
+    // Thumbnails
+
+    'thumbnails' => [
+        'class' => \HexideDigital\HexideAdmin\Classes\Thumb::class,
+        'format' => 'webp',
+        'quality' => 90,
+    ],
+
+    // -------------------------------
     // Some design properties
 
     'with_preloader' => true,
