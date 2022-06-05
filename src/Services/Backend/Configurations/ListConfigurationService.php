@@ -84,7 +84,7 @@ class ListConfigurationService extends BackendService
 
         if (false !== $path = $this->handleUploadedFile(
                 $request->file($model->id . ".$fieldPath." . $this->fieldPathForGetInputValue($model->type)),
-                $request->input($model->id . ".$fieldPath." . $this->getRemoveKeyForType($model->type)),
+                $request->boolean($model->id . ".$fieldPath." . $this->getRemoveKeyForType($model->type)),
                 $options)
         ) {
             return $path;
