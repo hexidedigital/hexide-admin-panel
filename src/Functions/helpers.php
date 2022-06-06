@@ -76,7 +76,7 @@ if (!function_exists('declension_key')) {
     {
         $locale = $locale ?: app()->getLocale();
 
-        $words = trans('declensions.' . $key, null, $locale);
+        $words = trans('declensions.' . $key, [], $locale);
 
         if (is_string($words)) {
             $words = explode('|', $words);
