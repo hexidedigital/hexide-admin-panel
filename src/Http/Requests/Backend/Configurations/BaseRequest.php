@@ -19,10 +19,19 @@ class BaseRequest extends FormRequest
             'type'              => ['required', 'string', 'in:' . \App::make(Configuration::class)->implodeTypes()],
             'key'               => ['required', 'string', 'max:10000'],
             'name'              => ['required', 'string', 'max:10000'],
-            'translatable'      => ['required', 'boolean'],
+            'translatable'      => ['boolean'],
+            'status'            => ['boolean'],
             'description'       => ['nullable', 'string', 'max:10000'],
             'group'             => ['nullable', 'string', 'max:10000'],
             'in_group_position' => ['numeric', 'max:10000', 'min:1'],
         ];
+    }
+
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'translatable' => $this->boolean('translatable'),
+            'status' => $this->boolean('status'),
+        ]);
     }
 }
