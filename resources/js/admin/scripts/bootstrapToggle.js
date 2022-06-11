@@ -1,6 +1,6 @@
 // make toggle/switch from checkbox
 window.initToggles = () => {
-    $('.toggle_attributes').bootstrapToggle()
+    $('.' + toggleInitClass).bootstrapToggle()
     $('.toogle').bootstrapToggle()
 }
 
