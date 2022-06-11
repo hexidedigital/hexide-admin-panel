@@ -1,4 +1,4 @@
-@if($showLanguages)
+@if($showLanguages())
     <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" aria-expanded="false">
             <i class="{{$currentLocaleIcon()}}"></i>
