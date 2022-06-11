@@ -7,7 +7,6 @@ namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 use HexideDigital\ModelPermissions\Models\Permission;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class PermissionTable extends DefaultTable
@@ -34,11 +33,7 @@ class PermissionTable extends DefaultTable
     {
         return [
             $this->getIdColumn(),
-
-            Column::make('title')
-                ->sortable()
-                ->searchable(),
-
+            $this->getTitleColumn(),
             $this->getActionsColumn(),
         ];
     }
@@ -51,14 +46,13 @@ class PermissionTable extends DefaultTable
     public function query(): Builder
     {
         return Permission::query()
-            ->when($this->getFilter('modules'), fn(Builder $builder, $modules) => $this->filterPermissions($builder))
+            ->when($this->getFilter('modules'), fn(Builder $builder, $modules) => $this
+                ->filterPermissions($builder, $modules))
             ->select();
     }
 
-    private function filterPermissions(Builder $builder): Builder
+    private function filterPermissions(Builder $builder, $modules): Builder
     {
-        $modules = $this->getFilter('modules');
-
         foreach ($modules as $module) {
             $builder->orWhere('title', 'like', $module . '%');
         }
