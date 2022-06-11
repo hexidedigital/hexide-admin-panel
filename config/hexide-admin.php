@@ -102,6 +102,17 @@ return [
         ],
     ],
 
+    'button-lines' => [
+        'edit-forms' => [
+            'top-line' => ['show' => false,],
+            'bottom-line' => ['show' => true,],
+        ],
+        'view-form' => [
+            'top-line' => ['show' => false,],
+            'bottom-line' => ['show' => true,],
+        ]
+    ],
+
     'cards' => [
         'default-theme' => 'navy',
     ],

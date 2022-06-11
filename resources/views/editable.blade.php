@@ -9,6 +9,12 @@
 
 @section("content")
 
+    @if(config('hexide-admin.button-lines.edit-forms.top-line.show', false))
+        <div class="mb-3">
+            @include("hexide-admin::partials.buttons.line__cancel_save")
+        </div>
+    @endif
+
     @yield('form-start', isset($model->id)
         /** @warning Form model not working with `yield` */
         ? Form::model($model, ['route' => ["admin.$module.update", $model->id], 'method' => 'put', 'files' => View::getSection('with_files', true)])
@@ -18,9 +24,11 @@
 {{--    {!! View::getSection('form-body', view("admin.view.$module.partials._form")) !!}--}}
     @yield('form-body')
 
-    <div class="mb-3">
-        @include("hexide-admin::partials.buttons.line__cancel_save")
-    </div>
+    @if(config('hexide-admin.button-lines.edit-forms.bottom-line.show', true))
+        <div class="mb-3">
+            @include("hexide-admin::partials.buttons.line__cancel_save")
+        </div>
+    @endif
 
     @yield('form-close', Form::close())
 @stop
