@@ -26,6 +26,10 @@ class HexideAdminComposer
             $data['locales'] = config('translatable.locales');
         }
 
+        if (!$view->offsetExists('module')) {
+            $data['module'] = 'shared';
+        }
+
         \View::share($data);
         $view->with($data);
     }
