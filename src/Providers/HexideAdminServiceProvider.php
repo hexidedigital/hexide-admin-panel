@@ -17,7 +17,6 @@ use HexideDigital\HexideAdmin\Console\Commands\CleanSeededStorageCommand;
 use HexideDigital\HexideAdmin\Console\Commands\CreateAdminUser;
 use HexideDigital\HexideAdmin\Console\Commands\Creators;
 use HexideDigital\HexideAdmin\Console\Commands\ModuleMakeCommand;
-use HexideDigital\HexideAdmin\Console\Commands\PrepareDeployCommand;
 use HexideDigital\HexideAdmin\Console\Commands\SetupProjectCommand;
 use HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 use HexideDigital\HexideAdmin\Http\ViewComposers\HexideAdminComposer;
@@ -134,7 +133,8 @@ class HexideAdminServiceProvider extends ServiceProvider
 
         $this->publishes([
             $this->packagePath('database/migrations') => database_path('migrations'),
-            $this->packagePath('database/seeders') => database_path('seeders'),
+            $this->packagePath('database/seeders/ConfigurationsSeeder.php.stub') => database_path('seeders/ConfigurationsSeeder.php'),
+            $this->packagePath('database/seeders/PermissionRoleSeeder.php.stub') => database_path('seeders/PermissionRoleSeeder.php'),
         ], 'hexide-admin:database');
     }
 

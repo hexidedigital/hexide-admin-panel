@@ -1,0 +1,2 @@
+PermissionRelation::touch('{{ table }}')->addCustomSet()->addResourceSet();
+        /*hexide_admin_stub*/

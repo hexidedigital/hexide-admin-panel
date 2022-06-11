@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use HexideDigital\ModelPermissions\Models\Permission as HDPermission;
 
 return new class extends Migration {
     public function up()
@@ -30,8 +29,6 @@ return new class extends Migration {
 
             $table->unique(['locale', '{{ table_singular }}_id']);
         });
-
-        PermissionRelation::touch('{{ table }}')->addCustomSet()->addResourceSet();
     }
 
     public function down()

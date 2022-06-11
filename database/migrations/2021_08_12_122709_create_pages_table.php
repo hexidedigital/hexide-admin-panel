@@ -35,11 +35,6 @@ return new class extends Migration {
 
             $table->unique(['locale', 'page_id']);
         });
-
-        PermissionRelation::touch('pages')->addCustomSet()->except([
-            Permission::Create,
-            Permission::Delete,
-        ]);
     }
 
     public function down()

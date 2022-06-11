@@ -21,6 +21,7 @@ class ModuleMakeCommand extends BaseCommand
 
     /** @var array<string, string> */
     protected array $stubPaths = [
+        'database' => 'database',
         'views' => 'views',
         'lang' => 'lang',
         'routes' => 'routes',
@@ -220,12 +221,16 @@ class ModuleMakeCommand extends BaseCommand
                 'start' => 'Translations',
                 'finish' => 'Translations',
             ],
+            'appendPermission' => [
+                'start' => 'Permission seeder',
+                'finish' => 'Permission seeder',
+            ],
         ]);
 
         foreach ($methods as $method => $points) {
             $this->info('Appending: ' . $points['start']);
 
-            $this->{$method}();
+            call_user_func([$this, $method]);
 
             $this->info('Finished: ' . $points['finish']);
             $this->newLine();
@@ -264,6 +269,32 @@ class ModuleMakeCommand extends BaseCommand
         }
 
         $this->makeFileOrPutContent($path, $route_content, true);
+    }
+
+    /** @throws FileNotFoundException */
+    private function appendPermission(): void
+    {
+        $path = base_path('database/seeders/PermissionRoleSeeder.php');
+
+        if (!$this->filesystem->isFile($path)) {
+            $this->warn("Seeder for permission not created [$path]");
+            $this->warn("To get run 'artisan vendor:publish --tag=hexide-admin:database'");
+
+            return;
+        }
+
+        $stubs = [
+            'permission-seeder-item.stub' => '/*hexide_admin_stub*/',
+        ];
+
+        $originalContent = $this->getContent($path);
+        foreach ($stubs as $stub => $replace) {
+            $content = $this->getContentWithReplace($this->resolveStubPath('database', $stub));
+
+            $originalContent = $this->getContentWithReplace($originalContent, [$replace => $content,]);
+        }
+
+        $this->makeFileOrPutContent($path, $originalContent, true);
     }
 
     /** @throws FileNotFoundException */
@@ -363,7 +394,7 @@ class ModuleMakeCommand extends BaseCommand
 
     protected function resolveStubPath(string $type, string $stub): string
     {
-        $stub = trim(Arr::get($this->stubPaths, $type, ''), '/') . '/' . trim($stub, '/');
+        $stub = trim(Arr::get($this->stubPaths, $type, $type), '/') . '/' . trim($stub, '/');
 
         return file_exists($customPath = $this->laravel->basePath('stubs/hexide-admin/' . $stub))
             ? $customPath
@@ -404,28 +435,6 @@ class ModuleMakeCommand extends BaseCommand
     protected function isTranslatable(): bool
     {
         return $this->translatable;
-    }
-
-    /**
-     * Ensure that a migration with the given name doesn't already exist.
-     *
-     * @throws FileNotFoundException
-     */
-    protected function migrationExists(string $name, string $migrationPath = null): bool
-    {
-        if (!empty($migrationPath)) {
-            $migrationFiles = $this->filesystem->glob($migrationPath . '*.php');
-
-            foreach ($migrationFiles as $migrationFile) {
-                $this->filesystem->requireOnce($migrationFile);
-            }
-        }
-
-        if (class_exists($name)) {
-            return true;
-        }
-
-        return false;
     }
 
     /**

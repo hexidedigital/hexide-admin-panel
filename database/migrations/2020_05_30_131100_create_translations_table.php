@@ -16,15 +16,6 @@ return new class extends Migration {
             $table->unique(['locale', 'group', 'key']);
             $table->timestamps();
         });
-
-        $data = [
-            'admin_viewAny',
-            'api_viewAny',
-            'site_viewAny',
-        ];
-        PermissionRelation::touch('translations')
-            ->extra($data)
-            ->addResourceSet();
     }
 
     public function down()

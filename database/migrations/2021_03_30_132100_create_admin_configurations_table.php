@@ -32,8 +32,6 @@ return new class extends Migration {
 
             $table->unique(['admin_configuration_id', 'locale'], 'a_conf_transl_admin_conf_locale');
         });
-
-        PermissionRelation::touch('admin_configurations')->addCustomSet()->addResourceSet();
     }
 
     public function down()

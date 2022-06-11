@@ -1,0 +1,35 @@
+<?php
+
+namespace Database\Seeders;
+
+use HexideDigital\ModelPermissions\Facades\PermissionRelation;
+use HexideDigital\ModelPermissions\Models\Permission;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
+
+class PermissionRoleSeeder extends Seeder
+{
+    public function run()
+    {
+        Artisan::call('model-permissions:init', [], $this->command->getOutput());
+
+        PermissionRelation::touch('users')->addSet('soft_delete')->populate();
+
+        PermissionRelation::touch('translations')
+            ->extra([
+                'admin_viewAny',
+                'api_viewAny',
+                'site_viewAny',
+            ])
+            ->addResourceSet();
+
+        PermissionRelation::touch("feedbacks")->addCustomSet()->except([
+            Permission::Create,
+        ]);
+
+        PermissionRelation::touch('admin_configurations')->addCustomSet()->addResourceSet();
+        PermissionRelation::touch('pages')->addCustomSet()->addResourceSet();
+
+        /*hexide_admin_stub*/
+    }
+}
