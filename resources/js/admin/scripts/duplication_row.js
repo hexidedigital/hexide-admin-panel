@@ -13,7 +13,8 @@ window.duplicate_row = function ($this) {
         return
     }
     window.ic++
-    $nrow[0].innerHTML = $nrow[0].innerHTML.replace(/replaseme/g, window.ic)
+    const regex = new RegExp(window.replaseMeKey, 'g');
+    $nrow[0].innerHTML = $nrow[0].innerHTML.replace(regex, window.ic)
     $nrow.removeClass('duplicate').insertBefore($parent.find('.duplication-button'))
     $nrow.find('.nav-link.active').removeClass('active')
     $nrow.find('.form-control').each(function () {
@@ -22,13 +23,12 @@ window.duplicate_row = function ($this) {
             return $(this).attr('required', $(this).data('required'))
         }
     })
-    if(!$nrow.attr('data-init')){
+    if (!$nrow.attr('data-init')) {
         // init ckeditor for textarea with class `with-editor`
-        $($nrow).find('textarea.with-editor').each((i, el)=>{
+        $($nrow).find('textarea.with-editor').each((i, el) => {
             CKEDITOR.replace($(el).attr('name'))
         })
 
-        // init ckeditor for select with class `with-select2`
         // init select2 for select with class `with-select2`
         $($nrow)
             .not('.duplicate.duplicate_select')

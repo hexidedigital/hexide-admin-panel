@@ -11,6 +11,7 @@
 @push("js")
     <script>
         window.toggleInitClass = '{{config('hexide-admin.toggle.init_class')}}';
+        window.replaseMeKey = '{{config('hexide-admin.replaseme_string')}}';
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
