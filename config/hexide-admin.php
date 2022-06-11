@@ -84,6 +84,28 @@ return [
         'default-theme' => 'navy',
     ],
 
+    'toggle' => [
+        'init_class' => 'toggle_attributes',
+        'styles' => [
+            'status' => [
+                'class' => 'toggle_attributes',
+                'data-on' => '<i class="fas fa-eye"></i>',
+                'data-off' => '<i class="fas fa-eye-slash"></i>',
+                'data-onstyle' => 'success',
+                'data-offstyle' => 'secondary',
+                'data-width' => '75',
+                'data-size' => 'small',
+            ],
+            'state_read' => [
+                'class' => 'toggle_attributes',
+                'data-on' => '<i class="far fa-envelope-open"></i>',
+                'data-off' => '<i class="far fa-envelope"></i>',
+                'data-onstyle' => 'default',
+                'data-offstyle' => 'primary',
+            ],
+        ],
+    ],
+
     // -------------------------------
     // Variables, admin configurations
 
