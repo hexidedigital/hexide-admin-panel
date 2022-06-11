@@ -29,4 +29,9 @@ class Breadcrumbs
     {
         return $this->breadcrumbs;
     }
+
+    public function isNotEmpty(): bool
+    {
+        return $this->breadcrumbs->isNotEmpty();
+    }
 }

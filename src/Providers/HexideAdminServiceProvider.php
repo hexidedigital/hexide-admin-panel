@@ -212,6 +212,14 @@ class HexideAdminServiceProvider extends ServiceProvider
                 'defaultCardTheme' => config('hexide-admin.cards.default-theme'),
             ]);
         });
+
+        $view->composer([
+            'hexide-admin::partials.breadcrumbs',
+        ], function (View $view) {
+            $view->with([
+                'breadcrumbs' => app(Breadcrumbs::class),
+            ]);
+        });
     }
 
     private function registerComponents()
