@@ -28,6 +28,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
+/**
+ * @method void getFormViewData()
+ */
 abstract class BackendController extends BaseController
 {
     use AuthorizesRequests;
@@ -470,7 +473,7 @@ abstract class BackendController extends BaseController
 
     /**
      * @param string $action
-     * @param Model|class-string<Model>|null $model
+     * @param Model|class-string<Model> $model
      *
      * @return bool|JsonResponse|RedirectResponse|SymfonyResponse
      */
@@ -705,6 +708,12 @@ abstract class BackendController extends BaseController
 
         if (empty($this->model) && !empty($this->modelClass)) {
             $this->dataModel($this->getModelObject());
+        }
+
+        if (in_array($view, [ViewNames::Create, ViewNames::Edit])) {
+            if (method_exists($this, 'getFormViewData')) {
+                call_user_func([$this, 'getFormViewData'], compact('view'));
+            }
         }
     }
 
