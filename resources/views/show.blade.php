@@ -5,7 +5,13 @@
 
 @section("content")
 
-    <x-adminlte-card :title='__("models.$module.show")' theme="navy" class="shadow" maximizable>
+    @if(config('hexide-admin.button-lines.view-form.top-line.show'))
+        <div class="mb-3">
+            @include("hexide-admin::partials.buttons.line__back_edit")
+        </div>
+    @endif
+
+    <x-adminlte-card :theme="$defaultCardTheme" class="shadow" :title='__("models.$module.show")' maximizable>
         <table class="table table-bordered table-striped">
             <thead>
             <tr class="bg-gradient-info">
@@ -22,7 +28,9 @@
         </table>
     </x-adminlte-card>
 
-    <div class="mb-3">
-        @include("hexide-admin::partials.buttons.line__back_edit")
-    </div>
+    @if(config('hexide-admin.button-lines.view-form.bottom-line.show'))
+        <div class="mb-3">
+            @include("hexide-admin::partials.buttons.line__back_edit")
+        </div>
+    @endif
 @stop
