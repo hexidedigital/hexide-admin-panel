@@ -67,9 +67,7 @@ class UserTable extends DefaultTable
                 ->searchable()
                 ->linkTo(fn($value, $column, $row) => route("admin.{$this->getModuleName()}.edit", $row)),
 
-            Column::make(trans_choice('models.roles.name', 2), 'roles')
-                ->format(fn($value) => view('components.admin.badge', ['list' => $value ? $value->pluck('title') : null]))
-                ->asHtml(),
+            $this->badgesColumn('roles', trans_choice('models.roles.name', 2),),
 
             $this->getActionsColumn(),
         ];

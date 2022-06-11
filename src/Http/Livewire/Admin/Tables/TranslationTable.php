@@ -50,6 +50,7 @@ class TranslationTable extends DefaultTable
 
     public function filters(): array
     {
+        /*todo move to gates*/
         if (!\Auth::user()->isRole(Role::SuperAdmin)) {
             return [];
         }

@@ -10,47 +10,32 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class ConfigurationTable extends DefaultTable
 {
+    public $refresh = false;
+
     public function columns(): array
     {
         return [
             $this->getIdColumn(),
 
-            Column::make(__('admin_labels.attributes.name'), 'name')
+            $this->makeColumn('name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('admin_labels.attributes.type'), 'type')
+            $this->makeColumn('type')
                 ->sortable()
                 ->format(fn($value, $col, $row) => __('models.admin_configurations.type.' . $row->type ?? '')),
 
-            Column::make(__('admin_labels.attributes.key'), 'key')
+            $this->makeColumn('key')
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('admin_labels.attributes.translatable'), 'translatable')
-                ->sortable()
-                ->format(function ($value, $col, $row) {
-                    /** @var AdminConfiguration $row */
-                    $icon = $row->translatable ? 'fas fa-check' : 'fas fa-times';
-                    $color = $row->translatable ? 'text-success' : 'text-danger';
+            $this->booleanColumn('translatable'),
 
-                    return <<<HTML
-                        <div class="row"><span class="col-12 text-center $color"><i class="$icon"></i></span></div>
-                    HTML;
-                })
-                ->asHtml(),
-
-            Column::make(__('admin_labels.attributes.group'), 'group')
+            $this->makeColumn('group')
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('admin_labels.attributes.in_group_position'), 'in_group_position')
-                ->sortable()
-                ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.input', [
-                    'model' => $row, 'module' => $this->getModuleName(),
-                    'field' => 'in_group_position', 'type' => 'number',
-                ]))
-                ->asHtml(),
+            $this->ajaxNumberColumn('in_group_position'),
 
             $this->getActionsColumn(),
         ];
@@ -63,11 +48,6 @@ class ConfigurationTable extends DefaultTable
 
     public function query(): Builder
     {
-        return AdminConfiguration::joinTranslations()
-            ->with('translations')
-            ->select([
-                'admin_configurations.*',
-                'admin_configuration_translations.text as text',
-            ]);
+        return AdminConfiguration::query();
     }
 }

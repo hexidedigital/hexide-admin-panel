@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
+use Illuminate\Translation\Translator;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
@@ -29,73 +30,176 @@ abstract class DefaultTable extends DataTableComponent
         return 'table table-striped table-hover';
     }
 
-    protected function getIdColumn(): Column
+    protected function getIdColumn(string $field = 'id', string $label = null): Column
     {
-        return Column::make(__("admin_labels.attributes.id"), 'id')
+        return $this->makeColumn($field, $label)
             ->addAttributes(['style' => 'width: 50px;'])
-            ->sortable();
+            ->sortable()
+            ->searchable();
     }
 
-    protected function getPositionColumn(): Column
+    protected function getSlugColumn(string $field = 'slug', string $label = null): Column
     {
-        return Column::make(__('admin_labels.attributes.position'), 'position')
+        return $this->makeColumn($field, $label)
+            ->sortable()
+            ->searchable();
+    }
+
+    protected function getTitleColumn(string $field = 'title', string $label = null): Column
+    {
+        return $this->makeColumn($field, $label)
+            ->sortable()
+            ->searchable();
+    }
+
+    protected function getPositionColumn(string $field = 'position', string $label = null): Column
+    {
+        return $this->ajaxNumberColumn($field, $label);
+    }
+
+    protected function getPriorityColumn(string $field = 'priority', string $label = null): Column
+    {
+        return $this->ajaxNumberColumn($field, $label);
+    }
+
+    protected function getStatusColumn(string $field = 'status', string $label = null): Column
+    {
+        return $this->ajaxToggleColumn($field, $label);
+    }
+
+    protected function getActionsColumn(array $options = []): Column
+    {
+        return Column::make(__("hexide-admin::buttons.actions"))
+            ->addAttributes(['style' => 'width: 95px'])
+            ->format(fn($value, $column, $row) => view(
+                'hexide-admin::partials.control_buttons',
+                array_merge(\Arr::except($options, ['model', 'module']), [
+                    'model' => $row,
+                    'module' => $this->getModuleName(),
+                ])))
+            ->asHtml();
+    }
+
+    protected function getImageColumn(string $field = 'image', string $label = null): Column
+    {
+        return $this->makeColumn($field, $label)
+            ->format(fn($value, $column, $row) => view('hexide-admin::partials.image', [
+                'src' => $row->getAttribute($field),
+                'classes' => 'img-thumbnail',
+            ]))
+            ->asHtml();
+    }
+
+    /**
+     * @param string $field
+     * @param string|null $label
+     * @param \Closure|string $list
+     * @return Column
+     */
+    protected function badgesColumn(string $field, string $label = null, $list = 'title'): Column
+    {
+        return $this->makeColumn($field, $label)
+            ->format(function ($value, $column, $row) use ($list) {
+                $res = [];
+
+                if (is_callable($list)) {
+                    $res = $list($value, $column, $row);
+                } elseif (is_string($list)) {
+                    $res = $value ? $value->pluck($list) : [];
+                }
+
+                return view('hexide-admin::partials.badges', [
+                    'list' => $res,
+                ]);
+            });
+    }
+
+    protected function ajaxNumberColumn(string $field, string $label = null): Column
+    {
+        return $this->makeColumn($field, $label)
             ->sortable()
             ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.input', [
                 'model' => $row,
                 'module' => $this->getModuleName(),
-                'field' => 'position',
+                'field' => $field,
                 'type' => 'number',
             ]))
             ->asHtml();
     }
 
-    protected function getPriorityColumn(): Column
+    protected function ajaxToggleColumn(string $field, string $label = null): Column
     {
-        return Column::make(__('admin_labels.attributes.priority'), 'priority')
-            ->sortable()
-            ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.input', [
-                'model' => $row,
-                'module' => $this->getModuleName(),
-                'field' => 'priority',
-                'type' => 'number',
-            ]))
-            ->asHtml();
-    }
-
-    protected function getStatusColumn(): Column
-    {
-        return Column::make(__('admin_labels.attributes.status'), 'status')
+        return $this->makeColumn($field, $label)
+            ->addAttributes(['style' => 'width: 75px'])
             ->sortable()
             ->format(fn($value, $column, $row) => view('hexide-admin::admin.partials.ajax.toggler', [
                 'model' => $row,
                 'module' => $this->getModuleName(),
-                'field' => 'status',
+                'field' => $field,
             ]))
             ->asHtml();
     }
 
-    protected function getActionsColumn(): Column
+    protected function booleanColumn(string $field, string $label = null, \Closure $closure = null): Column
     {
-        return Column::make(__("hexide-admin::buttons.actions"))
-            ->addAttributes(['style' => 'width: 95px'])
-            ->format(fn($value, $column, $row) => view('hexide-admin::partials.control_buttons', [
-                'model' => $row,
-                'module' => $this->getModuleName(),
-            ]))
-            ->asHtml();
-    }
-
-    protected function getImageColumn(): Column
-    {
-        return Column::make(__("admin_labels.attributes.image"), 'image')
-            ->format(fn($value, $column, $row) => view('hexide-admin::partials.image', ['src' => $row->image]))
-            ->asHtml();
-    }
-
-    protected function getTitleColumn(string $field = 'title'): Column
-    {
-        return Column::make(__("admin_labels.attributes.title"), $field)
+        return $this->makeColumn($field, $label)
             ->sortable()
-            ->searchable();
+            ->format(function ($value, $col, $row) use ($field, $closure) {
+                $result = is_null($closure)
+                    ? $value
+                    : $closure($value, $col, $row);
+
+                $icon = $result ? 'fas fa-check' : 'fas fa-times';
+                $color = $result ? 'text-success' : 'text-danger';
+
+                return <<<HTML
+                        <div class="row"><span class="col-12 text-center $color"><i class="$icon"></i></span></div>
+                    HTML;
+            })
+            ->asHtml();
+    }
+
+    protected function makeColumn(string $field, string $label = null): Column
+    {
+        $label = $this->translateLabel($field, $label);
+
+        return Column::make($label, $field);
+    }
+
+    protected function translateLabel(string $field, string $label = null): string
+    {
+        /** @var Translator $translator */
+        $translator = trans();
+        $module = $this->getModuleName();
+
+        if (!is_null($label)) {
+            if ($translator->has($label)) {
+                return $translator->get($label);
+            }
+
+            return $label;
+        }
+
+        $trans = $translator->get($key = "admin_labels.$module.attributes.$field");
+        if ($trans !== $key) {
+            return $trans;
+        }
+
+        $trans = $translator->get($key = "models.$module.attributes.$field");
+        if ($trans !== $key) {
+            return $trans;
+        }
+
+        $trans = $translator->get($key = "admin_labels.attributes.$field");
+        if ($trans !== $key) {
+            return $trans;
+        }
+
+        $trans = $translator->get($key = $field);
+        if ($trans !== $key) {
+            return $trans;
+        }
+
+        return \Str::ucfirst($field);
     }
 }

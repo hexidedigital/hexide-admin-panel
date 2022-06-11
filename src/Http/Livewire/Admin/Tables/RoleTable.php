@@ -6,7 +6,6 @@ namespace HexideDigital\HexideAdmin\Http\Livewire\Admin\Tables;
 
 use HexideDigital\ModelPermissions\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class RoleTable extends DefaultTable
 {
@@ -14,26 +13,10 @@ class RoleTable extends DefaultTable
     {
         return [
             $this->getIdColumn(),
-
             $this->getTitleColumn(),
-
-            Column::make(__('admin_labels.admin_access'), 'admin_access')
-                ->sortable()
-                ->format(function ($value, $col, $row) {
-                    /** @var Role $row */
-                    $icon = $row->admin_access ? 'fas fa-check' : 'fas fa-times';
-                    $color = $row->admin_access ? 'text-success' : 'text-danger';
-
-                    return <<<HTML
-                        <div class="row"><span class="col-12 text-center $color"><i class="$icon"></i></span></div>
-                    HTML;
-                })
-                ->asHtml(),
-
-            Column::make(trans_choice('models.permissions.name', 2), 'permissions')
-                ->format(fn($value) => view('components.admin.badge', ['list' => $value ? $value->pluck('title') : null]))
-                ->asHtml(),
-
+            $this->booleanColumn('admin_access', __('admin_labels.admin_access'))
+                ->addAttributes(['style' => 'width: 150px']),
+            $this->badgesColumn('permissions', trans_choice('models.permissions.name', 2),),
             $this->getActionsColumn(),
         ];
     }
