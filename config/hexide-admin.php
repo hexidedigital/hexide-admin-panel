@@ -83,6 +83,10 @@ return [
         'animate_name' => 'bounceOut animate__infinite',
     ],
 
+    'cards' => [
+        'default-theme' => 'navy',
+    ],
+
     // -------------------------------
     // Variables, admin configurations
 
