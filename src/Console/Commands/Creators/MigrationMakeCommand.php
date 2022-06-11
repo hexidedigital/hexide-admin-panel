@@ -22,7 +22,7 @@ class MigrationMakeCommand extends GeneratorCommand
 
     protected function getPath(string $name): string
     {
-        return database_path('migrations/' . date('Y_m_d_His') . '_' . Str::snake($name) . '.php');
+        return database_path('migrations/' . date('Y_m_d_His') . '_' . $this->migrationName($name) . '.php');
     }
 
     protected function getStub(): string
@@ -30,6 +30,16 @@ class MigrationMakeCommand extends GeneratorCommand
         $type = $this->isTranslatable() ? '.translation' : '';
 
         return $this->resolveStubPath("database/migration.create$type.stub");
+    }
+
+    private function migrationName(string $name): string
+    {
+        return (string)\Str::of($name)
+            ->ucfirst()
+            ->plural()
+            ->prepend('Create')
+            ->append('Table')
+            ->snake();
     }
 
     protected function getOptions(): array
