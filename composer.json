@@ -20,6 +20,7 @@
             "HexideDigital\\HexideAdmin\\": "src/"
         },
         "files": [
+            "./src/Functions/hexide-admin.php",
             "./src/Functions/helpers.php"
         ]
     },
