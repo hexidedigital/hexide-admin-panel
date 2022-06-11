@@ -5,32 +5,25 @@ declare(strict_types=1);
 namespace HexideDigital\HexideAdmin\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 class SetupProjectCommand extends Command
 {
-    private string $projectName;
-    private array $database = [];
-
-    protected $name = 'hd-admin:create:env';
+    protected $name = 'hd-admin:env-create';
     protected $description = 'Create .env file for project';
+
+    private string $projectName;
 
     public function handle(): int
     {
         try {
             $this->setProjectName();
 
-            if ($this->option('database')) {
-                $this->createUserAndDatabase();
-            }
-
             $this->createEnv();
-
-            $this->info('Env file generated.');
 
             return self::SUCCESS;
         } catch (\Exception $exception) {
@@ -40,113 +33,88 @@ class SetupProjectCommand extends Command
         }
     }
 
-    /** @throws \Exception */
-    private function setProjectName()
+    /** @throws \InvalidArgumentException */
+    private function setProjectName(): void
     {
-        $project = $this->argument('project') ?: $this->ask('Project projectName');
+        $dir = \File::basename(getcwd());
+
+        $project = $this->argument('project') ?: $this->askWithCompletion('Project projectName', [$dir], $dir);
 
         if (empty($project)) {
-            throw new \Exception('Incorrect projectName');
+            throw new \InvalidArgumentException('Incorrect projectName');
         }
 
         $names = explode('.', $project);
-        if (1 < sizeof($names)) {
-            $names = array_slice($names, 1);
-        }
 
         $this->projectName = Str::slug(strtolower(implode('-', $names)));
     }
 
-    /** @throws \Exception */
-    private function createEnv()
+    private function createEnv(): void
     {
-        $this->info('Changing .env parameters');
+        $this->backupOldEnvFile();
 
-        if (file_exists($old_env = base_path('/.env'))) {
-            copy($old_env, base_path('/.env.old'));
-        }
+        $this->comment('Changing .env parameters');
 
-        $envFilePath = base_path('/.env');
-        copy(base_path('/.env.example'), $envFilePath);
+        $envFilePath = implode('.', [base_path('.env'), $this->projectName, date('hmi')]);
+        \File::copy(base_path('.env.example'), $envFilePath);
 
         $this->replaceInFile([
-            'APP_NAME=project_name'        => 'APP_NAME="' . $this->projectName . '"',
-            'DB_DATABASE=laravel_database' => 'DB_DATABASE=' . Arr::get($this->database, 'name', 'laravel_database'),
-            'DB_USERNAME=laravel_database' => 'DB_USERNAME=' . Arr::get($this->database, 'user', 'laravel_database'),
-            'DB_PASSWORD=laravel_password' => 'DB_PASSWORD=' . Arr::get($this->database, 'pass', 'laravel_password'),
+            'APP_KEY=' => 'APP_KEY=' . $this->runAppKeyGenerate(),
+            'APP_NAME=project_name' => 'APP_NAME="' . $this->projectName . '"',
+            'DB_DATABASE=laravel_database' => 'DB_DATABASE=laravel_database',
+            'DB_USERNAME=laravel_database' => 'DB_USERNAME=laravel_database',
+            'DB_PASSWORD=laravel_password' => 'DB_PASSWORD=password',
+            'DB_HOST=127.0.0.1' => 'DB_HOST=' . $this->resolveDbHost(),
         ], $envFilePath);
 
-        $this->info('generating app_key');
-        $this->laravel['config']['app.key'] = null;
-        Artisan::call('key:generate', [], $this->output);
+        \File::copy($envFilePath, base_path('.env'));
 
-        $this->info('generating storage_link');
-        Artisan::call('storage:link', ['--relative' => true, '--force' => true], $this->output);
-
-        copy($envFilePath, $envFilePath . '.' . $this->projectName);
+        $this->info("Env file generated [$envFilePath].");
     }
 
-    /** @throws \Exception */
-    private function createUserAndDatabase()
+    private function backupOldEnvFile(): void
     {
-        $rootPassword = $this->argument('password') ?:
-            $this->secret('Database root password (if empty, will try get from current .env file)', '');
-
-        if (empty($rootPassword)) {
-            $connection = $this->laravel['config']['database.default'];
-            $rootPassword = $this->laravel['config']['database.connections.' . $connection . 'password'] ?? '';
+        if (\File::exists($old_env = base_path('.env'))) {
+            $backupName = base_path('.env.old.' . date('hmi'));
+            \File::copy($old_env, $backupName);
+            $this->info("Old .env file saved to path [$backupName]");
         }
-
-        $result = exec("mysql --user=root --password=$rootPassword --execute=\"exit\"");
-
-        if (Str::contains($result, 'Access denied')) {
-            $this->error($result);
-
-            // continue creating env file, but without configuring database
-            return;
-            // throw new \Exception('Invalid database root password');
-        }
-
-        $dbName = 'laravel_' . $this->projectName;
-        $dbPass = Str::random(10);
-
-        $this->info('Preparing database...');
-
-        $this->warn(exec("mysql --user=root --password=$rootPassword --execute=\"
-        CREATE DATABASE \`$dbName\`;
-        CREATE USER \`$dbName\`@'localhost' IDENTIFIED BY '$dbPass';
-        GRANT ALL PRIVILEGES ON \`$dbName\`.* TO \`$dbName\`@'localhost' WITH GRANT OPTION;
-        FLUSH PRIVILEGES;\" "));
-
-        $this->database = [
-            'name' => $dbName,
-            'user' => $dbName,
-            'pass' => $dbPass,
-        ];
-
-        $this->info('User and Database are created.');
     }
 
-    protected function replaceInFile(array $replacements, string $path)
+    private function runAppKeyGenerate(): string
     {
-        $content = file_get_contents($path);
-        $new_content = str_replace(array_keys($replacements), array_values($replacements), $content);
+        $output = new BufferedOutput();
+        Artisan::call('key:generate', ['--show' => true], $output);
 
-        file_put_contents($path, $new_content);
+        return trim($output->fetch());
+    }
+
+    /** @return array|bool|string */
+    private function resolveDbHost()
+    {
+        return $this->option('db-host') ?: '127.0.0.1';
+    }
+
+    protected function replaceInFile(array $replacements, string $path): void
+    {
+        \File::replaceInFile(
+            array_keys($replacements),
+            array_values($replacements),
+            $path
+        );
     }
 
     protected function getArguments(): array
     {
         return [
-            new InputArgument('project', InputArgument::REQUIRED, 'project name'),
-            new InputArgument('password', InputArgument::OPTIONAL, 'root password for database (not secure, but allowed)'),
+            new InputArgument('project', InputArgument::OPTIONAL, 'project name'),
         ];
     }
 
     protected function getOptions(): array
     {
         return [
-            new InputOption('database', 'd', InputOption::VALUE_NONE, 'Create user and database for project'),
+            new InputOption('db-host', null, InputOption::VALUE_OPTIONAL, 'Change db host'),
         ];
     }
 }
