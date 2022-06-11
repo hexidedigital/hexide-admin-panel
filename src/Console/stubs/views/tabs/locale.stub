@@ -1,7 +1,7 @@
 @php
     /**
      * @var string $locale
-     * @var \{{ model_namespace }}|null $model
+     * @var \{{ model_namespace }} $model
      * @var \Illuminate\Support\ViewErrorBag $errors
      */
 @endphp

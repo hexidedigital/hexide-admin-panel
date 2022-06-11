@@ -1,6 +1,6 @@
 @php
     /**
-     * @var \HexideDigital\ModelPermissions\Models\Role|null $model
+     * @var \HexideDigital\ModelPermissions\Models\Role $model
      * @var \HexideDigital\ModelPermissions\Models\Permission[]|\Illuminate\Database\Eloquent\Collection|null $permissions
      */
 @endphp
@@ -49,9 +49,9 @@
     </div>
 
     <div class="row">
-        @foreach($modules as $module => $permissions)
+        @foreach($modules as $moduleName => $permissions)
             <div class="col-6 mb-2">
-                <x-adminlte-card theme="navy" :title="trans_choice('models.'.$module.'.name',2)" collapsible
+                <x-adminlte-card theme="navy" :title="trans_choice('models.'.$moduleName.'.name',2)" collapsible
                 body-class="p-1">
                     <div class="list-group list-group-flush">
                         <a class="btn btn-sm btn-info"
@@ -59,7 +59,7 @@
                            x-data="{ add: false, group: [{{$permissions->pluck('id')->implode(',')}}],
                             toggleGroup() { if(this.add) this.pushGroup(this.group); else this.removeGroup(this.group); this.add = ! this.add; } }"
                         >
-                            {{$module}} - toggle all
+                            {{$moduleName}} - toggle all
                         </a>
                         @foreach($permissions as $permission)
                             <a class="px-3 py-1 border-top"
