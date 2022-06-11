@@ -80,6 +80,25 @@ return [
         'animate_name' => 'animate__bounceOut animate__infinite',
     ],
 
+    'show-profile-item' => true,
+    'default-admin-avatar' => [
+        'avatar' => '/img/avatars/avatar.png',
+    ],
+
+    'left_sidebar_footer' => [
+        /// also check config `adminlte.classes_sidebar` classes
+        /// for show must present class `main-sidebar-custom`
+        'show' => true,
+
+        'items' => [
+            /// now not recommended put more than one item
+            [
+                'icon' => 'fas fa-cogs',
+                'route' => ['admin.admin_configurations.list.index'],
+            ],
+        ],
+    ],
+
     'cards' => [
         'default-theme' => 'navy',
     ],
