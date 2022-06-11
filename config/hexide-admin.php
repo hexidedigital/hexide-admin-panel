@@ -13,6 +13,7 @@ return [
 
     'routes' => [
         'admin' => [
+            'dashboard' => 'home',
             'prefix' => 'admin',
             'middleware' => ['web', 'auth:admin', 'language:admin'],
         ],
