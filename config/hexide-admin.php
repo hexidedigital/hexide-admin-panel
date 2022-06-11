@@ -139,6 +139,9 @@ return [
         ],
     ],
 
+    /// todo: replace in all places
+    'replaseme_string' => 'replaseme',
+
     // -------------------------------
     // Variables, admin configurations
 
