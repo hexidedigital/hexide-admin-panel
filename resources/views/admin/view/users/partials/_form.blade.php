@@ -6,7 +6,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <x-adminlte-card theme="navy" class="" :title="__('admin_labels.tab_general')" collapsible>
+        <x-adminlte-card :theme="$defaultCardTheme" class="" :title="__('admin_labels.tab_general')" collapsible>
             @include("hexide-admin::admin.view.$module.tabs.general")
         </x-adminlte-card>
 

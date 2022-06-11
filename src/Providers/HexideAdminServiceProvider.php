@@ -26,6 +26,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\View;
 use Livewire\Livewire;
 use Route;
 
@@ -197,8 +198,20 @@ class HexideAdminServiceProvider extends ServiceProvider
 
     private function registerViewComposers(Factory $view)
     {
-        $view->composer('admin.*', HexideAdminComposer::class);
-        $view->composer('hexide-admin::*', HexideAdminComposer::class);
+        $view->composer([
+            'admin.*',
+            'hexide-admin::*',
+        ], HexideAdminComposer::class);
+
+        $view->composer([
+            '*._form',
+            '*.show',
+            'hexide-admin::admin.view.users.profile',
+        ], function (View $view) {
+            $view->with([
+                'defaultCardTheme' => config('hexide-admin.cards.default-theme'),
+            ]);
+        });
     }
 
     private function registerComponents()
