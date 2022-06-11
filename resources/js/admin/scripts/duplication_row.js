@@ -15,6 +15,7 @@ window.duplicate_row = function ($this) {
     window.ic++
     $nrow[0].innerHTML = $nrow[0].innerHTML.replace(/replaseme/g, window.ic)
     $nrow.removeClass('duplicate').insertBefore($parent.find('.duplication-button'))
+    $nrow.find('.nav-link.active').removeClass('active')
     $nrow.find('.form-control').each(function () {
         $(this).attr('name', $(this).data('name'))
         if ($(this).data('required')) {
