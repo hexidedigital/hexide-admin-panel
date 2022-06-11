@@ -1,6 +1,6 @@
 @php
     /**
-     * @var \Illuminate\Support\Collection $breadcrumbs
+     * @var \HexideDigital\HexideAdmin\Classes\Breadcrumbs $breadcrumbs
      */
 @endphp
 
@@ -12,7 +12,7 @@
                 {{__('admin_labels.dashboards')}}
             </a>
         </li>
-        @foreach ($breadcrumbs as $i => $data)
+        @foreach ($breadcrumbs->get() as $i => $data)
             @if(!$loop->last)
                 <li class="breadcrumb-item">
                     <a href="{{$data['url']}}">{{__($data['name'])}}</a>

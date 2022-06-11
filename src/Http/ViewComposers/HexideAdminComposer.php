@@ -19,7 +19,6 @@ class HexideAdminComposer
     {
         $data = [
             'hexide_admin' => $this->hexideAdmin,
-            'breadcrumbs' => $this->hexideAdmin->getBreadcrumbs()->get(),
             'toggle_attributes' => $this->getToggleAttributes(),
         ];
 

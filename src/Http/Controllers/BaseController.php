@@ -11,18 +11,22 @@ use View;
 
 abstract class BaseController extends Controller
 {
-    private array $viewData = [];
-    private bool $withBreadcrumbs = true;
-
     protected array $locales = [];
 
     protected HexideAdmin $hexideAdmin;
     protected Breadcrumbs $breadcrumbs;
 
+    private array $viewData = [];
+    private bool $withBreadcrumbs = true;
+
     public function __construct()
     {
-        $this->hexideAdmin = app(HexideAdmin::class);
-        $this->breadcrumbs = $this->hexideAdmin->getBreadcrumbs();
+        $this->middleware(function ($request, $next) {
+            $this->hexideAdmin = app(HexideAdmin::class);
+            $this->breadcrumbs = $this->hexideAdmin->getBreadcrumbs();
+
+            return $next($request);
+        });
     }
 
     /* ------------ Breadcrumbs ------------ */
@@ -86,8 +90,6 @@ abstract class BaseController extends Controller
      */
     protected function render(?string $view = null, array $data = [])
     {
-        $this->data('breadcrumbs', $this->breadcrumbs->get());
-
         $this->data($data);
 
         View::share($this->getViewData());
