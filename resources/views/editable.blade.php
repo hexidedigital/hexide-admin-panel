@@ -18,7 +18,7 @@
 {{--    {!! View::getSection('form-body', view("admin.view.$module.partials._form")) !!}--}}
     @yield('form-body')
 
-    <div class="row mb-3">
+    <div class="mb-3">
         @include("hexide-admin::partials.buttons.line__cancel_save")
     </div>
 

@@ -8,7 +8,7 @@ $url_params = $url_params ?? [];
 
 @endphp
 
-<div class="row col-12 justify-content-between">
+<div class="row justify-content-between">
     <div class="col-sm-6">
         <a class="btn btn-secondary"
            href="{!! $back_url ?? ($route ?? route("admin.$module.index", $url_params)) !!}">

@@ -22,7 +22,7 @@
         </table>
     </x-adminlte-card>
 
-    <div class="row mb-3">
+    <div class="mb-3">
         @include("hexide-admin::partials.buttons.line__back_edit")
     </div>
 @stop

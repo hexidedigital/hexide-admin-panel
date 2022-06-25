@@ -10,7 +10,7 @@ $url_params = $url_params ?? [];
 $url_params_edit = array_merge([str_singular($module) => $model], $url_params ?? []);
 @endphp
 
-<div class="row col-12 justify-content-between @if (!empty($class)) {!! $class !!} @endif">
+<div class="row justify-content-between @if (!empty($class)) {!! $class !!} @endif">
     <div class="col-12 col-sm-8 col-md-6">
         <a class="btn btn-secondary"
            href="{!! $back_url ?? ($route ?? route("admin.$module.index", $url_params)) !!}">
