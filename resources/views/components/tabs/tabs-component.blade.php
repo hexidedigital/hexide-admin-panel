@@ -1,3 +1,8 @@
+@props([
+    'tabItems' => null,
+    'tabContents' => null,
+])
+
 @php
     /**
      * @var Illuminate\Support\ViewErrorBag $errors
@@ -6,7 +11,7 @@
 
 {{--<div @if($showTabPanel) x-data='TabItems' @endif>--}}
 <x-slot name="slotTabs">
-    <ul class="nav nav-tabs border-bottom-0 {{$showTabPanel ? '' : 'd-none'}}">
+    <ul @class(["nav nav-tabs border-bottom-0", "d-none" => !$showTabPanel])>
 
         @if($showLocaleTabs)
             @foreach ($locales as $locale)
@@ -27,7 +32,7 @@
             />
         @endif
 
-        {!! $tabItems ?? '' !!}
+        {!! $tabItems !!}
     </ul>
 </x-slot>
 
@@ -36,7 +41,7 @@
     @if($showLocaleTabs)
         @foreach ($locales as $locale)
             <x-hexide-admin::tabs.tab-content :name="$locale">
-                @include($localeView())
+                @include($localeView(), ['locale' => $locale])
             </x-hexide-admin::tabs.tab-content>
         @endforeach
     @endif
@@ -47,7 +52,7 @@
         </x-hexide-admin::tabs.tab-content>
     @endif
 
-    {!! $tabContents ?? '' !!}
+    {!! $tabContents !!}
 
 </div>
 {{--</div>--}}
