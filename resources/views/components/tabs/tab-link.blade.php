@@ -1,22 +1,32 @@
-@props(['name', 'text', 'icon' => '', 'hasErrors' => false])
+@props([
+    'name',
+    'text' => null,
+    'icon' => '',
+    'hasErrors' => null
+])
 
 @php
-$hasErrors = $hasErrors ?? false;
+    $hasErrors ??= $errors->has((string)\Str::of($name)->finish('.*'));
 
-$text = $text ?? __("admin_labels.tab.$name");
-if($text == "admin_labels.tab.$name") $text = $name;
-
+    if (empty($text)) {
+        if (trans()->has($text == "admin_labels.tab.$name")) {
+            $text = trans($text);
+        } else {
+            $text = $name;
+        }
+    }
 @endphp
 
-<li class="nav-item" x-init="items.push({ name: '{{$name}}', title: '{{$text}}' });">
-    <a class="nav-link {{$hasErrors?' text-red text-bold':''}}"
-       :class="isActive('{{$name}}') && 'active'"
-       @click="setActive('{{$name}}')"
+<li @class(["nav-item"])
+    x-init="items.push({ name: '{{ $name }}', title: '{{ $text }}' });">
+    <a @class(['nav-link', 'text-red text-bold' => $hasErrors])
+       :class="isActive('{{ $name }}') && 'active'"
+       @click="setActive('{{ $name }}')"
     >
-        <span class="">{{$text}}</span>
+        <span class="">{{ $text }}</span>
 
         @if(!empty($icon))
-            <span class="ml-2 {{$icon}}"></span>
+            <span class="ml-2 {{ $icon }}"></span>
         @endif
 
         @if ($hasErrors)
