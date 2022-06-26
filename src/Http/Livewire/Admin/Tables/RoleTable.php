@@ -15,9 +15,7 @@ class RoleTable extends DefaultTable
         return [
             $this->getIdColumn(),
 
-            Column::make('title')
-                ->sortable()
-                ->searchable(),
+            $this->getTitleColumn(),
 
             Column::make(__('admin_labels.admin_access'), 'admin_access')
                 ->sortable()
