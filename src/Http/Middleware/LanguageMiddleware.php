@@ -47,24 +47,21 @@ class LanguageMiddleware
     {
         $locale = config('app.locale');
 
+        $available = config('app.locales');
+        $default = config('app.locale');
+
         if (in_array('admin', $args)) {
-            $locale = \Cookie::get(config('hexide-admin.lang_cookie'), config('hexide-admin.locale'));
-
-            if (!in_array($locale, config('hexide-admin.locales'))) {
-                $locale = config('hexide-admin.locale');
-            }
+            $locale = \Cookie::get(config('hexide-admin.lang_cookie', 'admin_locale'));
+            $available = config('hexide-admin.locales');
+            $default = config('hexide-admin.locale');
         } elseif (in_array('api', $args)) {
-            $locale = $request->header('X-localization', config('app.locale'));
-
-            if (!in_array($locale, config('app.locales'))) {
-                $locale = config('app.locale');
-            }
+            $locale = $request->header(config('hexide-admin.lang_header', 'X-localization'));
         } elseif (in_array('web', $args)) {
             $locale = self::getLocaleFromUrl();
+        }
 
-            if (!in_array($locale, config('app.locales'))) {
-                $locale = config('app.locale');
-            }
+        if (!in_array($locale, $available)) {
+            $locale = $default;
         }
 
         app()->setLocale($locale);

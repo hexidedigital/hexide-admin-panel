@@ -28,6 +28,7 @@ return [
 
     'locale' => 'uk',
     'lang_cookie' => 'admin_locale',
+    'lang_header' => 'X-localization',
 
     // locales only for admin panel
     'locales' => [

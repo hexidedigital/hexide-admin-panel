@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace HexideDigital\HexideAdmin\Http\Controllers\Backend;
 
-use Carbon\Carbon;
-
 class LanguageController extends BackendController
 {
     public function __invoke($locale)
@@ -21,7 +19,7 @@ class LanguageController extends BackendController
 
         $this->notify(null, $message, 'info', __("hexide-admin::messages.info.title", [], $locale));
 
-        $cookie = cookie(config('hexide-admin.lang_cookie'), $locale, Carbon::now()->diffInMinutes(Carbon::now()->addYear()));
+        $cookie = cookie(config('hexide-admin.lang_cookie'), $locale, now()->diffInMinutes(now()->addYear()));
 
         return redirect($path)->withCookie($cookie);
     }
