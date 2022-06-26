@@ -15,7 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class {{ class }} extends Model
 {
-    use Translatable, WithTranslationsTrait;
+    use Translatable;
+    use WithTranslationsTrait;
     use VisibleTrait;
     use PositionSortTrait;
 
