@@ -3,7 +3,7 @@
     "description": "hexide-digital admin panel",
     "license": "MIT",
     "type": "library",
-    "version": "2.9.0",
+    "version": "2.9.1",
     "support": {
         "issues": "https://github.com/hexidedigital/hexide-admin-panel/issues",
         "source": "https://github.com/hexidedigital/hexide-admin-panel",
@@ -37,7 +37,7 @@
         "yoeunes/toastr": "^1.2"
     },
     "require-dev": {
-        "hexide-digital/gitlab-deploy": "^0.3.0"
+        "hexide-digital/gitlab-deploy": "^0.4"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
