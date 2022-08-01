@@ -60,10 +60,10 @@ class SetupProjectCommand extends Command
 
         $this->replaceInFile([
             'APP_KEY=' => 'APP_KEY=' . $this->runAppKeyGenerate(),
-            'APP_NAME=project_name' => 'APP_NAME="' . $this->projectName . '"',
-            'DB_DATABASE=laravel_database' => 'DB_DATABASE=laravel_database',
-            'DB_USERNAME=laravel_database' => 'DB_USERNAME=laravel_database',
-            'DB_PASSWORD=laravel_password' => 'DB_PASSWORD=password',
+            'APP_NAME=' => 'APP_NAME="' . $this->projectName . '"#',
+            'DB_DATABASE=' => 'DB_DATABASE="laravel"#',
+            'DB_USERNAME=' => 'DB_USERNAME="root"#',
+            'DB_PASSWORD=' => 'DB_PASSWORD="password"#',
             'DB_HOST=127.0.0.1' => 'DB_HOST=' . $this->resolveDbHost(),
         ], $envFilePath);
 
