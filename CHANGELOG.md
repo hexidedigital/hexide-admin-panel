@@ -5,34 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[//]: # (### Added)
+## [Unreleased](https://github.com/hexidedigital/hexide-admin-panel/compare/v2.10.0...main)
 
-[//]: # (### Changed)
-
-[//]: # (### Fixed)
-
-[//]: # (### Removed)
-
-## [Unreleased](https://github.com/hexidedigital/hexide-admin-panel/compare/v2.9.1...main)
+## [v2.10.0](https://github.com/hexidedigital/hexide-admin-panel/compare/v2.9.1...v2.10.0) - 2022-08-08
 
 ### Added
 
-- Config to change header name to detect locale from api requests
-- Updated tab component and added options to enable transition for some cases
+- Config to change header name to detect locale from api requests ([b005313e](https://github.com/hexidedigital/hexide-admin-panel/commit/b005313e8ff68e50b2cfc95f97b6620d751aa635))
+- Stay on the same tab after successfully saving the form ([6c9990c6](https://github.com/hexidedigital/hexide-admin-panel/commit/6c9990c62b6267bbd3fdb0cad8bcf8818e60b8e6))
+
+### Fixed
+
+- `DB::rollback` never called on exceptions ([1a041ab8](https://github.com/hexidedigital/hexide-admin-panel/commit/1a041ab8c8fc0fe3bfcfecc578a88f84d2b06596))
+- Displaying errors in console on login page ([2ca82f7e](https://github.com/hexidedigital/hexide-admin-panel/commit/2ca82f7ef483824c11ed840ff67ef3cbffaf93c3))
 
 ### Updated
 
-- Command for generation .env file
+- Command for generation .env file ([58c912d0](https://github.com/hexidedigital/hexide-admin-panel/commit/58c912d04e6aa0d3b7f635ca0d6ea7960c0f3fbb))
+- Changed columns api for **livewire table**, added new types ([62a9e533](https://github.com/hexidedigital/hexide-admin-panel/commit/62a9e53348a0a31e861efa3f08193e64fc3c274c))
+- Updated markup for tabs component, tab links and added options to enable transition for some use-cases ([b97ef32a](https://github.com/hexidedigital/hexide-admin-panel/commit/b97ef32a4c9e543de3951c46e5abb28e798c4b15), [30323330](https://github.com/hexidedigital/hexide-admin-panel/commit/3032333028fd0266d85f155710074027d390e465))
+- Updated resolving translation for breadcrumbs ([b434ac21](https://github.com/hexidedigital/hexide-admin-panel/commit/b434ac213340cc86ae17de2f3ebf89840e4fca49))
+- Replaced default status code values onto symfony response constants in `ApiController` ([7c6d0bb2](https://github.com/hexidedigital/hexide-admin-panel/commit/7c6d0bb2516bb16bde381175cce6c2ec229ea094))
+- Updated config options for page preloader ([d2aefe4a](https://github.com/hexidedigital/hexide-admin-panel/commit/d2aefe4ab39a28e100793ca7998de1102f6235b8))
+
+### Deprecated
+
+- `hd-admin:utils:clean-seed-files` command ([ad7e0786](https://github.com/hexidedigital/hexide-admin-panel/commit/ad7e0786bde844d33e242134dc6e09a9988ef1b9))
 
 ### Removed
 
-- `auth` lang files from source folder
+- `locales_map` config option ([c6de5dad](https://github.com/hexidedigital/hexide-admin-panel/commit/c6de5dada3fd557fe22a7fb06a72f9b584213f10))
+- `auth` lang files from source folder ([aa0b5872](https://github.com/hexidedigital/hexide-admin-panel/commit/aa0b5872a448fa657246b8fd21f8c994af76753d))
 
 ## [v2.9.1](https://github.com/hexidedigital/hexide-admin-panel/compare/v2.9.0...v2.9.1) - 2022-07-10
 
 ### Added
 
-- Method to call only form routes to prepare view data
+- Method to call only form routes to prepare view data ([44b5f688](https://github.com/hexidedigital/hexide-admin-panel/commit/44b5f6888e156a7923394e9687033762a2f7c116))
 
 ### Fixed
 
@@ -150,7 +159,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored translations controller
 - Updated `FactoryWithTranslations`
 - Refactored working with model - getting attributes, keys and other with function call
-
 
 ## [v2.6.5](https://github.com/hexidedigital/hexide-admin-panel/compare/v2.6.3...v2.6.5) - 2022-04-08
 
