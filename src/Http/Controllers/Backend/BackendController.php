@@ -446,12 +446,30 @@ abstract class BackendController extends BaseController
         $module = $this->getModuleName();
 
         if (in_array($nextAction, ['edit', 'show'])) {
-            $params[str_singular($module)] = $model;
+            $params = array_merge([
+                str_singular($module) => $model,
+            ], $params, $this->resolveOldActiveTab($nextAction));
         }
 
         return redirect()->route("admin.$module.$nextAction", $params);
     }
 
+    protected function resolveOldActiveTab(string $action = null)
+    {
+        if ($action && $action == 'edit') {
+            parse_str(
+                parse_url(
+                    request()->headers->get('referer') ?? ''
+                    , PHP_URL_QUERY
+                ) ?? ''
+                , $refererQueryParams
+            );
+
+            return \Arr::only($refererQueryParams, ['active_tab']);
+        }
+
+        return [];
+    }
 
     /* ------------ View data ------------ */
 
