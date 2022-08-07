@@ -5,7 +5,7 @@ use HexideDigital\HexideAdmin\Classes\Configurations\Configuration;
 return [
 
     'configurations' => [
-        'secret_key' => null, //env('ADMIN_SECRET', null),
+        'secret_key' => env('ADMIN_SECRET', null),
         'show_admin_header' => true,
         'show_debug_footer_site' => false,
         'show_debug_footer_admin' => true,
@@ -73,9 +73,11 @@ return [
     'with_preloader' => true,
     'preloader' => [
         'image' => 'img/HexideDigitalLogo.png',
+        // set size for image, if value `false` - do not set size property
         'height' => 90,
         'width' => 90,
-        'animate_name' => 'bounceOut animate__infinite',
+        // see more style on Animate.css site - https://animate.style/
+        'animate_name' => 'animate__bounceOut animate__infinite',
     ],
 
     // -------------------------------
