@@ -37,12 +37,6 @@ return [
         'en',
     ],
 
-    // if you need to use another locale key for some logic
-    // use this map to define it
-    'locales_map' => [
-//        'uk' => 'ua',
-    ],
-
     // -------------------------------
     // Generate command
 
