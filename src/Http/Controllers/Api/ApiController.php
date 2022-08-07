@@ -6,6 +6,7 @@ namespace HexideDigital\HexideAdmin\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as Controller;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 abstract class ApiController extends Controller
 {
@@ -20,7 +21,7 @@ abstract class ApiController extends Controller
         return $this;
     }
 
-    protected function respondMessage(string $message, int $status = 200): JsonResponse
+    protected function respondMessage(string $message, int $status = SymfonyResponse::HTTP_OK): JsonResponse
     {
         return $this->setMessage($message)->respondArray([
             'message' => $this->message,
@@ -28,25 +29,25 @@ abstract class ApiController extends Controller
     }
 
     /** Respond with success status 200 and massage 'Success' */
-    protected function respondSuccess(string $message = 'success', int $status = 200): JsonResponse
+    protected function respondSuccess(string $message = 'success', int $status = SymfonyResponse::HTTP_OK): JsonResponse
     {
         return $this->respondMessage($message, $status);
     }
 
     /** Respond without content with status 204 */
-    protected function respondNoContent()
+    protected function respondNoContent(): JsonResponse
     {
-        return response()->noContent();
+        return response()->json('', SymfonyResponse::HTTP_NO_CONTENT);
     }
 
     /** Respond with a given array of items */
-    protected function respondDataArray(array $array, int $status = 200, array $headers = []): JsonResponse
+    protected function respondDataArray(array $array, int $status = SymfonyResponse::HTTP_OK, array $headers = []): JsonResponse
     {
         return $this->respondArray(['data' => $array], $status, $headers);
     }
 
     /** Respond with a given array of items */
-    protected function respondArray(array $array, int $status = 200, array $headers = []): JsonResponse
+    protected function respondArray(array $array, int $status = SymfonyResponse::HTTP_OK, array $headers = []): JsonResponse
     {
         return response()->json($array, $status, $headers);
     }
@@ -54,58 +55,55 @@ abstract class ApiController extends Controller
     /** Response with the current error */
     protected function respondWithError(string $message, int $statusCode): JsonResponse
     {
-        // todo
-//        throw new \Exception($message, $statusCode);
-
         return $this->setMessage($message)->respondArray([
             'message' => $this->message,
         ], $statusCode);
     }
 
     /** Generate a Response with a 400 HTTP header and a given message. */
-    protected function errorWrongArgs(string $message = 'wrong arguments', int $statusCode = 400): JsonResponse
+    protected function errorWrongArgs(string $message = 'wrong arguments', int $statusCode = SymfonyResponse::HTTP_BAD_REQUEST): JsonResponse
     {
         return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 401 HTTP header and a given message */
-    protected function errorUnauthorized(string $message = 'unauthorized', int $statusCode = 401): JsonResponse
+    protected function errorUnauthorized(string $message = 'unauthorized', int $statusCode = SymfonyResponse::HTTP_UNAUTHORIZED): JsonResponse
     {
         return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 403 HTTP header and a given message */
-    protected function errorForbidden(string $message = 'forbidden', int $statusCode = 403): JsonResponse
+    protected function errorForbidden(string $message = 'forbidden', int $statusCode = SymfonyResponse::HTTP_FORBIDDEN): JsonResponse
     {
         return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 403 HTTP header and a given message */
-    protected function errorLocked(string $message = 'your account is locked', int $statusCode = 403): JsonResponse
+    protected function errorLocked(string $message = 'your account is locked', int $statusCode = SymfonyResponse::HTTP_FORBIDDEN): JsonResponse
     {
         return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 404 HTTP header and a given message */
-    protected function errorNotFound(string $message = 'resource not found', int $statusCode = 404): JsonResponse
+    protected function errorNotFound(string $message = 'resource not found', int $statusCode = SymfonyResponse::HTTP_NOT_FOUND): JsonResponse
     {
         return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 409 HTTP header and a given message */
-    protected function errorAlreadyExist(string $message = 'resource has already exist', int $statusCode = 409): JsonResponse
+    protected function errorAlreadyExist(string $message = 'resource has already exist', int $statusCode = SymfonyResponse::HTTP_CONFLICT): JsonResponse
     {
         return $this->respondWithError($message, $statusCode);
     }
 
     /** Generate a Response with a 418 HTTP header and a given message */
-    protected function errorAuth(string $message = 'auth failed', int $statusCode = 418): JsonResponse
+    protected function errorAuth(string $message = 'auth failed', int $statusCode = SymfonyResponse::HTTP_I_AM_A_TEAPOT): JsonResponse
     {
         return $this->respondWithError($message, $statusCode);
     }
 
     /** Response with 422 code */
-    protected function respondValidationErrors(array $errors, string $message = 'given data was invalid', int $statusCode = 422, array $headers = []): JsonResponse
+    protected function respondValidationErrors(array $errors, string $message = 'given data was invalid', int $statusCode = SymfonyResponse::HTTP_UNPROCESSABLE_ENTITY, array $headers = []): JsonResponse
     {
         return $this->setMessage($message)->respondDataArray([
             'message' => $this->message,
@@ -114,7 +112,7 @@ abstract class ApiController extends Controller
     }
 
     /** Generate a Response with a 500 HTTP header and a given message */
-    protected function errorInternalError(string $message = 'Internal error', int $statusCode = 500): JsonResponse
+    protected function errorInternalError(string $message = 'Internal server error', int $statusCode = SymfonyResponse::HTTP_INTERNAL_SERVER_ERROR): JsonResponse
     {
         return $this->respondWithError($message, $statusCode);
     }
@@ -131,7 +129,6 @@ abstract class ApiController extends Controller
     protected function respondTokenAndMessage($token, string $message = 'success'): JsonResponse
     {
         return $this->setMessage($message)->respondDataArray([
-            // todo move and make key for token editable (from configs)
             'access_token' => $token,
             'message' => $this->message,
         ]);
