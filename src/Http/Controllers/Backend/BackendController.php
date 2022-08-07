@@ -35,12 +35,14 @@ abstract class BackendController extends BaseController
 {
     use AuthorizesRequests;
 
+    /** @deprecated Use `$this->getActionMethodsWithProxy()` method */
     protected const Actions = [
         'index', 'show', 'create', 'store', 'edit', 'update', 'destroy',
         'restore', 'forceDelete',
         'ajaxFieldChange',
     ];
 
+    /** @deprecated Use `$this->getBackendDatabaseActions()` method */
     protected const DatabaseAction = [
         'store' => ActionNames::Create,
         'update' => ActionNames::Edit,
@@ -209,6 +211,8 @@ abstract class BackendController extends BaseController
     {
         DB::beginTransaction();
 
+        $actionName = $this->getBackendDatabaseActions()[$action] ?? $action;
+
         try {
             if (!method_exists($this, $action)) {
                 $result = App::call([$this, $action . 'Action'], $parameters);
@@ -216,7 +220,7 @@ abstract class BackendController extends BaseController
                 $result = parent::callAction($action, $parameters);
             }
 
-            $this->notify(self::DatabaseAction[$action]);
+            $this->notify($actionName);
 
             DB::commit();
 
@@ -228,18 +232,23 @@ abstract class BackendController extends BaseController
                 throw $exception;
             }
 
-            if ((!$this->catchExceptions && App::hasDebugModeEnabled())
-                || \Auth::user()->isRoleSuperAdmin()) {
+            if ($this->throwOnDatabaseActionException()) {
                 throw $exception;
             }
 
             report($exception);
             $this
-                ->notify(self::DatabaseAction[$action], 'See logs to get more details about error', 'error')
-                ->notify(self::DatabaseAction[$action], class_basename($exception) . $exception->getMessage(), 'error');
+                ->notify($actionName, 'See logs to get more details about error', 'error')
+                ->notify($actionName, class_basename($exception) . $exception->getMessage(), 'error');
         }
 
         return redirect()->back();
+    }
+
+    protected function throwOnDatabaseActionException(): bool
+    {
+        return (!$this->catchExceptions && App::hasDebugModeEnabled())
+            || \Auth::user()->isRoleSuperAdmin();
     }
 
     /* ------------ Model and module ------------ */
@@ -507,6 +516,9 @@ abstract class BackendController extends BaseController
                 ->setStatusCode(403);
         }
 
+        $message = trans('hexide-admin::messages.forbidden', ['key' => $this->module . '.' . $action]);
+        $this->notify(ActionNames::Action, $message, 'error');
+
         if ($action !== 'index') {
             return $this->redirect();
         }
@@ -653,49 +665,89 @@ abstract class BackendController extends BaseController
         }
     }
 
-    protected function beforeCallAnyAction($method, &$parameters): void
-    {
-        //
-    }
-
-
     /* ------------ Controller methods ------------ */
 
     public function callAction($method, $parameters)
     {
-        $this->beforeCallAnyAction($method, $parameters);
+        $result = $this->proxyBackendCallAction($method, $parameters);
 
+        if (null !== $result) {
+            return $result;
+        }
+
+        return parent::callAction($method, $parameters);
+    }
+
+    /**
+     * @param $method
+     * @param $parameters
+     * @return RedirectResponse|mixed|SymfonyResponse|null
+     * @throws \Throwable
+     */
+    protected function proxyBackendCallAction($method, $parameters)
+    {
         $this->createBreadcrumb($this->getModuleName());
 
-        /* // todo move or remove this code
+        // todo: vendor: backend-controller - move or remove this code, for protect every action (move to middleware)
+        /*
         $result = $this->protectAction($method);
-
         if ($result !== true) {
-            $message = trans('hexide-admin::messages.forbidden', ['key' => $this->module . '.' . $method]);
-            $this->notify(ActionNames::Action, $message, 'error');
-
             return $result;
         }
         */
 
-        if (!in_array($method, self::Actions)) {
-            return parent::callAction($method, $parameters);
+        $hasProxy = in_array($method, $this->getActionMethodsWithProxy());
+        if (!$hasProxy) {
+            return null;
         }
 
         if ($this->isDatabaseAction($method)) {
             return $this->dbTransactionAction($method, $parameters);
         }
 
-        if (!method_exists($this, $method)) {
+        // To externally defined additional action methods
+        if (method_exists($this, $method . 'Action')) {
             return App::call([$this, $method . 'Action'], $parameters);
         }
 
-        return parent::callAction($method, $parameters);
+        return null;
     }
 
-    protected function isDatabaseAction(string $action): bool
+    /**
+     * @return string[] Array of methods that have proxy methods (with a suffix `Action`)
+     */
+    protected function getActionMethodsWithProxy(): array
     {
-        return in_array($action, array_keys(self::DatabaseAction));
+        return [
+            'index', 'show', 'create', 'store', 'edit', 'update', 'destroy',
+            'restore', 'forceDelete',
+            'ajaxFieldChange',
+        ];
+    }
+
+    /**
+     * @return array<string, string> Returns array with methods and related action names, e.x. for toast notifications <br/> [ method => action_name ]
+     */
+    protected function getBackendDatabaseActions(): array
+    {
+        return [
+            'store' => ActionNames::Create,
+            'update' => ActionNames::Edit,
+            'destroy' => ActionNames::Delete,
+            'restore' => ActionNames::Restore,
+            'forceDelete' => ActionNames::ForceDelete,
+        ];
+    }
+
+    /**
+     * Check the method that can be wrapped in a database transaction
+     *
+     * @param string $method
+     * @return bool if true, wrap method in a DB::transaction
+     */
+    protected function isDatabaseAction(string $method): bool
+    {
+        return in_array($method, array_keys($this->getBackendDatabaseActions()));
     }
 
     /**
