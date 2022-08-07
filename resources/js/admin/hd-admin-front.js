@@ -12,16 +12,20 @@ $(document).ready(function () {
 
     // --------------------
 
-    // CKEDITOR
-    CKEDITOR.config.removePlugins   = 'elementspath'
-    CKEDITOR.config.enterMode       = CKEDITOR.ENTER_P
-    CKEDITOR.config.shiftEnterMode  = CKEDITOR.ENTER_BR
+    if (window.CKEDITOR && CKEDITOR?.config) {
+        // CKEDITOR
+        CKEDITOR.config.removePlugins = 'elementspath'
+        CKEDITOR.config.enterMode = CKEDITOR.ENTER_P
+        CKEDITOR.config.shiftEnterMode = CKEDITOR.ENTER_BR
+    }
 
     // --------------------
 
-    moment.updateLocale('en', {
-        week: {dow: 1} // Monday is the first day of the week
-    })
+    if (window.moment) {
+        moment.updateLocale('en', {
+            week: {dow: 1} // Monday is the first day of the week
+        })
+    }
 
     $('.date').datetimepicker({
         format: 'YYYY-MM-DD',
