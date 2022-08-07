@@ -222,6 +222,8 @@ abstract class BackendController extends BaseController
 
             return $result;
         } catch (\Throwable $exception) {
+            DB::rollBack();
+
             if ($exception instanceof ValidationException) {
                 throw $exception;
             }
@@ -235,11 +237,9 @@ abstract class BackendController extends BaseController
             $this
                 ->notify(self::DatabaseAction[$action], 'See logs to get more details about error', 'error')
                 ->notify(self::DatabaseAction[$action], class_basename($exception) . $exception->getMessage(), 'error');
-
-            DB::rollBack();
         }
 
-        return back();
+        return redirect()->back();
     }
 
     /* ------------ Model and module ------------ */
