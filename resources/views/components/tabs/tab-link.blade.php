@@ -9,19 +9,22 @@
     $hasErrors ??= $errors->has((string)\Str::of($name)->finish('.*'));
 
     if (empty($text)) {
-        if (trans()->has($text == "admin_labels.tab.$name")) {
-            $text = trans($text);
-        } else {
-            $text = $name;
-        }
+        $text = trans()->has($textKey == "admin_labels.tab.$name")
+            ? trans($textKey)
+            : $name;
     }
 @endphp
 
 <li @class(["nav-item"])
-    x-init="items.push({ name: '{{ $name }}', title: '{{ $text }}' });">
-    <a @class(['nav-link', 'text-red text-bold' => $hasErrors])
-       :class="isActive('{{ $name }}') && 'active'"
-       @click="setActive('{{ $name }}')"
+    x-init="items.push({ name: '{{ $name }}', title: '{{ $text }}' });"
+>
+    <a
+        @class(['nav-link', 'text-red text-bold' => $hasErrors])
+        :class="isActive('{{ $name }}') && 'active'"
+        @click.prevent="setActive('{{ $name }}')"
+        href="#"
+        role="tab"
+        :aria-selected="isActive('{{$name}}')"
     >
         <span class="">{{ $text }}</span>
 

@@ -11,7 +11,10 @@
 
 {{--<div @if($showTabPanel) x-data='TabItems' @endif>--}}
 <x-slot name="slotTabs">
-    <ul @class(["nav nav-tabs border-bottom-0", "d-none" => !$showTabPanel])>
+    <ul
+        @class(["nav nav-tabs border-bottom-0", "d-none" => !$showTabPanel])
+        role="tablist"
+    >
 
         @if($showLocaleTabs)
             @foreach ($locales as $locale)

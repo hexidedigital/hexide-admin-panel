@@ -6,6 +6,7 @@
 
 <div
     x-show="isActive('{{$name}}')" x-cloak
+    role="tabpanel"
     {{ $attributes }}
     @if($transition)
         x-transition
