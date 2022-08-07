@@ -10,8 +10,6 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class ConfigurationTable extends DefaultTable
 {
-    public $refresh = false;
-
     public function columns(): array
     {
         return [

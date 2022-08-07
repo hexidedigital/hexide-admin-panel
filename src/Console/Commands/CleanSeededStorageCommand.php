@@ -8,6 +8,9 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @deprecated Usage is deprecated and will be removed in 3.0.
+ */
 class CleanSeededStorageCommand extends Command
 {
     protected $signature = 'hd-admin:utils:clean-seed-files';
@@ -15,6 +18,8 @@ class CleanSeededStorageCommand extends Command
 
     public function handle(): int
     {
+        trigger_deprecation('hexide-digital/hexide-admin-panel', '2.9.2', 'Usage "%s" is deprecated and will be removed in 3.0.', __CLASS__);
+
         if (!App::isLocal()) {
             $this->error('You can`t run in non locally environment');
 
