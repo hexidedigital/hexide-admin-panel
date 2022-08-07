@@ -589,6 +589,10 @@ abstract class BackendController extends BaseController
             return trans_choice("models.$module.name", 2);
         }
 
+        if (trans()->has($key = "models.$module.$method")) {
+            return trans($key);
+        }
+
         return trans("models.$method");
     }
 
