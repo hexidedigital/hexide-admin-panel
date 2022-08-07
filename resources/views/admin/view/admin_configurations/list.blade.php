@@ -1,4 +1,4 @@
-@extends("hexide-admin::index", ['with_create'=>false])
+@extends("hexide-admin::index", ['with_create' => false])
 
 @php
     /**
@@ -15,11 +15,9 @@
             <div class="nav flex-column nav-tabs h-100 border-right-0">
                 @foreach($admin_configuration_groups ?? [] as $groupName => $admin_configurations)
                     @php
-                        if(trans()->has($tabText = "admin_labels.admin_configuration_tab.$groupName")) {
-                            $tabText = trans($tabText);
-                        } else {
-                            $tabText = $groupName;
-                        }
+                        $tabText = trans()->has($tabText = "admin_labels.admin_configuration_tab.$groupName")
+                            ? trans($tabText)
+                            : $groupName
                     @endphp
 
                     <x-hexide-admin::tabs.tab-link :name="$groupName" :text="$tabText"/>
