@@ -705,6 +705,10 @@ abstract class BackendController extends BaseController
             return $this->dbTransactionAction($method, $parameters);
         }
 
+        if (method_exists($this, $method)) {
+            return null;
+        }
+
         // To externally defined additional action methods
         if (method_exists($this, $method . 'Action')) {
             return App::call([$this, $method . 'Action'], $parameters);
