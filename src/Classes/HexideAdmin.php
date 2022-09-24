@@ -21,9 +21,4 @@ class HexideAdmin
     {
         return $this->breadcrumbs;
     }
-
-    public function getDashboardRouteName(): string
-    {
-        return 'admin.' . config('hexide-admin.routes.admin.dashboard', 'home');
-    }
 }
